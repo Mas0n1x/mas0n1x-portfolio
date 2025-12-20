@@ -1,0 +1,18 @@
+{
+  "name": "mas0n1x-portfolio",
+  "version": "1.0.0",
+  "description": "Portfolio mit Admin-Panel",
+  "main": "api/server.js",
+  "scripts": {
+    "start": "node api/server.js",
+    "dev": "node --watch api/server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "sql.js": "^1.10.3",
+    "express-session": "^1.17.3",
+    "bcryptjs": "^2.4.3",
+    "multer": "^1.4.5-lts.1",
+    "cors": "^2.8.5"
+  }
+}

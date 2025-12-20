@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel - Mas0n1x Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+  <!-- Login Screen -->
+  <div id="login-screen" class="login-screen">
+    <div class="login-container">
+      <div class="login-logo">
+        <img src="/logo.png" alt="Logo">
+      </div>
+      <h1>Admin Login</h1>
+      <form id="login-form">
+        <div class="form-group">
+          <label for="password">Passwort</label>
+          <input type="password" id="password" name="password" placeholder="Admin Passwort eingeben" required>
+        </div>
+        <button type="submit" class="btn-primary">
+          <i class="fas fa-sign-in-alt"></i> Anmelden
+        </button>
+        <p id="login-error" class="error-message"></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- Admin Dashboard -->
+  <div id="admin-dashboard" class="admin-dashboard hidden">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <img src="/logo.png" alt="Logo" class="sidebar-logo">
+        <span>Admin Panel</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="#" class="nav-item active" data-section="projects">
+          <i class="fas fa-folder-open"></i> Projekte
+        </a>
+        <a href="#" class="nav-item" data-section="services">
+          <i class="fas fa-cogs"></i> Services
+        </a>
+        <a href="#" class="nav-item" data-section="settings">
+          <i class="fas fa-sliders-h"></i> Einstellungen
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="/" class="nav-item" target="_blank">
+          <i class="fas fa-external-link-alt"></i> Portfolio ansehen
+        </a>
+        <button id="logout-btn" class="nav-item logout">
+          <i class="fas fa-sign-out-alt"></i> Abmelden
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Projects Section -->
+      <section id="section-projects" class="content-section active">
+        <div class="section-header">
+          <h1><i class="fas fa-folder-open"></i> Projekte verwalten</h1>
+          <button id="add-project-btn" class="btn-primary">
+            <i class="fas fa-plus"></i> Neues Projekt
+          </button>
+        </div>
+        <div class="info-box">
+          <i class="fas fa-info-circle"></i>
+          <span>Verwalte hier deine Portfolio-Projekte. Du kannst Projekte hinzufügen, bearbeiten und löschen.</span>
+        </div>
+        <div id="projects-list" class="items-grid">
+          <!-- Projects loaded dynamically -->
+        </div>
+      </section>
+
+      <!-- Services Section -->
+      <section id="section-services" class="content-section">
+        <div class="section-header">
+          <h1><i class="fas fa-cogs"></i> Services verwalten</h1>
+          <button id="add-service-btn" class="btn-primary">
+            <i class="fas fa-plus"></i> Neuer Service
+          </button>
+        </div>
+        <div class="info-box">
+          <i class="fas fa-info-circle"></i>
+          <span>Hier kannst du deine angebotenen Services verwalten.</span>
+        </div>
+        <div id="services-list" class="items-grid">
+          <!-- Services loaded dynamically -->
+        </div>
+      </section>
+
+      <!-- Settings Section -->
+      <section id="section-settings" class="content-section">
+        <div class="section-header">
+          <h1><i class="fas fa-sliders-h"></i> Einstellungen</h1>
+        </div>
+
+        <div class="settings-card">
+          <h3><i class="fas fa-key"></i> Passwort ändern</h3>
+          <form id="change-password-form">
+            <div class="form-group">
+              <label for="current-password">Aktuelles Passwort</label>
+              <input type="password" id="current-password" required>
+            </div>
+            <div class="form-group">
+              <label for="new-password">Neues Passwort</label>
+              <input type="password" id="new-password" required>
+            </div>
+            <div class="form-group">
+              <label for="confirm-password">Passwort bestätigen</label>
+              <input type="password" id="confirm-password" required>
+            </div>
+            <button type="submit" class="btn-primary">
+              <i class="fas fa-save"></i> Passwort ändern
+            </button>
+          </form>
+        </div>
+
+        <div class="settings-card">
+          <h3><i class="fas fa-database"></i> Daten importieren</h3>
+          <p>Importiere die bestehenden Projekte und Services aus der index.html in die Datenbank.</p>
+          <button id="import-data-btn" class="btn-secondary">
+            <i class="fas fa-file-import"></i> Bestehende Daten importieren
+          </button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal for Project/Service Edit -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modal-title">Bearbeiten</h2>
+        <button id="modal-close" class="modal-close">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div id="modal-body" class="modal-body">
+        <!-- Form loaded dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notifications -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <script src="js/admin.js"></script>
+</body>
+</html>

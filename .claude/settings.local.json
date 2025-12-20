@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "Bash(npm install)",
+      "Bash(node:*)",
+      "Bash(curl:*)",
+      "Bash(for id in 6 7 8 9 10)",
+      "Bash(do curl -s -X DELETE \"http://localhost:3000/api/services/$id\" -b cookies.txt)",
+      "Bash(done)"
+    ]
+  }
+}
