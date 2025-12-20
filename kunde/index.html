@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kundenportal - Mas0n1x</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/kunde.css">
+</head>
+<body>
+  <!-- Login Screen -->
+  <div id="login-screen" class="login-screen">
+    <div class="login-container">
+      <div class="login-logo">
+        <img src="/logo.png" alt="Logo">
+      </div>
+      <h1>Kundenportal</h1>
+      <form id="login-form">
+        <div class="form-group">
+          <label for="email">E-Mail</label>
+          <input type="email" id="email" placeholder="ihre@email.de" required>
+        </div>
+        <div class="form-group">
+          <label for="password">Passwort</label>
+          <input type="password" id="password" placeholder="Ihr Passwort" required>
+        </div>
+        <button type="submit" class="btn-primary">
+          <i class="fas fa-sign-in-alt"></i> Anmelden
+        </button>
+        <p id="login-error" class="error-message"></p>
+      </form>
+      <div class="login-footer">
+        <p>Noch kein Konto? <a href="/projekt-starten.html">Projekt starten</a></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dashboard -->
+  <div id="dashboard" class="dashboard hidden">
+    <header class="header">
+      <div class="header-left">
+        <img src="/logo.png" alt="Logo" class="header-logo">
+        <span>Kundenportal</span>
+      </div>
+      <div class="header-right">
+        <span id="user-email"></span>
+        <button id="logout-btn" class="btn-icon">
+          <i class="fas fa-sign-out-alt"></i>
+        </button>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <!-- Requests List View -->
+      <div id="requests-view">
+        <div class="page-header">
+          <h1><i class="fas fa-folder-open"></i> Meine Anfragen</h1>
+          <a href="/projekt-starten.html" class="btn-primary">
+            <i class="fas fa-plus"></i> Neues Projekt
+          </a>
+        </div>
+
+        <div id="requests-list" class="requests-list">
+          <!-- Loaded dynamically -->
+        </div>
+      </div>
+
+      <!-- Request Detail View -->
+      <div id="request-detail-view" class="hidden">
+        <div class="page-header">
+          <button id="back-btn" class="btn-secondary">
+            <i class="fas fa-arrow-left"></i> Zurück
+          </button>
+          <h1 id="detail-title"><i class="fas fa-file-alt"></i> Anfrage Details</h1>
+        </div>
+
+        <div class="detail-container">
+          <div class="detail-sidebar">
+            <div id="request-info" class="info-card">
+              <!-- Loaded dynamically -->
+            </div>
+          </div>
+
+          <div class="chat-container">
+            <div class="chat-header">
+              <h3><i class="fas fa-comments"></i> Kommunikation</h3>
+            </div>
+            <div id="chat-messages" class="chat-messages">
+              <!-- Loaded dynamically -->
+            </div>
+            <div class="chat-input-area">
+              <div class="chat-input-wrapper">
+                <textarea id="message-input" placeholder="Nachricht schreiben..." rows="2"></textarea>
+                <label class="file-btn">
+                  <input type="file" id="file-input" hidden>
+                  <i class="fas fa-paperclip"></i>
+                </label>
+              </div>
+              <span id="file-name" class="file-name"></span>
+              <button id="send-btn" class="btn-primary">
+                <i class="fas fa-paper-plane"></i> Senden
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/kunde.js"></script>
+</body>
+</html>

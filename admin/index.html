@@ -41,11 +41,23 @@
         <span>Admin Panel</span>
       </div>
       <nav class="sidebar-nav">
+        <a href="#" class="nav-item" data-section="requests">
+          <i class="fas fa-inbox"></i> Anfragen <span id="request-badge" class="nav-badge hidden">0</span>
+        </a>
+        <a href="#" class="nav-item" data-section="customers">
+          <i class="fas fa-users"></i> Kunden
+        </a>
         <a href="#" class="nav-item active" data-section="projects">
           <i class="fas fa-folder-open"></i> Projekte
         </a>
         <a href="#" class="nav-item" data-section="services">
           <i class="fas fa-cogs"></i> Services
+        </a>
+        <a href="#" class="nav-item" data-section="invoices">
+          <i class="fas fa-file-invoice-dollar"></i> Rechnungen
+        </a>
+        <a href="#" class="nav-item" data-section="impressum">
+          <i class="fas fa-gavel"></i> Impressum
         </a>
         <a href="#" class="nav-item" data-section="settings">
           <i class="fas fa-sliders-h"></i> Einstellungen
@@ -63,6 +75,157 @@
 
     <!-- Main Content -->
     <main class="main-content">
+      <!-- Requests Section -->
+      <section id="section-requests" class="content-section">
+        <div class="section-header">
+          <h1><i class="fas fa-inbox"></i> Projektanfragen</h1>
+        </div>
+        <div class="info-box">
+          <i class="fas fa-info-circle"></i>
+          <span>Hier siehst du alle Kundenanfragen. Klicke auf eine Anfrage um Details zu sehen und mit dem Kunden zu kommunizieren.</span>
+        </div>
+        <div id="requests-list" class="requests-list">
+          <!-- Requests loaded dynamically -->
+        </div>
+      </section>
+
+      <!-- Request Detail Section -->
+      <section id="section-request-detail" class="content-section">
+        <div class="section-header">
+          <button id="back-to-requests" class="btn-secondary">
+            <i class="fas fa-arrow-left"></i> Zurück
+          </button>
+          <h1 id="request-detail-title"><i class="fas fa-file-alt"></i> Anfrage Details</h1>
+        </div>
+        <div class="request-detail-container">
+          <div class="request-info-panel">
+            <div id="request-info">
+              <!-- Request info loaded dynamically -->
+            </div>
+            <div class="request-actions">
+              <div class="form-group">
+                <label>Status</label>
+                <select id="request-status">
+                  <option value="new">Neu</option>
+                  <option value="in_progress">In Bearbeitung</option>
+                  <option value="waiting">Warte auf Kunde</option>
+                  <option value="completed">Abgeschlossen</option>
+                  <option value="cancelled">Abgebrochen</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Deadline</label>
+                <input type="date" id="request-deadline">
+              </div>
+              <button id="save-request-btn" class="btn-primary">
+                <i class="fas fa-save"></i> Speichern
+              </button>
+            </div>
+          </div>
+          <div class="chat-panel">
+            <div class="chat-header">
+              <h3><i class="fas fa-comments"></i> Kommunikation</h3>
+            </div>
+            <div id="chat-messages" class="chat-messages">
+              <!-- Messages loaded dynamically -->
+            </div>
+            <div class="chat-input-container">
+              <div class="chat-input-wrapper">
+                <textarea id="chat-input" placeholder="Nachricht schreiben..." rows="2"></textarea>
+                <label class="file-upload-btn">
+                  <input type="file" id="chat-file" hidden>
+                  <i class="fas fa-paperclip"></i>
+                </label>
+              </div>
+              <span id="selected-file" class="selected-file"></span>
+              <button id="send-message-btn" class="btn-primary">
+                <i class="fas fa-paper-plane"></i> Senden
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Customers Section -->
+      <section id="section-customers" class="content-section">
+        <div class="section-header">
+          <h1><i class="fas fa-users"></i> Kundenverwaltung</h1>
+        </div>
+        <div class="info-box">
+          <i class="fas fa-info-circle"></i>
+          <span>Hier siehst du alle registrierten Kunden und kannst deren Daten verwalten.</span>
+        </div>
+
+        <!-- Customer Stats -->
+        <div class="customer-stats">
+          <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-users"></i></div>
+            <div class="stat-info">
+              <span class="stat-value" id="total-customers">0</span>
+              <span class="stat-label">Kunden gesamt</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-file-alt"></i></div>
+            <div class="stat-info">
+              <span class="stat-value" id="total-customer-requests">0</span>
+              <span class="stat-label">Anfragen gesamt</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-clock"></i></div>
+            <div class="stat-info">
+              <span class="stat-value" id="active-requests">0</span>
+              <span class="stat-label">Aktive Anfragen</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Customer Search -->
+        <div class="customer-search-bar">
+          <div class="search-input-wrapper">
+            <i class="fas fa-search"></i>
+            <input type="text" id="customer-search" placeholder="Kunde suchen (Name, E-Mail, Firma)...">
+          </div>
+        </div>
+
+        <!-- Customers List -->
+        <div id="customers-list" class="customers-list">
+          <!-- Customers loaded dynamically -->
+        </div>
+      </section>
+
+      <!-- Customer Detail Modal -->
+      <div id="customer-detail-modal" class="modal">
+        <div class="modal-content modal-large">
+          <div class="modal-header">
+            <h2><i class="fas fa-user"></i> <span id="customer-modal-title">Kundendetails</span></h2>
+            <button class="modal-close" data-close-modal>&times;</button>
+          </div>
+          <div class="modal-body">
+            <div class="customer-detail-grid">
+              <div class="customer-info-section">
+                <h3><i class="fas fa-id-card"></i> Kontaktdaten</h3>
+                <div class="info-grid" id="customer-contact-info">
+                  <!-- Customer contact info loaded dynamically -->
+                </div>
+              </div>
+              <div class="customer-requests-section">
+                <h3><i class="fas fa-folder"></i> Anfragen (<span id="customer-request-count">0</span>)</h3>
+                <div id="customer-requests-list" class="customer-requests-list">
+                  <!-- Customer requests loaded dynamically -->
+                </div>
+              </div>
+            </div>
+            <div class="customer-actions">
+              <button id="delete-customer-btn" class="btn-danger">
+                <i class="fas fa-trash"></i> Kunde löschen
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Projects Section -->
       <section id="section-projects" class="content-section active">
         <div class="section-header">
@@ -95,6 +258,195 @@
         <div id="services-list" class="items-grid">
           <!-- Services loaded dynamically -->
         </div>
+      </section>
+
+      <!-- Invoices Section -->
+      <section id="section-invoices" class="content-section">
+        <div class="section-header">
+          <h1><i class="fas fa-file-invoice-dollar"></i> Rechnungsgenerator</h1>
+        </div>
+        <div class="invoice-container">
+          <div class="invoice-form-panel">
+            <h3><i class="fas fa-edit"></i> Rechnungsdaten</h3>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Rechnungsnummer</label>
+                <input type="text" id="invoice-number" placeholder="z.B. 2024-001">
+              </div>
+              <div class="form-group">
+                <label>Datum</label>
+                <input type="date" id="invoice-date">
+              </div>
+            </div>
+
+            <h4>Absender (Du)</h4>
+            <div class="form-group">
+              <label>Name / Firma</label>
+              <input type="text" id="invoice-from-name" placeholder="Max Mustermann">
+            </div>
+            <div class="form-group">
+              <label>Adresse</label>
+              <textarea id="invoice-from-address" rows="2" placeholder="Musterstraße 1&#10;12345 Musterstadt"></textarea>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>E-Mail</label>
+                <input type="email" id="invoice-from-email" placeholder="mail@example.com">
+              </div>
+              <div class="form-group">
+                <label>Telefon</label>
+                <input type="tel" id="invoice-from-phone" placeholder="+49 123 456789">
+              </div>
+            </div>
+
+            <h4>Empfänger (Kunde)</h4>
+            <div class="form-group">
+              <label>Name / Firma</label>
+              <input type="text" id="invoice-to-name" placeholder="Kunde GmbH">
+            </div>
+            <div class="form-group">
+              <label>Adresse</label>
+              <textarea id="invoice-to-address" rows="2" placeholder="Kundenstraße 2&#10;54321 Kundenstadt"></textarea>
+            </div>
+
+            <h4>Positionen</h4>
+            <div id="invoice-items">
+              <div class="invoice-item">
+                <div class="form-row">
+                  <div class="form-group" style="flex: 3;">
+                    <label>Beschreibung</label>
+                    <input type="text" class="item-desc" placeholder="z.B. Webentwicklung">
+                  </div>
+                  <div class="form-group" style="flex: 1;">
+                    <label>Menge</label>
+                    <input type="number" class="item-qty" value="1" min="1">
+                  </div>
+                  <div class="form-group" style="flex: 1;">
+                    <label>Preis (€)</label>
+                    <input type="number" class="item-price" value="0" step="0.01" min="0">
+                  </div>
+                  <button type="button" class="btn-icon danger remove-item" style="align-self: flex-end; margin-bottom: 16px;">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <button type="button" id="add-invoice-item" class="btn-secondary" style="margin-bottom: 20px;">
+              <i class="fas fa-plus"></i> Position hinzufügen
+            </button>
+
+            <h4>Zahlungsinformationen</h4>
+            <div class="form-group">
+              <label>Zahlungsziel (Tage)</label>
+              <input type="number" id="invoice-payment-days" value="14" min="1">
+            </div>
+            <div class="form-group">
+              <label>Bankverbindung</label>
+              <textarea id="invoice-bank" rows="3" placeholder="IBAN: DE12 3456 7890 1234 5678 90&#10;BIC: ABCDEFGH&#10;Bank: Musterbank"></textarea>
+            </div>
+            <div class="form-group">
+              <label>Zusätzliche Hinweise</label>
+              <textarea id="invoice-notes" rows="2" placeholder="z.B. Vielen Dank für Ihren Auftrag!"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label>
+                <input type="checkbox" id="invoice-kleinunternehmer" checked>
+                Kleinunternehmerregelung (keine MwSt.)
+              </label>
+            </div>
+          </div>
+
+          <div class="invoice-preview-panel">
+            <div class="invoice-preview-header">
+              <h3><i class="fas fa-eye"></i> Vorschau</h3>
+              <button id="download-invoice-btn" class="btn-primary">
+                <i class="fas fa-download"></i> PDF herunterladen
+              </button>
+            </div>
+            <div id="invoice-preview" class="invoice-preview">
+              <!-- Invoice preview rendered here -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Impressum Section -->
+      <section id="section-impressum" class="content-section">
+        <div class="section-header">
+          <h1><i class="fas fa-gavel"></i> Impressum verwalten</h1>
+        </div>
+        <div class="info-box">
+          <i class="fas fa-info-circle"></i>
+          <span>Das Impressum wird automatisch im Footer deiner Hauptseite angezeigt. Alle Felder sind optional.</span>
+        </div>
+
+        <div class="settings-card">
+          <h3><i class="fas fa-user"></i> Angaben gemäß § 5 TMG</h3>
+          <form id="impressum-form">
+            <div class="form-group">
+              <label>Vollständiger Name</label>
+              <input type="text" id="imp-name" placeholder="Max Mustermann">
+            </div>
+            <div class="form-group">
+              <label>Straße und Hausnummer</label>
+              <input type="text" id="imp-street" placeholder="Musterstraße 1">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>PLZ</label>
+                <input type="text" id="imp-zip" placeholder="12345">
+              </div>
+              <div class="form-group">
+                <label>Stadt</label>
+                <input type="text" id="imp-city" placeholder="Musterstadt">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Land</label>
+              <input type="text" id="imp-country" placeholder="Deutschland">
+            </div>
+          </form>
+        </div>
+
+        <div class="settings-card">
+          <h3><i class="fas fa-envelope"></i> Kontakt</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label>E-Mail</label>
+              <input type="email" id="imp-email" placeholder="mail@example.com">
+            </div>
+            <div class="form-group">
+              <label>Telefon (optional)</label>
+              <input type="tel" id="imp-phone" placeholder="+49 123 456789">
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3><i class="fas fa-briefcase"></i> Geschäftliche Angaben (optional)</h3>
+          <div class="form-group">
+            <label>Umsatzsteuer-ID</label>
+            <input type="text" id="imp-ustid" placeholder="DE123456789">
+          </div>
+          <div class="form-group">
+            <label>Berufsbezeichnung / Tätigkeit</label>
+            <input type="text" id="imp-job" placeholder="Softwareentwickler">
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3><i class="fas fa-shield-alt"></i> Haftungsausschluss</h3>
+          <div class="form-group">
+            <label>Zusätzlicher Text (optional)</label>
+            <textarea id="imp-disclaimer" rows="4" placeholder="Haftung für Inhalte, Links, etc."></textarea>
+          </div>
+        </div>
+
+        <button id="save-impressum-btn" class="btn-primary" style="margin-top: 20px;">
+          <i class="fas fa-save"></i> Impressum speichern
+        </button>
       </section>
 
       <!-- Settings Section -->

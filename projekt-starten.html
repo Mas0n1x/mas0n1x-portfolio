@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Projekt Starten - Mas0n1x</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --bg-primary: #0a0a0a;
+      --bg-secondary: #111111;
+      --bg-card: #161616;
+      --text-primary: #ffffff;
+      --text-secondary: #a0a0a0;
+      --text-muted: #666666;
+      --accent: #ff3366;
+      --accent-secondary: #00d4ff;
+      --border-color: #222222;
+      --border-accent: rgba(0, 212, 255, 0.3);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .wizard-container {
+      width: 100%;
+      max-width: 700px;
+      background: var(--bg-card);
+      border-radius: 24px;
+      border: 1px solid var(--border-color);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .wizard-header {
+      padding: 24px 32px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .step-indicator {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .progress-bar {
+      height: 3px;
+      background: var(--border-color);
+      position: relative;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-secondary));
+      transition: width 0.4s ease;
+    }
+
+    .close-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1.2rem;
+      transition: all 0.3s ease;
+    }
+
+    .close-btn:hover {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+    }
+
+    .wizard-content {
+      padding: 40px 32px;
+      min-height: 400px;
+    }
+
+    .step {
+      display: none;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .step.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .step-title {
+      font-size: 1.8rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: -0.5px;
+    }
+
+    .step-subtitle {
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+      font-size: 0.95rem;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .option-card {
+      background: var(--bg-secondary);
+      border: 2px solid var(--border-color);
+      border-radius: 16px;
+      padding: 24px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .option-card:hover {
+      border-color: var(--border-accent);
+      transform: translateY(-2px);
+    }
+
+    .option-card.selected {
+      border-color: var(--accent-secondary);
+      background: rgba(0, 212, 255, 0.05);
+    }
+
+    .option-icon {
+      font-size: 2rem;
+      margin-bottom: 12px;
+    }
+
+    .option-title {
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .option-desc {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .option-item {
+      background: var(--bg-secondary);
+      border: 2px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px 24px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .option-item:hover {
+      border-color: var(--border-accent);
+    }
+
+    .option-item.selected {
+      border-color: var(--accent-secondary);
+      background: rgba(0, 212, 255, 0.05);
+    }
+
+    .option-item-title {
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin-bottom: 4px;
+    }
+
+    .option-item-desc {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .textarea-container {
+      position: relative;
+    }
+
+    .wizard-textarea {
+      width: 100%;
+      min-height: 200px;
+      background: var(--bg-secondary);
+      border: 2px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      resize: vertical;
+      transition: border-color 0.3s ease;
+    }
+
+    .wizard-textarea:focus {
+      outline: none;
+      border-color: var(--accent-secondary);
+    }
+
+    .wizard-textarea::placeholder {
+      color: var(--text-muted);
+    }
+
+    .char-count {
+      position: absolute;
+      bottom: 12px;
+      left: 20px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 16px 20px;
+      background: var(--bg-secondary);
+      border: 2px solid var(--border-color);
+      border-radius: 12px;
+      color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      transition: border-color 0.3s ease;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--accent-secondary);
+    }
+
+    .form-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .wizard-footer {
+      padding: 24px 32px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .btn {
+      padding: 14px 28px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .btn-back {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+    }
+
+    .btn-back:hover {
+      border-color: var(--border-accent);
+      color: var(--text-primary);
+    }
+
+    .btn-next {
+      background: linear-gradient(135deg, var(--accent-secondary), #0099cc);
+      border: none;
+      color: white;
+    }
+
+    .btn-next:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 212, 255, 0.3);
+    }
+
+    .btn-next:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .btn-submit {
+      background: linear-gradient(135deg, var(--accent), #cc2952);
+      border: none;
+      color: white;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(255, 51, 102, 0.3);
+    }
+
+    .success-container {
+      text-align: center;
+      padding: 40px 0;
+    }
+
+    .success-icon {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, var(--accent-secondary), #0099cc);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+      font-size: 2.5rem;
+    }
+
+    .success-title {
+      font-size: 1.8rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    .success-desc {
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+      line-height: 1.7;
+    }
+
+    .login-toggle {
+      text-align: center;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .login-toggle a {
+      color: var(--accent-secondary);
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .login-toggle a:hover {
+      text-decoration: underline;
+    }
+
+    .error-message {
+      background: rgba(255, 51, 102, 0.1);
+      border: 1px solid rgba(255, 51, 102, 0.3);
+      color: var(--accent);
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 600px) {
+      .options-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .wizard-content {
+        padding: 24px 20px;
+      }
+
+      .wizard-footer {
+        padding: 20px;
+      }
+
+      .step-title {
+        font-size: 1.4rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wizard-container">
+    <div class="wizard-header">
+      <span class="step-indicator">Schritt <span id="current-step">1</span> von 5</span>
+      <button class="close-btn" onclick="window.location.href='/'">&times;</button>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill" style="width: 20%"></div>
+    </div>
+
+    <div class="wizard-content">
+      <!-- Step 1: Project Type -->
+      <div class="step active" data-step="1">
+        <h2 class="step-title">Welche Art von Projekt?</h2>
+        <p class="step-subtitle">Wählen Sie die Kategorie, die am besten passt</p>
+        <div class="options-grid">
+          <div class="option-card" data-value="webdesign">
+            <div class="option-icon">💻</div>
+            <div class="option-title">Webdesign</div>
+            <div class="option-desc">Website & Web-Entwicklung</div>
+          </div>
+          <div class="option-card" data-value="custom-app">
+            <div class="option-icon">🛠️</div>
+            <div class="option-title">Custom Anwendung</div>
+            <div class="option-desc">Individuelle Software-Lösung</div>
+          </div>
+          <div class="option-card" data-value="discord-bot">
+            <div class="option-icon">🤖</div>
+            <div class="option-title">Discord Bot</div>
+            <div class="option-desc">Custom Bot-Entwicklung</div>
+          </div>
+          <div class="option-card" data-value="linux-setup">
+            <div class="option-icon">🐧</div>
+            <div class="option-title">Linux-Setup</div>
+            <div class="option-desc">Server & System-Konfiguration</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: Budget -->
+      <div class="step" data-step="2">
+        <h2 class="step-title">Was ist Ihr Budget?</h2>
+        <p class="step-subtitle">Wählen Sie eine Preisspanne</p>
+        <div class="options-list">
+          <div class="option-item" data-value="unter-500">
+            <div class="option-item-title">Unter 500€</div>
+            <div class="option-item-desc">Kleinere Projekte</div>
+          </div>
+          <div class="option-item" data-value="500-1000">
+            <div class="option-item-title">500€ - 1.000€</div>
+            <div class="option-item-desc">Standard-Projekte</div>
+          </div>
+          <div class="option-item" data-value="1000-2500">
+            <div class="option-item-title">1.000€ - 2.500€</div>
+            <div class="option-item-desc">Mittlere Projekte</div>
+          </div>
+          <div class="option-item" data-value="ueber-2500">
+            <div class="option-item-title">Über 2.500€</div>
+            <div class="option-item-desc">Größere Projekte</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3: Timeline -->
+      <div class="step" data-step="3">
+        <h2 class="step-title">Wann soll es fertig sein?</h2>
+        <p class="step-subtitle">Wählen Sie Ihren gewünschten Zeitrahmen</p>
+        <div class="options-list">
+          <div class="option-item" data-value="asap">
+            <div class="option-item-title">So schnell wie möglich</div>
+            <div class="option-item-desc">Dringend</div>
+          </div>
+          <div class="option-item" data-value="1-2-wochen">
+            <div class="option-item-title">1-2 Wochen</div>
+            <div class="option-item-desc">Zeitnah</div>
+          </div>
+          <div class="option-item" data-value="1-monat">
+            <div class="option-item-title">1 Monat</div>
+            <div class="option-item-desc">Normal</div>
+          </div>
+          <div class="option-item" data-value="flexibel">
+            <div class="option-item-title">Flexibel</div>
+            <div class="option-item-desc">Kein fester Termin</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4: Description -->
+      <div class="step" data-step="4">
+        <h2 class="step-title">Erzählen Sie uns mehr</h2>
+        <p class="step-subtitle">Beschreiben Sie Ihr Projekt im Detail</p>
+        <div class="textarea-container">
+          <textarea class="wizard-textarea" id="project-description" placeholder="Beschreiben Sie Ihre Vision, Ziele und spezifischen Anforderungen..."></textarea>
+          <span class="char-count"><span id="char-count">0</span> Zeichen</span>
+        </div>
+      </div>
+
+      <!-- Step 5: Registration -->
+      <div class="step" data-step="5">
+        <h2 class="step-title">Erstellen Sie Ihr Konto</h2>
+        <p class="step-subtitle">Damit wir Sie kontaktieren können</p>
+        <div id="error-container"></div>
+        <div id="register-form">
+          <div class="form-group">
+            <label class="form-label">E-Mail Adresse *</label>
+            <input type="email" class="form-input" id="reg-email" placeholder="ihre@email.de" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Telefonnummer</label>
+            <input type="tel" class="form-input" id="reg-phone" placeholder="+49 123 456789">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Passwort *</label>
+            <input type="password" class="form-input" id="reg-password" placeholder="Min. 6 Zeichen" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Passwort bestätigen *</label>
+            <input type="password" class="form-input" id="reg-password-confirm" placeholder="Passwort wiederholen" required>
+          </div>
+          <div class="login-toggle">
+            Bereits ein Konto? <a onclick="toggleLoginForm()">Hier einloggen</a>
+          </div>
+        </div>
+        <div id="login-form" style="display: none;">
+          <div class="form-group">
+            <label class="form-label">E-Mail Adresse</label>
+            <input type="email" class="form-input" id="login-email" placeholder="ihre@email.de" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Passwort</label>
+            <input type="password" class="form-input" id="login-password" placeholder="Ihr Passwort" required>
+          </div>
+          <div class="login-toggle">
+            Noch kein Konto? <a onclick="toggleLoginForm()">Jetzt registrieren</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Success -->
+      <div class="step" data-step="success">
+        <div class="success-container">
+          <div class="success-icon">
+            <i class="fas fa-check"></i>
+          </div>
+          <h2 class="success-title">Anfrage gesendet!</h2>
+          <p class="success-desc">
+            Vielen Dank für Ihre Projektanfrage.<br>
+            Sie erhalten in Kürze eine Bestätigung per E-Mail.<br>
+            Sie können den Status Ihrer Anfrage jederzeit im Kundenportal einsehen.
+          </p>
+          <a href="/kunde" class="btn btn-next">Zum Kundenportal</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="wizard-footer" id="wizard-footer">
+      <button class="btn btn-back" id="btn-back" style="visibility: hidden;">
+        <i class="fas fa-chevron-left"></i> Zurück
+      </button>
+      <button class="btn btn-next" id="btn-next" disabled>
+        Weiter <i class="fas fa-chevron-right"></i>
+      </button>
+    </div>
+  </div>
+
+  <script>
+    let currentStep = 1;
+    const totalSteps = 5;
+    const formData = {
+      projectType: null,
+      budget: null,
+      timeline: null,
+      description: ''
+    };
+    let isLoginMode = false;
+
+    // DOM Elements
+    const steps = document.querySelectorAll('.step');
+    const progressFill = document.getElementById('progress-fill');
+    const stepIndicator = document.getElementById('current-step');
+    const btnBack = document.getElementById('btn-back');
+    const btnNext = document.getElementById('btn-next');
+    const wizardFooter = document.getElementById('wizard-footer');
+    const textarea = document.getElementById('project-description');
+    const charCount = document.getElementById('char-count');
+
+    // Initialize
+    function init() {
+      // Option cards click handlers
+      document.querySelectorAll('.option-card, .option-item').forEach(card => {
+        card.addEventListener('click', () => {
+          const parent = card.parentElement;
+          parent.querySelectorAll('.option-card, .option-item').forEach(c => c.classList.remove('selected'));
+          card.classList.add('selected');
+
+          const step = card.closest('.step').dataset.step;
+          const value = card.dataset.value;
+
+          if (step === '1') formData.projectType = value;
+          if (step === '2') formData.budget = value;
+          if (step === '3') formData.timeline = value;
+
+          updateButtons();
+        });
+      });
+
+      // Textarea character count
+      textarea.addEventListener('input', () => {
+        charCount.textContent = textarea.value.length;
+        formData.description = textarea.value;
+        updateButtons();
+      });
+
+      // Navigation buttons
+      btnBack.addEventListener('click', goBack);
+      btnNext.addEventListener('click', goNext);
+
+      updateButtons();
+    }
+
+    function updateProgress() {
+      const progress = (currentStep / totalSteps) * 100;
+      progressFill.style.width = progress + '%';
+      stepIndicator.textContent = currentStep;
+    }
+
+    function showStep(step) {
+      steps.forEach(s => s.classList.remove('active'));
+      const targetStep = document.querySelector(`[data-step="${step}"]`);
+      if (targetStep) {
+        targetStep.classList.add('active');
+      }
+
+      // Show/hide footer on success
+      if (step === 'success') {
+        wizardFooter.style.display = 'none';
+      } else {
+        wizardFooter.style.display = 'flex';
+      }
+
+      updateProgress();
+      updateButtons();
+    }
+
+    function updateButtons() {
+      // Back button visibility
+      btnBack.style.visibility = currentStep > 1 ? 'visible' : 'hidden';
+
+      // Next button state
+      let canProceed = false;
+
+      switch (currentStep) {
+        case 1:
+          canProceed = formData.projectType !== null;
+          break;
+        case 2:
+          canProceed = formData.budget !== null;
+          break;
+        case 3:
+          canProceed = formData.timeline !== null;
+          break;
+        case 4:
+          canProceed = formData.description.length >= 10;
+          break;
+        case 5:
+          canProceed = true; // Will be validated on submit
+          break;
+      }
+
+      btnNext.disabled = !canProceed;
+
+      // Change button text/style on last step
+      if (currentStep === 5) {
+        btnNext.innerHTML = 'Absenden <i class="fas fa-paper-plane"></i>';
+        btnNext.classList.remove('btn-next');
+        btnNext.classList.add('btn-submit');
+      } else {
+        btnNext.innerHTML = 'Weiter <i class="fas fa-chevron-right"></i>';
+        btnNext.classList.add('btn-next');
+        btnNext.classList.remove('btn-submit');
+      }
+    }
+
+    function goBack() {
+      if (currentStep > 1) {
+        currentStep--;
+        showStep(currentStep);
+      }
+    }
+
+    async function goNext() {
+      if (currentStep < 5) {
+        currentStep++;
+        showStep(currentStep);
+      } else {
+        // Submit form
+        await submitForm();
+      }
+    }
+
+    function toggleLoginForm() {
+      isLoginMode = !isLoginMode;
+      document.getElementById('register-form').style.display = isLoginMode ? 'none' : 'block';
+      document.getElementById('login-form').style.display = isLoginMode ? 'block' : 'none';
+    }
+
+    function showError(message) {
+      const container = document.getElementById('error-container');
+      container.innerHTML = `<div class="error-message">${message}</div>`;
+    }
+
+    function clearError() {
+      document.getElementById('error-container').innerHTML = '';
+    }
+
+    async function submitForm() {
+      clearError();
+      btnNext.disabled = true;
+      btnNext.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Wird gesendet...';
+
+      try {
+        let customerId;
+
+        if (isLoginMode) {
+          // Login
+          const email = document.getElementById('login-email').value;
+          const password = document.getElementById('login-password').value;
+
+          if (!email || !password) {
+            showError('Bitte füllen Sie alle Felder aus.');
+            updateButtons();
+            return;
+          }
+
+          const loginRes = await fetch('/api/customer/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ email, password })
+          });
+
+          const loginData = await loginRes.json();
+          if (!loginRes.ok) {
+            showError(loginData.error || 'Login fehlgeschlagen');
+            updateButtons();
+            return;
+          }
+
+          customerId = loginData.customerId;
+        } else {
+          // Register
+          const email = document.getElementById('reg-email').value;
+          const phone = document.getElementById('reg-phone').value;
+          const password = document.getElementById('reg-password').value;
+          const passwordConfirm = document.getElementById('reg-password-confirm').value;
+
+          if (!email || !password) {
+            showError('Bitte füllen Sie alle Pflichtfelder aus.');
+            updateButtons();
+            return;
+          }
+
+          if (password.length < 6) {
+            showError('Das Passwort muss mindestens 6 Zeichen lang sein.');
+            updateButtons();
+            return;
+          }
+
+          if (password !== passwordConfirm) {
+            showError('Die Passwörter stimmen nicht überein.');
+            updateButtons();
+            return;
+          }
+
+          const registerRes = await fetch('/api/customer/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ email, password, phone })
+          });
+
+          const registerData = await registerRes.json();
+          if (!registerRes.ok) {
+            showError(registerData.error || 'Registrierung fehlgeschlagen');
+            updateButtons();
+            return;
+          }
+
+          customerId = registerData.customerId;
+        }
+
+        // Submit project request
+        const requestRes = await fetch('/api/requests', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            projectType: formData.projectType,
+            budget: formData.budget,
+            timeline: formData.timeline,
+            description: formData.description
+          })
+        });
+
+        const requestData = await requestRes.json();
+        if (!requestRes.ok) {
+          showError(requestData.error || 'Anfrage konnte nicht gesendet werden');
+          updateButtons();
+          return;
+        }
+
+        // Success!
+        showStep('success');
+
+      } catch (error) {
+        showError('Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.');
+        updateButtons();
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

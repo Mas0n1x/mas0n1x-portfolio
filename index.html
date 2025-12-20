@@ -594,6 +594,147 @@
             line-height: 1.7;
         }
 
+        /* Active Projects Section */
+        #active-projects {
+            background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+        }
+
+        .active-projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 28px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .active-project-card {
+            background: linear-gradient(145deg, var(--bg-card) 0%, rgba(17, 17, 17, 0.9) 100%);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .active-project-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-secondary), var(--accent), var(--accent-secondary));
+            animation: gradient-flow 3s ease infinite;
+        }
+
+        @keyframes gradient-flow {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .active-project-card:hover {
+            border-color: rgba(0, 212, 255, 0.6);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 40px rgba(0, 212, 255, 0.15);
+        }
+
+        .active-project-image {
+            height: 200px;
+            background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-card) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .active-project-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: all 0.5s ease;
+        }
+
+        .active-project-card:hover .active-project-image img {
+            transform: scale(1.05);
+        }
+
+        .active-project-status {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            background: rgba(0, 212, 255, 0.2);
+            border: 1px solid rgba(0, 212, 255, 0.4);
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--accent-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .active-project-status .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--accent-secondary);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .active-project-content {
+            padding: 24px;
+        }
+
+        .active-project-content h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+        }
+
+        .active-project-content p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.7;
+            margin-bottom: 16px;
+        }
+
+        .active-project-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .active-project-tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            padding: 5px 12px;
+            background: rgba(0, 212, 255, 0.1);
+            color: var(--accent-secondary);
+            border-radius: 16px;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        .no-active-projects {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .no-active-projects i {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .no-active-projects p {
+            font-size: 1rem;
+        }
+
         /* Portfolio Section */
         #portfolio {
             background: var(--bg-secondary);
@@ -987,8 +1128,7 @@
         footer {
             background: var(--bg-secondary);
             border-top: 1px solid var(--border);
-            padding: 50px 60px;
-            text-align: center;
+            padding: 30px 60px;
             position: relative;
             z-index: 1;
         }
@@ -998,20 +1138,138 @@
             margin: 0 auto;
         }
 
-        .footer-logo {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 1.3rem;
-            font-weight: 600;
-            margin-bottom: 16px;
-        }
-
-        .footer-logo span {
-            color: var(--accent);
+        .footer-bottom {
+            text-align: center;
         }
 
         .footer-text {
             color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-top: 12px;
+        }
+
+        .footer-links a {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent);
+        }
+
+        /* Impressum Modal */
+        .impressum-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .impressum-modal.active {
+            display: flex;
+        }
+
+        .impressum-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .impressum-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px 28px;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            background: var(--bg-card);
+        }
+
+        .impressum-header h2 {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .impressum-close {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .impressum-close:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .impressum-body {
+            padding: 28px;
+        }
+
+        .impressum-body h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--accent);
+        }
+
+        .impressum-body p {
+            color: var(--text-secondary);
             font-size: 0.9rem;
+            line-height: 1.8;
+            margin-bottom: 24px;
+        }
+
+        .impressum-body a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .impressum-body a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .footer-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .footer-logo-section {
+                text-align: center;
+            }
+
+            .footer-social {
+                justify-content: center;
+            }
         }
 
         /* Scroll Reveal Animation */
@@ -1135,7 +1393,7 @@
             <li><a href="#about">About</a></li>
             <li><a href="#contact">Kontakt</a></li>
         </ul>
-        <a href="#contact" class="nav-cta">Let's talk</a>
+        <a href="/kunde" class="nav-cta"><i class="fas fa-user"></i> Kundenlogin</a>
         <button class="nav-toggle" id="navToggle">
             <i class="fas fa-bars"></i>
         </button>
@@ -1161,7 +1419,7 @@
                 Sauberer Code, durchdachte Architektur und zuverlässige Lösungen.
             </p>
             <div class="hero-buttons">
-                <a href="#contact" class="btn btn-primary">
+                <a href="/projekt-starten.html" class="btn btn-primary">
                     <i class="fas fa-rocket"></i>
                     Projekt starten
                 </a>
@@ -1172,7 +1430,7 @@
             </div>
             <div class="hero-stats">
                 <div class="stat-item">
-                    <div class="stat-number"><span class="accent">5</span>+</div>
+                    <div class="stat-number"><span class="accent" id="project-count">5</span>+</div>
                     <div class="stat-label">Projekte</div>
                 </div>
                 <div class="stat-item">
@@ -1236,11 +1494,25 @@
         </div>
     </section>
 
+    <!-- Active Projects Section -->
+    <section id="active-projects">
+        <div class="section-header reveal">
+            <p class="section-label">// Aktive Projekte</p>
+            <h2 class="section-title">Woran ich gerade arbeite</h2>
+            <p class="section-subtitle">
+                Aktuelle Projekte in Entwicklung - bleib auf dem Laufenden.
+            </p>
+        </div>
+        <div class="active-projects-grid" id="active-projects-grid">
+            <!-- Aktive Projekte werden dynamisch geladen -->
+        </div>
+    </section>
+
     <!-- Portfolio Section -->
     <section id="portfolio">
         <div class="section-header reveal">
             <p class="section-label">// Portfolio</p>
-            <h2 class="section-title">Ausgewählte Projekte</h2>
+            <h2 class="section-title">Abgeschlossene Projekte</h2>
             <p class="section-subtitle">
                 Ein Blick auf einige meiner bisherigen Arbeiten und Projekte.
             </p>
@@ -1397,10 +1669,29 @@
     <!-- Footer -->
     <footer>
         <div class="footer-content">
-            <p class="footer-logo">Mas0n1x<span>_</span></p>
-            <p class="footer-text">&copy; 2024 Mas0n1x. All rights reserved.</p>
+            <div class="footer-bottom">
+                <p class="footer-text">&copy; 2024 Mas0n1x. All rights reserved.</p>
+                <div class="footer-links">
+                    <a href="#" id="impressum-link">Impressum</a>
+                </div>
+            </div>
         </div>
     </footer>
+
+    <!-- Impressum Modal -->
+    <div id="impressum-modal" class="impressum-modal">
+        <div class="impressum-content">
+            <div class="impressum-header">
+                <h2>Impressum</h2>
+                <button id="impressum-close" class="impressum-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="impressum-body" class="impressum-body">
+                <!-- Dynamisch geladen -->
+            </div>
+        </div>
+    </div>
 
     <script>
         // Mobile Navigation Toggle
@@ -1532,12 +1823,20 @@
                 if (projectsResponse.ok) {
                     const projects = await projectsResponse.json();
                     if (projects.length > 0) {
-                        renderProjects(projects);
+                        // Separate active and completed projects
+                        const activeProjects = projects.filter(p => p.status === 'in_progress' || p.status === 'planned');
+                        const completedProjects = projects.filter(p => p.status === 'completed' || !p.status);
+
+                        renderActiveProjects(activeProjects);
+                        renderProjects(completedProjects);
                     }
                 }
             } catch (e) {
                 // API not available, keep static content
                 console.log('API not available, using static content');
+                // Hide active projects section if no API
+                const activeSection = document.getElementById('active-projects');
+                if (activeSection) activeSection.style.display = 'none';
             }
 
             try {
@@ -1554,8 +1853,47 @@
             }
         }
 
+        function renderActiveProjects(projects) {
+            const container = document.getElementById('active-projects-grid');
+            const section = document.getElementById('active-projects');
+
+            if (projects.length === 0) {
+                section.style.display = 'none';
+                return;
+            }
+
+            section.style.display = 'block';
+            container.innerHTML = projects.map(project => `
+                <div class="active-project-card reveal active">
+                    <div class="active-project-image">
+                        ${project.image
+                            ? `<img src="${project.image}" alt="${escapeHtml(project.title)}">`
+                            : `<i class="fas fa-code" style="font-size: 3rem; color: var(--accent-secondary);"></i>`
+                        }
+                        <div class="active-project-status">
+                            <span class="pulse-dot"></span>
+                            ${project.status === 'in_progress' ? 'In Arbeit' : 'Geplant'}
+                        </div>
+                    </div>
+                    <div class="active-project-content">
+                        <h3>${escapeHtml(project.title)}</h3>
+                        <p>${escapeHtml(project.description || '')}</p>
+                        <div class="active-project-tags">
+                            ${(project.tags || []).map(tag => `<span class="active-project-tag">${escapeHtml(tag)}</span>`).join('')}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
         function renderProjects(projects) {
             const container = document.getElementById('portfolio-grid');
+
+            if (projects.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: var(--text-muted); grid-column: 1 / -1;">Noch keine abgeschlossenen Projekte.</p>';
+                return;
+            }
+
             container.innerHTML = projects.map(project => `
                 <div class="portfolio-card reveal active">
                     <div class="portfolio-image">
@@ -1595,8 +1933,147 @@
             return div.innerHTML;
         }
 
+        // Load project count for hero stats
+        async function loadProjectCount() {
+            try {
+                const response = await fetch('/api/projects');
+                if (response.ok) {
+                    const projects = await response.json();
+                    const countElement = document.getElementById('project-count');
+                    if (countElement && projects.length > 0) {
+                        countElement.textContent = projects.length;
+                    }
+                }
+            } catch (e) {
+                console.log('Could not load project count');
+            }
+        }
+
         // Load dynamic content when page loads
         loadDynamicContent();
+        loadProjectCount();
+
+        // ==================== IMPRESSUM ====================
+        async function loadImpressum() {
+            try {
+                const response = await fetch('/api/settings');
+                if (!response.ok) return;
+
+                const settings = await response.json();
+
+                // Footer contact info
+                const contactInfo = document.getElementById('footer-contact-info');
+                if (contactInfo) {
+                    let contactHtml = '';
+                    if (settings.impressum_email) {
+                        contactHtml += `<a href="mailto:${escapeHtml(settings.impressum_email)}">${escapeHtml(settings.impressum_email)}</a><br>`;
+                    }
+                    if (settings.impressum_phone) {
+                        contactHtml += `<a href="tel:${escapeHtml(settings.impressum_phone)}">${escapeHtml(settings.impressum_phone)}</a><br>`;
+                    }
+                    if (settings.impressum_city) {
+                        contactHtml += `${escapeHtml(settings.impressum_city)}`;
+                        if (settings.impressum_country) {
+                            contactHtml += `, ${escapeHtml(settings.impressum_country)}`;
+                        }
+                    }
+                    contactInfo.innerHTML = contactHtml || 'Kontaktdaten werden geladen...';
+                }
+
+                // Impressum modal content
+                const impressumBody = document.getElementById('impressum-body');
+                if (impressumBody) {
+                    let html = '';
+
+                    // Angaben gemäß § 5 TMG
+                    if (settings.impressum_name) {
+                        html += '<h3>Angaben gemäß § 5 TMG</h3><p>';
+                        html += escapeHtml(settings.impressum_name) + '<br>';
+                        if (settings.impressum_job) {
+                            html += escapeHtml(settings.impressum_job) + '<br>';
+                        }
+                        if (settings.impressum_street) {
+                            html += escapeHtml(settings.impressum_street) + '<br>';
+                        }
+                        if (settings.impressum_zip || settings.impressum_city) {
+                            html += `${escapeHtml(settings.impressum_zip || '')} ${escapeHtml(settings.impressum_city || '')}<br>`;
+                        }
+                        if (settings.impressum_country) {
+                            html += escapeHtml(settings.impressum_country);
+                        }
+                        html += '</p>';
+                    }
+
+                    // Kontakt
+                    if (settings.impressum_email || settings.impressum_phone) {
+                        html += '<h3>Kontakt</h3><p>';
+                        if (settings.impressum_email) {
+                            html += `E-Mail: <a href="mailto:${escapeHtml(settings.impressum_email)}">${escapeHtml(settings.impressum_email)}</a><br>`;
+                        }
+                        if (settings.impressum_phone) {
+                            html += `Telefon: <a href="tel:${escapeHtml(settings.impressum_phone)}">${escapeHtml(settings.impressum_phone)}</a>`;
+                        }
+                        html += '</p>';
+                    }
+
+                    // Umsatzsteuer-ID
+                    if (settings.impressum_ustid) {
+                        html += '<h3>Umsatzsteuer-ID</h3><p>';
+                        html += `Umsatzsteuer-Identifikationsnummer gemäß § 27 a Umsatzsteuergesetz:<br>${escapeHtml(settings.impressum_ustid)}`;
+                        html += '</p>';
+                    }
+
+                    // Haftungsausschluss
+                    if (settings.impressum_disclaimer) {
+                        html += '<h3>Haftungsausschluss</h3><p>';
+                        html += escapeHtml(settings.impressum_disclaimer).replace(/\n/g, '<br>');
+                        html += '</p>';
+                    }
+
+                    // Default if empty
+                    if (!html) {
+                        html = '<p style="text-align: center; color: var(--text-muted);">Impressum-Daten wurden noch nicht hinterlegt.</p>';
+                    }
+
+                    impressumBody.innerHTML = html;
+                }
+            } catch (e) {
+                console.log('Impressum not available');
+            }
+        }
+
+        // Impressum Modal handlers
+        const impressumLink = document.getElementById('impressum-link');
+        const impressumModal = document.getElementById('impressum-modal');
+        const impressumClose = document.getElementById('impressum-close');
+
+        if (impressumLink) {
+            impressumLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                loadImpressum();
+                impressumModal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            });
+        }
+
+        if (impressumClose) {
+            impressumClose.addEventListener('click', () => {
+                impressumModal.classList.remove('active');
+                document.body.style.overflow = '';
+            });
+        }
+
+        if (impressumModal) {
+            impressumModal.addEventListener('click', (e) => {
+                if (e.target === impressumModal) {
+                    impressumModal.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            });
+        }
+
+        // Load impressum on page load for footer
+        loadImpressum();
     </script>
 </body>
 </html>

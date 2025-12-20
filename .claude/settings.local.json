@@ -7,7 +7,20 @@
       "Bash(curl:*)",
       "Bash(for id in 6 7 8 9 10)",
       "Bash(do curl -s -X DELETE \"http://localhost:3000/api/services/$id\" -b cookies.txt)",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(ls -la \"c:\\\\Users\\\\bleck\\\\Desktop\\\\Projekte\\\\mas0n1x-portfolio\"\"*.png 2>/dev/null || dir \"c:UsersbleckDesktopProjektemas0n1x-portfolio*.png \")",
+      "Bash(dir:*)",
+      "Bash(net use)",
+      "Bash(cmd /c \"dir Z:\"\")",
+      "Bash(cmd /c dir Z:)",
+      "Bash(powershell -Command \"Get-ChildItem ''Z:\\\\'' | Select-Object Name\")",
+      "Bash(powershell -Command \"Get-ChildItem ''Z:\\\\Screenshots projekte portfolio'' | Select-Object Name\")",
+      "Bash(powershell -Command:*)",
+      "Bash(npm start)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(timeout:*)",
+      "Bash(ping:*)"
     ]
   }
 }
