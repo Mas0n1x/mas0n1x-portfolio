@@ -20,7 +20,14 @@
       "Bash(netstat:*)",
       "Bash(findstr:*)",
       "Bash(timeout:*)",
-      "Bash(ping:*)"
+      "Bash(ping:*)",
+      "Bash(taskkill:*)",
+      "Bash(cat:*)",
+      "Bash(for i in 1 2 3 4 5 6 7 8)",
+      "Bash(do curl -s -X DELETE \"http://localhost:3000/api/admin/faqs/$i\" -b cookies.txt)",
+      "Bash(powershell -ExecutionPolicy Bypass -File \"c:\\\\Users\\\\bleck\\\\Desktop\\\\Projekte\\\\mas0n1x-portfolio\\\\create_data.ps1\")",
+      "Bash(del \"c:\\\\Users\\\\bleck\\\\Desktop\\\\Projekte\\\\mas0n1x-portfolio\\\\api\\\\fix-umlauts.js\")",
+      "Bash(del \"c:\\\\Users\\\\bleck\\\\Desktop\\\\Projekte\\\\mas0n1x-portfolio\\\\cookies.txt\")"
     ]
   }
 }

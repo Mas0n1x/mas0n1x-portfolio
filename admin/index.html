@@ -41,13 +41,16 @@
         <span>Admin Panel</span>
       </div>
       <nav class="sidebar-nav">
+        <a href="#" class="nav-item active" data-section="dashboard">
+          <i class="fas fa-tachometer-alt"></i> Dashboard
+        </a>
         <a href="#" class="nav-item" data-section="requests">
           <i class="fas fa-inbox"></i> Anfragen <span id="request-badge" class="nav-badge hidden">0</span>
         </a>
         <a href="#" class="nav-item" data-section="customers">
           <i class="fas fa-users"></i> Kunden
         </a>
-        <a href="#" class="nav-item active" data-section="projects">
+        <a href="#" class="nav-item" data-section="projects">
           <i class="fas fa-folder-open"></i> Projekte
         </a>
         <a href="#" class="nav-item" data-section="services">
@@ -56,8 +59,32 @@
         <a href="#" class="nav-item" data-section="invoices">
           <i class="fas fa-file-invoice-dollar"></i> Rechnungen
         </a>
-        <a href="#" class="nav-item" data-section="impressum">
-          <i class="fas fa-gavel"></i> Impressum
+        <a href="#" class="nav-item" data-section="calendar">
+          <i class="fas fa-calendar-alt"></i> Kalender
+        </a>
+        <a href="#" class="nav-item" data-section="reviews">
+          <i class="fas fa-star"></i> Bewertungen
+        </a>
+        <a href="#" class="nav-item" data-section="analytics">
+          <i class="fas fa-chart-bar"></i> Analytics
+        </a>
+        <a href="#" class="nav-item" data-section="faqs">
+          <i class="fas fa-question-circle"></i> FAQs
+        </a>
+        <a href="#" class="nav-item" data-section="appointments">
+          <i class="fas fa-calendar-check"></i> Termine
+        </a>
+        <a href="#" class="nav-item" data-section="templates">
+          <i class="fas fa-file-alt"></i> Vorlagen
+        </a>
+        <a href="#" class="nav-item" data-section="contracts">
+          <i class="fas fa-file-signature"></i> Verträge
+        </a>
+        <a href="#" class="nav-item" data-section="backups">
+          <i class="fas fa-database"></i> Backups
+        </a>
+        <a href="#" class="nav-item" data-section="legal">
+          <i class="fas fa-gavel"></i> Rechtliches
         </a>
         <a href="#" class="nav-item" data-section="settings">
           <i class="fas fa-sliders-h"></i> Einstellungen
@@ -75,6 +102,123 @@
 
     <!-- Main Content -->
     <main class="main-content">
+      <!-- Dashboard Section -->
+      <section id="section-dashboard" class="content-section active">
+        <div class="section-header">
+          <h1><i class="fas fa-tachometer-alt"></i> Dashboard</h1>
+          <div class="header-actions">
+            <button id="backup-db-btn" class="btn-secondary">
+              <i class="fas fa-download"></i> Backup erstellen
+            </button>
+          </div>
+        </div>
+
+        <!-- Willkommen -->
+        <div class="dashboard-welcome">
+          <h2>Willkommen zurück!</h2>
+          <p>Hier ist deine Übersicht für heute.</p>
+        </div>
+
+        <!-- Statistik-Karten -->
+        <div class="dashboard-stats">
+          <div class="stat-card primary">
+            <div class="stat-icon"><i class="fas fa-folder-open"></i></div>
+            <div class="stat-info">
+              <span class="stat-value" id="dash-projects">0</span>
+              <span class="stat-label">Projekte</span>
+            </div>
+          </div>
+          <div class="stat-card success">
+            <div class="stat-icon"><i class="fas fa-users"></i></div>
+            <div class="stat-info">
+              <span class="stat-value" id="dash-customers">0</span>
+              <span class="stat-label">Kunden</span>
+            </div>
+          </div>
+          <div class="stat-card warning">
+            <div class="stat-icon"><i class="fas fa-inbox"></i></div>
+            <div class="stat-info">
+              <span class="stat-value" id="dash-requests">0</span>
+              <span class="stat-label">Offene Anfragen</span>
+            </div>
+          </div>
+          <div class="stat-card info">
+            <div class="stat-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+            <div class="stat-info">
+              <span class="stat-value" id="dash-invoices">0</span>
+              <span class="stat-label">Rechnungen</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Umsatz-Übersicht -->
+        <div class="dashboard-row">
+          <div class="dashboard-card revenue-card">
+            <div class="card-header">
+              <h3><i class="fas fa-euro-sign"></i> Umsatz-Übersicht</h3>
+            </div>
+            <div class="card-body">
+              <div class="revenue-stats">
+                <div class="revenue-item">
+                  <span class="revenue-label">Gesamt</span>
+                  <span class="revenue-value" id="dash-revenue-total">0,00 €</span>
+                </div>
+                <div class="revenue-item">
+                  <span class="revenue-label">Bezahlt</span>
+                  <span class="revenue-value success" id="dash-revenue-paid">0,00 €</span>
+                </div>
+                <div class="revenue-item">
+                  <span class="revenue-label">Offen</span>
+                  <span class="revenue-value warning" id="dash-revenue-open">0,00 €</span>
+                </div>
+                <div class="revenue-item">
+                  <span class="revenue-label">Überfällig</span>
+                  <span class="revenue-value danger" id="dash-revenue-overdue">0,00 €</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="dashboard-card activity-card">
+            <div class="card-header">
+              <h3><i class="fas fa-clock"></i> Letzte Aktivitäten</h3>
+            </div>
+            <div class="card-body">
+              <div id="dash-activities" class="activity-list">
+                <p class="empty-text">Keine Aktivitäten vorhanden</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schnellzugriff -->
+        <div class="dashboard-card">
+          <div class="card-header">
+            <h3><i class="fas fa-bolt"></i> Schnellzugriff</h3>
+          </div>
+          <div class="card-body">
+            <div class="quick-actions">
+              <button class="quick-action-btn" onclick="document.querySelector('[data-section=projects]').click(); setTimeout(() => openProjectModal(), 100);">
+                <i class="fas fa-plus"></i>
+                <span>Neues Projekt</span>
+              </button>
+              <button class="quick-action-btn" onclick="document.querySelector('[data-section=services]').click(); setTimeout(() => openServiceModal(), 100);">
+                <i class="fas fa-cogs"></i>
+                <span>Neuer Service</span>
+              </button>
+              <button class="quick-action-btn" onclick="document.querySelector('[data-section=invoices]').click();">
+                <i class="fas fa-file-invoice"></i>
+                <span>Neue Rechnung</span>
+              </button>
+              <button class="quick-action-btn" onclick="document.querySelector('[data-section=requests]').click();">
+                <i class="fas fa-inbox"></i>
+                <span>Anfragen prüfen</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- Requests Section -->
       <section id="section-requests" class="content-section">
         <div class="section-header">
@@ -117,6 +261,27 @@
                 <label>Deadline</label>
                 <input type="date" id="request-deadline">
               </div>
+              <div class="form-group">
+                <label>Projektfortschritt</label>
+                <div class="progress-slider-container">
+                  <input type="range" id="request-progress" min="0" max="100" value="0" class="progress-slider">
+                  <div class="progress-display">
+                    <span id="request-progress-value">0</span>%
+                  </div>
+                </div>
+                <div class="progress-milestones">
+                  <span data-value="0">Start</span>
+                  <span data-value="25">25%</span>
+                  <span data-value="50">50%</span>
+                  <span data-value="75">75%</span>
+                  <span data-value="100">Fertig</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label><i class="fas fa-sticky-note"></i> Private Notizen</label>
+                <textarea id="request-admin-notes" placeholder="Private Notizen zu diesem Projekt... (nur für dich sichtbar)" rows="4"></textarea>
+                <small class="form-hint">Diese Notizen sind nur im Admin-Panel sichtbar, nicht für den Kunden.</small>
+              </div>
               <button id="save-request-btn" class="btn-primary">
                 <i class="fas fa-save"></i> Speichern
               </button>
@@ -141,6 +306,14 @@
               <button id="send-message-btn" class="btn-primary">
                 <i class="fas fa-paper-plane"></i> Senden
               </button>
+            </div>
+          </div>
+          <div class="quick-replies-panel">
+            <div class="quick-replies-header">
+              <h3><i class="fas fa-bolt"></i> Schnellantworten</h3>
+            </div>
+            <div id="quick-replies-list" class="quick-replies-list">
+              <!-- Quick replies loaded dynamically -->
             </div>
           </div>
         </div>
@@ -227,7 +400,7 @@
       </div>
 
       <!-- Projects Section -->
-      <section id="section-projects" class="content-section active">
+      <section id="section-projects" class="content-section">
         <div class="section-header">
           <h1><i class="fas fa-folder-open"></i> Projekte verwalten</h1>
           <button id="add-project-btn" class="btn-primary">
@@ -263,10 +436,26 @@
       <!-- Invoices Section -->
       <section id="section-invoices" class="content-section">
         <div class="section-header">
-          <h1><i class="fas fa-file-invoice-dollar"></i> Rechnungsgenerator</h1>
+          <h1><i class="fas fa-file-invoice-dollar"></i> Rechnungen & Angebote</h1>
         </div>
-        <div class="invoice-container">
-          <div class="invoice-form-panel">
+
+        <!-- Invoice Tabs -->
+        <div class="invoice-tabs">
+          <button class="invoice-tab active" data-tab="generator">
+            <i class="fas fa-plus"></i> Neue Rechnung
+          </button>
+          <button class="invoice-tab" data-tab="quote">
+            <i class="fas fa-file-alt"></i> Neues Angebot
+          </button>
+          <button class="invoice-tab" data-tab="archive">
+            <i class="fas fa-archive"></i> Archiv
+          </button>
+        </div>
+
+        <!-- Generator Tab -->
+        <div id="invoice-generator-tab" class="invoice-tab-content active">
+          <div class="invoice-container">
+            <div class="invoice-form-panel">
             <h3><i class="fas fa-edit"></i> Rechnungsdaten</h3>
 
             <div class="form-row">
@@ -361,92 +550,887 @@
           <div class="invoice-preview-panel">
             <div class="invoice-preview-header">
               <h3><i class="fas fa-eye"></i> Vorschau</h3>
-              <button id="download-invoice-btn" class="btn-primary">
-                <i class="fas fa-download"></i> PDF herunterladen
-              </button>
+              <div class="invoice-preview-actions">
+                <button id="save-invoice-btn" class="btn-success">
+                  <i class="fas fa-save"></i> Speichern
+                </button>
+                <button id="download-invoice-btn" class="btn-primary">
+                  <i class="fas fa-download"></i> PDF herunterladen
+                </button>
+              </div>
             </div>
             <div id="invoice-preview" class="invoice-preview">
               <!-- Invoice preview rendered here -->
             </div>
           </div>
         </div>
+        </div>
+
+        <!-- Quote Tab -->
+        <div id="invoice-quote-tab" class="invoice-tab-content">
+          <div class="invoice-container">
+            <div class="invoice-form-panel">
+              <h3><i class="fas fa-file-alt"></i> Angebotsdaten</h3>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Angebotsnummer</label>
+                  <input type="text" id="quote-number" placeholder="z.B. A-2024-001">
+                </div>
+                <div class="form-group">
+                  <label>Datum</label>
+                  <input type="date" id="quote-date">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Gültigkeit (Tage)</label>
+                <input type="number" id="quote-validity" value="30" min="1">
+              </div>
+
+              <h4>Absender (Du)</h4>
+              <div class="form-group">
+                <label>Name / Firma</label>
+                <input type="text" id="quote-from-name" placeholder="Max Mustermann">
+              </div>
+              <div class="form-group">
+                <label>Adresse</label>
+                <textarea id="quote-from-address" rows="2" placeholder="Musterstraße 1&#10;12345 Musterstadt"></textarea>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>E-Mail</label>
+                  <input type="email" id="quote-from-email" placeholder="mail@example.com">
+                </div>
+                <div class="form-group">
+                  <label>Telefon</label>
+                  <input type="tel" id="quote-from-phone" placeholder="+49 123 456789">
+                </div>
+              </div>
+
+              <h4>Empfänger (Kunde)</h4>
+              <div class="form-group">
+                <label>Name / Firma</label>
+                <input type="text" id="quote-to-name" placeholder="Kunde GmbH">
+              </div>
+              <div class="form-group">
+                <label>Adresse</label>
+                <textarea id="quote-to-address" rows="2" placeholder="Kundenstraße 2&#10;54321 Kundenstadt"></textarea>
+              </div>
+
+              <h4>Projektbeschreibung</h4>
+              <div class="form-group">
+                <label>Projekttitel</label>
+                <input type="text" id="quote-project-title" placeholder="z.B. Webseiten-Entwicklung">
+              </div>
+              <div class="form-group">
+                <label>Projektbeschreibung</label>
+                <textarea id="quote-project-description" rows="4" placeholder="Detaillierte Beschreibung des Projekts..."></textarea>
+              </div>
+
+              <h4>Leistungen & Kosten</h4>
+              <div id="quote-items">
+                <div class="invoice-item">
+                  <div class="form-row">
+                    <div class="form-group" style="flex: 3;">
+                      <label>Leistung</label>
+                      <input type="text" class="quote-item-desc" placeholder="z.B. Design & Konzept">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                      <label>Stunden</label>
+                      <input type="number" class="quote-item-hours" value="0" min="0">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                      <label>Stundensatz</label>
+                      <input type="number" class="quote-item-rate" value="75" step="0.01" min="0">
+                    </div>
+                    <button type="button" class="btn-icon danger remove-quote-item" style="align-self: flex-end; margin-bottom: 16px;">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <button type="button" id="add-quote-item" class="btn-secondary" style="margin-bottom: 20px;">
+                <i class="fas fa-plus"></i> Position hinzufügen
+              </button>
+
+              <h4>Zeitrahmen</h4>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Geschätzte Dauer</label>
+                  <input type="text" id="quote-duration" placeholder="z.B. 2-3 Wochen">
+                </div>
+                <div class="form-group">
+                  <label>Frühester Starttermin</label>
+                  <input type="date" id="quote-start-date">
+                </div>
+              </div>
+
+              <h4>Optionen</h4>
+              <div class="form-group">
+                <label>
+                  <input type="checkbox" id="quote-kleinunternehmer" checked>
+                  Kleinunternehmerregelung (keine MwSt.)
+                </label>
+              </div>
+              <div class="form-group">
+                <label>Zusätzliche Hinweise</label>
+                <textarea id="quote-notes" rows="3" placeholder="z.B. Zahlungsmodalitäten, Änderungsvorbehalte..."></textarea>
+              </div>
+            </div>
+
+            <div class="invoice-preview-panel">
+              <div class="invoice-preview-header">
+                <h3><i class="fas fa-eye"></i> Vorschau</h3>
+                <div class="invoice-preview-actions">
+                  <button id="download-quote-btn" class="btn-primary">
+                    <i class="fas fa-download"></i> PDF herunterladen
+                  </button>
+                </div>
+              </div>
+              <div id="quote-preview" class="invoice-preview">
+                <!-- Quote preview rendered here -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Archive Tab -->
+        <div id="invoice-archive-tab" class="invoice-tab-content">
+          <div class="invoice-archive-container">
+            <!-- Suchleiste -->
+            <div class="archive-search-bar">
+              <div class="search-input-wrapper">
+                <i class="fas fa-search"></i>
+                <input type="text" id="invoice-search" placeholder="Rechnung suchen (Nr., Kunde, Betrag)...">
+              </div>
+              <div class="archive-filters">
+                <select id="invoice-status-filter">
+                  <option value="">Alle Status</option>
+                  <option value="offen">Offen</option>
+                  <option value="bezahlt">Bezahlt</option>
+                  <option value="ueberfaellig">Überfällig</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Archiv Statistiken -->
+            <div class="archive-stats">
+              <div class="archive-stat-card">
+                <span class="archive-stat-value" id="archive-total-count">0</span>
+                <span class="archive-stat-label">Rechnungen</span>
+              </div>
+              <div class="archive-stat-card success">
+                <span class="archive-stat-value" id="archive-paid-amount">0,00 €</span>
+                <span class="archive-stat-label">Bezahlt</span>
+              </div>
+              <div class="archive-stat-card warning">
+                <span class="archive-stat-value" id="archive-open-amount">0,00 €</span>
+                <span class="archive-stat-label">Offen</span>
+              </div>
+              <div class="archive-stat-card danger">
+                <span class="archive-stat-value" id="archive-overdue-amount">0,00 €</span>
+                <span class="archive-stat-label">Überfällig</span>
+              </div>
+            </div>
+
+            <!-- Rechnungsliste -->
+            <div id="invoice-archive-list" class="invoice-archive-list">
+              <p class="empty-text">Keine Rechnungen vorhanden</p>
+            </div>
+          </div>
+        </div>
       </section>
 
-      <!-- Impressum Section -->
-      <section id="section-impressum" class="content-section">
+      <!-- Calendar Section -->
+      <section id="section-calendar" class="content-section">
         <div class="section-header">
-          <h1><i class="fas fa-gavel"></i> Impressum verwalten</h1>
+          <h1><i class="fas fa-calendar-alt"></i> Kalender</h1>
+          <div class="header-actions">
+            <button id="calendar-today-btn" class="btn-secondary">
+              <i class="fas fa-calendar-day"></i> Heute
+            </button>
+          </div>
         </div>
         <div class="info-box">
           <i class="fas fa-info-circle"></i>
-          <span>Das Impressum wird automatisch im Footer deiner Hauptseite angezeigt. Alle Felder sind optional.</span>
+          <span>Behalte den Überblick über alle Deadlines und Termine deiner Projekte.</span>
         </div>
 
-        <div class="settings-card">
-          <h3><i class="fas fa-user"></i> Angaben gemäß § 5 TMG</h3>
-          <form id="impressum-form">
-            <div class="form-group">
-              <label>Vollständiger Name</label>
-              <input type="text" id="imp-name" placeholder="Max Mustermann">
+        <!-- Calendar Navigation -->
+        <div class="calendar-navigation">
+          <button id="calendar-prev" class="btn-icon">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          <h2 id="calendar-month-year">Dezember 2024</h2>
+          <button id="calendar-next" class="btn-icon">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+
+        <!-- Calendar Grid -->
+        <div class="calendar-container">
+          <div class="calendar-header">
+            <div class="calendar-weekday">Mo</div>
+            <div class="calendar-weekday">Di</div>
+            <div class="calendar-weekday">Mi</div>
+            <div class="calendar-weekday">Do</div>
+            <div class="calendar-weekday">Fr</div>
+            <div class="calendar-weekday weekend">Sa</div>
+            <div class="calendar-weekday weekend">So</div>
+          </div>
+          <div id="calendar-grid" class="calendar-grid">
+            <!-- Calendar days loaded dynamically -->
+          </div>
+        </div>
+
+        <!-- Upcoming Deadlines -->
+        <div class="calendar-sidebar">
+          <div class="upcoming-deadlines">
+            <h3><i class="fas fa-clock"></i> Anstehende Deadlines</h3>
+            <div id="upcoming-deadlines-list" class="deadlines-list">
+              <!-- Deadlines loaded dynamically -->
             </div>
-            <div class="form-group">
-              <label>Straße und Hausnummer</label>
-              <input type="text" id="imp-street" placeholder="Musterstraße 1">
+          </div>
+        </div>
+      </section>
+
+      <!-- Reviews Section -->
+      <section id="section-reviews" class="content-section">
+        <div class="section-header">
+          <h1><i class="fas fa-star"></i> Kundenbewertungen</h1>
+        </div>
+        <div class="info-box">
+          <i class="fas fa-info-circle"></i>
+          <span>Verwalte Kundenbewertungen. Genehmigte Bewertungen können auf der Portfolio-Seite angezeigt werden.</span>
+        </div>
+
+        <!-- Reviews Stats -->
+        <div class="dashboard-stats" style="margin-bottom: 24px;">
+          <div class="stat-card primary">
+            <div class="stat-icon"><i class="fas fa-star"></i></div>
+            <div class="stat-info">
+              <span class="stat-value" id="total-reviews">0</span>
+              <span class="stat-label">Bewertungen</span>
             </div>
+          </div>
+          <div class="stat-card warning">
+            <div class="stat-icon"><i class="fas fa-clock"></i></div>
+            <div class="stat-info">
+              <span class="stat-value" id="pending-reviews">0</span>
+              <span class="stat-label">Ausstehend</span>
+            </div>
+          </div>
+          <div class="stat-card info">
+            <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
+            <div class="stat-info">
+              <span class="stat-value" id="avg-rating">-</span>
+              <span class="stat-label">Durchschnitt</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="reviews-list" class="reviews-list">
+          <!-- Reviews loaded dynamically -->
+        </div>
+      </section>
+
+      <!-- Templates Section -->
+      <section id="section-templates" class="content-section">
+        <div class="section-header">
+          <h1><i class="fas fa-file-alt"></i> Nachrichtenvorlagen</h1>
+          <button id="add-template-btn" class="btn-primary">
+            <i class="fas fa-plus"></i> Neue Vorlage
+          </button>
+        </div>
+        <div class="info-box">
+          <i class="fas fa-info-circle"></i>
+          <span>Erstelle Vorlagen für häufig verwendete Nachrichten. Diese können beim Schreiben von Nachrichten schnell eingefügt werden.</span>
+        </div>
+
+        <!-- Templates Stats -->
+        <div class="dashboard-stats" style="margin-bottom: 24px;">
+          <div class="stat-card primary">
+            <div class="stat-icon"><i class="fas fa-file-alt"></i></div>
+            <div class="stat-info">
+              <span class="stat-value" id="total-templates">0</span>
+              <span class="stat-label">Vorlagen</span>
+            </div>
+          </div>
+          <div class="stat-card info">
+            <div class="stat-icon"><i class="fas fa-tags"></i></div>
+            <div class="stat-info">
+              <span class="stat-value" id="template-categories">0</span>
+              <span class="stat-label">Kategorien</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="templates-list" class="templates-list">
+          <!-- Templates loaded dynamically -->
+        </div>
+      </section>
+
+      <!-- Contracts Section -->
+      <section id="section-contracts" class="content-section">
+        <div class="section-header">
+          <h1><i class="fas fa-file-signature"></i> Vertragsvorlagen & Verträge</h1>
+          <button id="add-contract-template-btn" class="btn-primary">
+            <i class="fas fa-plus"></i> Neue Vorlage
+          </button>
+        </div>
+        <div class="info-box">
+          <i class="fas fa-info-circle"></i>
+          <span>Erstelle Vertragsvorlagen mit Platzhaltern wie {{KUNDE_NAME}}, {{PROJEKT_TYP}} etc. Diese werden beim Generieren automatisch ersetzt.</span>
+        </div>
+
+        <!-- Contract Tabs -->
+        <div class="invoice-tabs">
+          <button class="contract-tab active" data-contract-tab="templates">
+            <i class="fas fa-file-alt"></i> Vorlagen
+          </button>
+          <button class="contract-tab" data-contract-tab="generated">
+            <i class="fas fa-file-signature"></i> Generierte Verträge
+          </button>
+        </div>
+
+        <!-- Templates Tab -->
+        <div id="contract-templates-tab" class="contract-tab-content active">
+          <div class="dashboard-stats" style="margin-bottom: 24px;">
+            <div class="stat-card primary">
+              <div class="stat-icon"><i class="fas fa-file-alt"></i></div>
+              <div class="stat-info">
+                <span class="stat-value" id="total-contract-templates">0</span>
+                <span class="stat-label">Vorlagen</span>
+              </div>
+            </div>
+          </div>
+          <div id="contract-templates-list" class="templates-list">
+            <!-- Templates loaded dynamically -->
+          </div>
+        </div>
+
+        <!-- Generated Contracts Tab -->
+        <div id="contract-generated-tab" class="contract-tab-content">
+          <div class="dashboard-stats" style="margin-bottom: 24px;">
+            <div class="stat-card primary">
+              <div class="stat-icon"><i class="fas fa-file-signature"></i></div>
+              <div class="stat-info">
+                <span class="stat-value" id="total-contracts">0</span>
+                <span class="stat-label">Verträge</span>
+              </div>
+            </div>
+            <div class="stat-card warning">
+              <div class="stat-icon"><i class="fas fa-clock"></i></div>
+              <div class="stat-info">
+                <span class="stat-value" id="draft-contracts">0</span>
+                <span class="stat-label">Entwürfe</span>
+              </div>
+            </div>
+            <div class="stat-card success">
+              <div class="stat-icon"><i class="fas fa-check"></i></div>
+              <div class="stat-info">
+                <span class="stat-value" id="signed-contracts">0</span>
+                <span class="stat-label">Unterschrieben</span>
+              </div>
+            </div>
+          </div>
+          <div id="contracts-list" class="contracts-list">
+            <!-- Contracts loaded dynamically -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Backups Section -->
+      <section id="section-backups" class="content-section">
+        <div class="section-header">
+          <h1><i class="fas fa-database"></i> Backup-Verwaltung</h1>
+          <button id="create-backup-btn" class="btn-primary">
+            <i class="fas fa-plus"></i> Backup erstellen
+          </button>
+        </div>
+        <div class="info-box">
+          <i class="fas fa-info-circle"></i>
+          <span>Verwalte manuelle und automatische Backups deiner Datenbank. Automatische Backups werden täglich erstellt wenn aktiviert.</span>
+        </div>
+
+        <!-- Backup Settings -->
+        <div class="settings-card" style="margin-bottom: 24px;">
+          <h3><i class="fas fa-cog"></i> Automatisierung</h3>
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="backup-enabled">
+              <span>Automatische tägliche Backups aktivieren</span>
+            </label>
+          </div>
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="auto-payment-reminders">
+              <span>Automatische Zahlungserinnerungen bei überfälligen Rechnungen</span>
+            </label>
+          </div>
+          <button id="save-backup-settings-btn" class="btn-primary" style="margin-top: 10px;">
+            <i class="fas fa-save"></i> Einstellungen speichern
+          </button>
+        </div>
+
+        <!-- Backup Stats -->
+        <div class="dashboard-stats" style="margin-bottom: 24px;">
+          <div class="stat-card primary">
+            <div class="stat-icon"><i class="fas fa-database"></i></div>
+            <div class="stat-info">
+              <span class="stat-value" id="total-backups">0</span>
+              <span class="stat-label">Backups</span>
+            </div>
+          </div>
+          <div class="stat-card info">
+            <div class="stat-icon"><i class="fas fa-clock"></i></div>
+            <div class="stat-info">
+              <span class="stat-value" id="last-backup">-</span>
+              <span class="stat-label">Letztes Backup</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="backups-list" class="backups-list">
+          <!-- Backups loaded dynamically -->
+        </div>
+
+        <!-- Email Logs -->
+        <div class="settings-card" style="margin-top: 24px;">
+          <h3><i class="fas fa-envelope"></i> E-Mail-Protokoll</h3>
+          <div id="email-logs-list" class="email-logs-list">
+            <!-- Email logs loaded dynamically -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Legal Section -->
+      <section id="section-legal" class="content-section">
+        <div class="section-header">
+          <h1><i class="fas fa-gavel"></i> Rechtliches verwalten</h1>
+        </div>
+        <div class="info-box">
+          <i class="fas fa-info-circle"></i>
+          <span>Verwalte hier alle rechtlichen Texte für deine Website: Impressum, Datenschutz, AGB und Widerrufsbelehrung.</span>
+        </div>
+
+        <!-- Legal Tabs -->
+        <div class="legal-tabs">
+          <button class="legal-tab active" data-legal-tab="impressum">
+            <i class="fas fa-id-card"></i> Impressum
+          </button>
+          <button class="legal-tab" data-legal-tab="datenschutz">
+            <i class="fas fa-shield-alt"></i> Datenschutz
+          </button>
+          <button class="legal-tab" data-legal-tab="agb">
+            <i class="fas fa-file-contract"></i> AGB
+          </button>
+          <button class="legal-tab" data-legal-tab="widerruf">
+            <i class="fas fa-undo-alt"></i> Widerruf
+          </button>
+        </div>
+
+        <!-- Impressum Tab -->
+        <div id="legal-impressum-tab" class="legal-tab-content active">
+          <div class="settings-card">
+            <h3><i class="fas fa-user"></i> Angaben gemäß § 5 TMG</h3>
+            <form id="impressum-form">
+              <div class="form-group">
+                <label>Vollständiger Name</label>
+                <input type="text" id="imp-name" placeholder="Max Mustermann">
+              </div>
+              <div class="form-group">
+                <label>Straße und Hausnummer</label>
+                <input type="text" id="imp-street" placeholder="Musterstraße 1">
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>PLZ</label>
+                  <input type="text" id="imp-zip" placeholder="12345">
+                </div>
+                <div class="form-group">
+                  <label>Stadt</label>
+                  <input type="text" id="imp-city" placeholder="Musterstadt">
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Land</label>
+                <input type="text" id="imp-country" placeholder="Deutschland">
+              </div>
+            </form>
+          </div>
+
+          <div class="settings-card">
+            <h3><i class="fas fa-envelope"></i> Kontakt</h3>
             <div class="form-row">
               <div class="form-group">
-                <label>PLZ</label>
-                <input type="text" id="imp-zip" placeholder="12345">
+                <label>E-Mail</label>
+                <input type="email" id="imp-email" placeholder="mail@example.com">
               </div>
               <div class="form-group">
-                <label>Stadt</label>
-                <input type="text" id="imp-city" placeholder="Musterstadt">
+                <label>Telefon (optional)</label>
+                <input type="tel" id="imp-phone" placeholder="+49 123 456789">
               </div>
             </div>
-            <div class="form-group">
-              <label>Land</label>
-              <input type="text" id="imp-country" placeholder="Deutschland">
-            </div>
-          </form>
-        </div>
+          </div>
 
-        <div class="settings-card">
-          <h3><i class="fas fa-envelope"></i> Kontakt</h3>
-          <div class="form-row">
+          <div class="settings-card">
+            <h3><i class="fas fa-briefcase"></i> Geschäftliche Angaben (optional)</h3>
             <div class="form-group">
-              <label>E-Mail</label>
-              <input type="email" id="imp-email" placeholder="mail@example.com">
+              <label>Umsatzsteuer-ID</label>
+              <input type="text" id="imp-ustid" placeholder="DE123456789">
             </div>
             <div class="form-group">
-              <label>Telefon (optional)</label>
-              <input type="tel" id="imp-phone" placeholder="+49 123 456789">
+              <label>Berufsbezeichnung / Tätigkeit</label>
+              <input type="text" id="imp-job" placeholder="Softwareentwickler">
+            </div>
+          </div>
+
+          <div class="settings-card">
+            <h3><i class="fas fa-shield-alt"></i> Haftungsausschluss</h3>
+            <div class="form-group">
+              <label>Zusätzlicher Text (optional)</label>
+              <textarea id="imp-disclaimer" rows="4" placeholder="Haftung für Inhalte, Links, etc."></textarea>
+            </div>
+          </div>
+
+          <button id="save-impressum-btn" class="btn-primary" style="margin-top: 20px;">
+            <i class="fas fa-save"></i> Impressum speichern
+          </button>
+        </div>
+
+        <!-- Datenschutz Tab -->
+        <div id="legal-datenschutz-tab" class="legal-tab-content">
+          <div class="settings-card">
+            <div class="legal-info-banner">
+              <i class="fas fa-info-circle"></i>
+              <div>
+                <strong>Automatische Generierung</strong>
+                <p>Die Datenschutzerklärung wird automatisch basierend auf deinen Impressum-Daten generiert. Du kannst unten einen eigenen Text verwenden, falls du individuelle Anpassungen benötigst.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-card">
+            <h3><i class="fas fa-edit"></i> Eigene Datenschutzerklärung (optional)</h3>
+            <div class="form-group">
+              <label>
+                <input type="checkbox" id="datenschutz-custom-toggle">
+                Eigenen Text verwenden
+              </label>
+            </div>
+            <div id="datenschutz-custom-container" class="hidden">
+              <div class="form-group">
+                <label>Eigene Datenschutzerklärung</label>
+                <textarea id="datenschutz-custom" rows="20" placeholder="Geben Sie hier Ihren eigenen Datenschutztext ein..."></textarea>
+              </div>
+            </div>
+          </div>
+
+          <button id="save-datenschutz-btn" class="btn-primary" style="margin-top: 20px;">
+            <i class="fas fa-save"></i> Datenschutz speichern
+          </button>
+        </div>
+
+        <!-- AGB Tab -->
+        <div id="legal-agb-tab" class="legal-tab-content">
+          <div class="settings-card">
+            <div class="legal-info-banner">
+              <i class="fas fa-info-circle"></i>
+              <div>
+                <strong>Automatische Generierung</strong>
+                <p>Die AGB werden automatisch für Software-Entwicklungsdienstleistungen generiert. Du kannst unten einen eigenen Text verwenden, falls du individuelle Anpassungen benötigst.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-card">
+            <h3><i class="fas fa-edit"></i> Eigene AGB (optional)</h3>
+            <div class="form-group">
+              <label>
+                <input type="checkbox" id="agb-custom-toggle">
+                Eigenen Text verwenden
+              </label>
+            </div>
+            <div id="agb-custom-container" class="hidden">
+              <div class="form-group">
+                <label>Eigene AGB</label>
+                <textarea id="agb-custom" rows="20" placeholder="Geben Sie hier Ihre eigenen AGB ein..."></textarea>
+              </div>
+            </div>
+          </div>
+
+          <button id="save-agb-btn" class="btn-primary" style="margin-top: 20px;">
+            <i class="fas fa-save"></i> AGB speichern
+          </button>
+        </div>
+
+        <!-- Widerruf Tab -->
+        <div id="legal-widerruf-tab" class="legal-tab-content">
+          <div class="settings-card">
+            <div class="legal-info-banner">
+              <i class="fas fa-info-circle"></i>
+              <div>
+                <strong>Automatische Generierung</strong>
+                <p>Die Widerrufsbelehrung wird automatisch für Dienstleistungen generiert. Du kannst unten einen eigenen Text verwenden, falls du individuelle Anpassungen benötigst.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-card">
+            <h3><i class="fas fa-edit"></i> Eigene Widerrufsbelehrung (optional)</h3>
+            <div class="form-group">
+              <label>
+                <input type="checkbox" id="widerruf-custom-toggle">
+                Eigenen Text verwenden
+              </label>
+            </div>
+            <div id="widerruf-custom-container" class="hidden">
+              <div class="form-group">
+                <label>Eigene Widerrufsbelehrung</label>
+                <textarea id="widerruf-custom" rows="20" placeholder="Geben Sie hier Ihre eigene Widerrufsbelehrung ein..."></textarea>
+              </div>
+            </div>
+          </div>
+
+          <button id="save-widerruf-btn" class="btn-primary" style="margin-top: 20px;">
+            <i class="fas fa-save"></i> Widerruf speichern
+          </button>
+        </div>
+      </section>
+
+      <!-- Analytics Section -->
+      <section id="section-analytics" class="content-section">
+        <div class="section-header">
+          <h1><i class="fas fa-chart-bar"></i> Analytics Dashboard</h1>
+          <div class="header-actions">
+            <select id="analytics-period">
+              <option value="30">Letzte 30 Tage</option>
+              <option value="90">Letzte 90 Tage</option>
+              <option value="365">Letztes Jahr</option>
+              <option value="all">Gesamt</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Analytics Stats -->
+        <div class="dashboard-stats analytics-stats">
+          <div class="stat-card primary">
+            <div class="stat-icon"><i class="fas fa-percentage"></i></div>
+            <div class="stat-info">
+              <span class="stat-value" id="analytics-conversion">0%</span>
+              <span class="stat-label">Conversion Rate</span>
+            </div>
+          </div>
+          <div class="stat-card success">
+            <div class="stat-icon"><i class="fas fa-clock"></i></div>
+            <div class="stat-info">
+              <span class="stat-value" id="analytics-response-time">0h</span>
+              <span class="stat-label">Ø Reaktionszeit</span>
+            </div>
+          </div>
+          <div class="stat-card warning">
+            <div class="stat-icon"><i class="fas fa-inbox"></i></div>
+            <div class="stat-info">
+              <span class="stat-value" id="analytics-total-requests">0</span>
+              <span class="stat-label">Anfragen</span>
+            </div>
+          </div>
+          <div class="stat-card info">
+            <div class="stat-icon"><i class="fas fa-euro-sign"></i></div>
+            <div class="stat-info">
+              <span class="stat-value" id="analytics-total-revenue">0€</span>
+              <span class="stat-label">Umsatz</span>
             </div>
           </div>
         </div>
 
-        <div class="settings-card">
-          <h3><i class="fas fa-briefcase"></i> Geschäftliche Angaben (optional)</h3>
-          <div class="form-group">
-            <label>Umsatzsteuer-ID</label>
-            <input type="text" id="imp-ustid" placeholder="DE123456789">
+        <!-- Analytics Charts -->
+        <div class="analytics-grid">
+          <!-- Project Types -->
+          <div class="analytics-card">
+            <div class="card-header">
+              <h3><i class="fas fa-chart-pie"></i> Projekttypen</h3>
+            </div>
+            <div class="card-body">
+              <div id="project-types-chart" class="chart-container">
+                <!-- Chart rendered dynamically -->
+              </div>
+            </div>
           </div>
-          <div class="form-group">
-            <label>Berufsbezeichnung / Tätigkeit</label>
-            <input type="text" id="imp-job" placeholder="Softwareentwickler">
+
+          <!-- Status Distribution -->
+          <div class="analytics-card">
+            <div class="card-header">
+              <h3><i class="fas fa-tasks"></i> Status-Verteilung</h3>
+            </div>
+            <div class="card-body">
+              <div id="status-chart" class="chart-container">
+                <!-- Chart rendered dynamically -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Requests per Month -->
+          <div class="analytics-card wide">
+            <div class="card-header">
+              <h3><i class="fas fa-chart-line"></i> Anfragen pro Monat</h3>
+            </div>
+            <div class="card-body">
+              <div id="requests-per-month-chart" class="chart-container">
+                <!-- Chart rendered dynamically -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Top Customers -->
+          <div class="analytics-card">
+            <div class="card-header">
+              <h3><i class="fas fa-trophy"></i> Top Kunden</h3>
+            </div>
+            <div class="card-body">
+              <div id="top-customers-list" class="top-list">
+                <!-- List rendered dynamically -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Revenue per Month -->
+          <div class="analytics-card">
+            <div class="card-header">
+              <h3><i class="fas fa-euro-sign"></i> Umsatz pro Monat</h3>
+            </div>
+            <div class="card-body">
+              <div id="revenue-per-month-chart" class="chart-container">
+                <!-- Chart rendered dynamically -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- FAQs Section -->
+      <section id="section-faqs" class="content-section">
+        <div class="section-header">
+          <h1><i class="fas fa-question-circle"></i> FAQ-Verwaltung</h1>
+          <button id="add-faq-btn" class="btn-primary">
+            <i class="fas fa-plus"></i> Neue FAQ
+          </button>
+        </div>
+        <div class="info-box">
+          <i class="fas fa-info-circle"></i>
+          <span>FAQs werden im Kundenportal angezeigt. Ordne sie nach Wichtigkeit mit Drag & Drop.</span>
+        </div>
+
+        <!-- FAQ Stats -->
+        <div class="dashboard-stats" style="margin-bottom: 24px;">
+          <div class="stat-card primary">
+            <div class="stat-icon"><i class="fas fa-question-circle"></i></div>
+            <div class="stat-info">
+              <span class="stat-value" id="total-faqs">0</span>
+              <span class="stat-label">FAQs</span>
+            </div>
+          </div>
+          <div class="stat-card success">
+            <div class="stat-icon"><i class="fas fa-eye"></i></div>
+            <div class="stat-info">
+              <span class="stat-value" id="active-faqs">0</span>
+              <span class="stat-label">Aktiv</span>
+            </div>
           </div>
         </div>
 
-        <div class="settings-card">
-          <h3><i class="fas fa-shield-alt"></i> Haftungsausschluss</h3>
-          <div class="form-group">
-            <label>Zusätzlicher Text (optional)</label>
-            <textarea id="imp-disclaimer" rows="4" placeholder="Haftung für Inhalte, Links, etc."></textarea>
+        <div id="faq-list" class="faqs-admin-list">
+          <!-- FAQs loaded dynamically -->
+        </div>
+      </section>
+
+      <!-- FAQ Modal -->
+      <div id="faq-modal" class="modal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2 id="faq-modal-title">Neue FAQ</h2>
+            <button class="modal-close" data-close-modal>
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="faq-id">
+            <div class="form-group">
+              <label for="faq-question">Frage</label>
+              <input type="text" id="faq-question" placeholder="z.B. Wie lange dauert ein Projekt?">
+            </div>
+            <div class="form-group">
+              <label for="faq-answer">Antwort</label>
+              <textarea id="faq-answer" rows="6" placeholder="Ausführliche Antwort..."></textarea>
+            </div>
+            <div class="form-group">
+              <label>
+                <input type="checkbox" id="faq-active" checked>
+                Aktiv (im Kundenportal sichtbar)
+              </label>
+            </div>
+            <div class="modal-footer">
+              <button id="save-faq-btn" class="btn-primary">
+                <i class="fas fa-save"></i> Speichern
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Appointments Section -->
+      <section id="section-appointments" class="content-section">
+        <div class="section-header">
+          <h1><i class="fas fa-calendar-check"></i> Terminverwaltung</h1>
+        </div>
+        <div class="info-box">
+          <i class="fas fa-info-circle"></i>
+          <span>Verwalte hier alle Kundentermine. Bestätige oder lehne Terminanfragen ab.</span>
+        </div>
+
+        <!-- Appointment Stats -->
+        <div class="dashboard-stats" style="margin-bottom: 24px;">
+          <div class="stat-card warning">
+            <div class="stat-icon"><i class="fas fa-clock"></i></div>
+            <div class="stat-info">
+              <span class="stat-value" id="pending-appointments">0</span>
+              <span class="stat-label">Ausstehend</span>
+            </div>
+          </div>
+          <div class="stat-card success">
+            <div class="stat-icon"><i class="fas fa-check"></i></div>
+            <div class="stat-info">
+              <span class="stat-value" id="confirmed-appointments">0</span>
+              <span class="stat-label">Bestätigt</span>
+            </div>
+          </div>
+          <div class="stat-card primary">
+            <div class="stat-icon"><i class="fas fa-calendar"></i></div>
+            <div class="stat-info">
+              <span class="stat-value" id="upcoming-appointments">0</span>
+              <span class="stat-label">Diese Woche</span>
+            </div>
           </div>
         </div>
 
-        <button id="save-impressum-btn" class="btn-primary" style="margin-top: 20px;">
-          <i class="fas fa-save"></i> Impressum speichern
-        </button>
+        <!-- Appointment Filters -->
+        <div class="appointment-filters">
+          <button class="filter-btn active" data-filter="pending">
+            <i class="fas fa-clock"></i> Ausstehend
+          </button>
+          <button class="filter-btn" data-filter="confirmed">
+            <i class="fas fa-check"></i> Bestätigt
+          </button>
+          <button class="filter-btn" data-filter="all">
+            <i class="fas fa-list"></i> Alle
+          </button>
+        </div>
+
+        <div id="appointments-admin-list" class="appointments-admin-list">
+          <!-- Appointments loaded dynamically -->
+        </div>
       </section>
 
       <!-- Settings Section -->
@@ -483,12 +1467,93 @@
             <i class="fas fa-file-import"></i> Bestehende Daten importieren
           </button>
         </div>
+
+        <!-- E-Mail Settings -->
+        <div class="settings-card">
+          <h3><i class="fas fa-envelope"></i> E-Mail-Benachrichtigungen</h3>
+          <div class="info-box" style="margin-bottom: 20px;">
+            <i class="fas fa-info-circle"></i>
+            <span>Konfiguriere E-Mail-Benachrichtigungen für neue Nachrichten, Statusänderungen und Deadline-Erinnerungen.</span>
+          </div>
+
+          <div class="form-group">
+            <label>
+              <input type="checkbox" id="email-enabled">
+              E-Mail-Benachrichtigungen aktivieren
+            </label>
+          </div>
+
+          <div id="email-settings-container">
+            <h4 style="margin-top: 20px; margin-bottom: 15px;">SMTP-Konfiguration</h4>
+            <div class="form-row">
+              <div class="form-group">
+                <label>SMTP-Server</label>
+                <input type="text" id="smtp-host" placeholder="z.B. smtp.gmail.com">
+              </div>
+              <div class="form-group">
+                <label>Port</label>
+                <input type="number" id="smtp-port" value="587" placeholder="587">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Benutzername / E-Mail</label>
+                <input type="email" id="smtp-user" placeholder="deine@email.de">
+              </div>
+              <div class="form-group">
+                <label>Passwort / App-Passwort</label>
+                <input type="password" id="smtp-pass" placeholder="********">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Absender-Name</label>
+              <input type="text" id="smtp-from-name" placeholder="Mas0n1x Portfolio">
+            </div>
+
+            <h4 style="margin-top: 25px; margin-bottom: 15px;">Benachrichtigungsoptionen</h4>
+            <div class="notification-options">
+              <div class="form-group">
+                <label>
+                  <input type="checkbox" id="notify-new-message" checked>
+                  Bei neuen Kundennachrichten benachrichtigen
+                </label>
+              </div>
+              <div class="form-group">
+                <label>
+                  <input type="checkbox" id="notify-new-request" checked>
+                  Bei neuen Projektanfragen benachrichtigen
+                </label>
+              </div>
+              <div class="form-group">
+                <label>
+                  <input type="checkbox" id="notify-status-change" checked>
+                  Kunde bei Statusänderung benachrichtigen
+                </label>
+              </div>
+              <div class="form-group">
+                <label>
+                  <input type="checkbox" id="notify-deadline-reminder">
+                  Deadline-Erinnerungen (3 Tage vorher)
+                </label>
+              </div>
+            </div>
+
+            <div class="form-row" style="margin-top: 20px;">
+              <button id="save-email-settings-btn" class="btn-primary">
+                <i class="fas fa-save"></i> E-Mail-Einstellungen speichern
+              </button>
+              <button id="test-email-btn" class="btn-secondary">
+                <i class="fas fa-paper-plane"></i> Test-E-Mail senden
+              </button>
+            </div>
+          </div>
+        </div>
       </section>
     </main>
   </div>
 
   <!-- Modal for Project/Service Edit -->
-  <div id="modal" class="modal hidden">
+  <div id="modal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
         <h2 id="modal-title">Bearbeiten</h2>
@@ -498,6 +1563,139 @@
       </div>
       <div id="modal-body" class="modal-body">
         <!-- Form loaded dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Template Modal -->
+  <div id="template-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="template-modal-title">Neue Vorlage</h2>
+        <button class="modal-close">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="template-id">
+        <div class="form-group">
+          <label for="template-name">Name</label>
+          <input type="text" id="template-name" placeholder="z.B. Begrüßung">
+        </div>
+        <div class="form-group">
+          <label for="template-subject">Betreff (optional)</label>
+          <input type="text" id="template-subject" placeholder="z.B. Willkommen bei Mas0n1x">
+        </div>
+        <div class="form-group">
+          <label for="template-category">Kategorie</label>
+          <select id="template-category">
+            <option value="general">Allgemein</option>
+            <option value="greeting">Begrüßung</option>
+            <option value="status">Status-Updates</option>
+            <option value="payment">Zahlung</option>
+            <option value="support">Support</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="template-content">Inhalt</label>
+          <textarea id="template-content" rows="8" placeholder="Nachrichteninhalt..."></textarea>
+        </div>
+        <div class="modal-footer">
+          <button id="save-template-btn" class="btn-primary">
+            <i class="fas fa-save"></i> Speichern
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contract Template Modal -->
+  <div id="contract-template-modal" class="modal">
+    <div class="modal-content modal-large">
+      <div class="modal-header">
+        <h2 id="contract-template-modal-title">Neue Vertragsvorlage</h2>
+        <button class="modal-close">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="contract-template-id">
+        <div class="form-group">
+          <label for="contract-template-name">Name</label>
+          <input type="text" id="contract-template-name" placeholder="z.B. Standard-Projektvertrag">
+        </div>
+        <div class="form-group">
+          <label for="contract-template-type">Typ</label>
+          <select id="contract-template-type">
+            <option value="standard">Standard</option>
+            <option value="webseite">Webseite</option>
+            <option value="app">App-Entwicklung</option>
+            <option value="bot">Discord Bot</option>
+            <option value="backend">Backend</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Verfügbare Platzhalter:</label>
+          <div class="placeholder-tags">
+            <span class="placeholder-tag" onclick="insertPlaceholder('{{VERTRAGSNUMMER}}')">{{VERTRAGSNUMMER}}</span>
+            <span class="placeholder-tag" onclick="insertPlaceholder('{{DATUM}}')">{{DATUM}}</span>
+            <span class="placeholder-tag" onclick="insertPlaceholder('{{KUNDE_NAME}}')">{{KUNDE_NAME}}</span>
+            <span class="placeholder-tag" onclick="insertPlaceholder('{{KUNDE_EMAIL}}')">{{KUNDE_EMAIL}}</span>
+            <span class="placeholder-tag" onclick="insertPlaceholder('{{KUNDE_FIRMA}}')">{{KUNDE_FIRMA}}</span>
+            <span class="placeholder-tag" onclick="insertPlaceholder('{{ANBIETER_NAME}}')">{{ANBIETER_NAME}}</span>
+            <span class="placeholder-tag" onclick="insertPlaceholder('{{PROJEKT_TYP}}')">{{PROJEKT_TYP}}</span>
+            <span class="placeholder-tag" onclick="insertPlaceholder('{{PROJEKT_BUDGET}}')">{{PROJEKT_BUDGET}}</span>
+            <span class="placeholder-tag" onclick="insertPlaceholder('{{PROJEKT_ZEITRAHMEN}}')">{{PROJEKT_ZEITRAHMEN}}</span>
+            <span class="placeholder-tag" onclick="insertPlaceholder('{{PROJEKT_BESCHREIBUNG}}')">{{PROJEKT_BESCHREIBUNG}}</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="contract-template-content">Vertragsinhalt</label>
+          <textarea id="contract-template-content" rows="20" placeholder="Vertragstext mit Platzhaltern..."></textarea>
+        </div>
+        <div class="modal-footer">
+          <button id="save-contract-template-btn" class="btn-primary">
+            <i class="fas fa-save"></i> Speichern
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Generate Contract Modal -->
+  <div id="generate-contract-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Vertrag generieren</h2>
+        <button class="modal-close">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="generate-template-select">Vorlage auswählen</label>
+          <select id="generate-template-select">
+            <!-- Options loaded dynamically -->
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="generate-customer-select">Kunde auswählen</label>
+          <select id="generate-customer-select">
+            <!-- Options loaded dynamically -->
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="generate-request-select">Anfrage (optional)</label>
+          <select id="generate-request-select">
+            <option value="">-- Keine Anfrage --</option>
+            <!-- Options loaded dynamically -->
+          </select>
+        </div>
+        <div class="modal-footer">
+          <button id="generate-contract-btn" class="btn-primary">
+            <i class="fas fa-file-signature"></i> Vertrag generieren
+          </button>
+        </div>
       </div>
     </div>
   </div>

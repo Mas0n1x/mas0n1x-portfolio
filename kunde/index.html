@@ -53,9 +53,22 @@
       </div>
     </header>
 
+    <!-- Navigation Tabs -->
+    <nav class="portal-nav">
+      <button class="portal-tab active" data-view="requests">
+        <i class="fas fa-folder-open"></i> Meine Anfragen
+      </button>
+      <button class="portal-tab" data-view="appointments">
+        <i class="fas fa-calendar-alt"></i> Termine
+      </button>
+      <button class="portal-tab" data-view="faq">
+        <i class="fas fa-question-circle"></i> FAQ
+      </button>
+    </nav>
+
     <main class="main-content">
       <!-- Requests List View -->
-      <div id="requests-view">
+      <div id="requests-view" class="portal-view">
         <div class="page-header">
           <h1><i class="fas fa-folder-open"></i> Meine Anfragen</h1>
           <a href="/projekt-starten.html" class="btn-primary">
@@ -64,6 +77,65 @@
         </div>
 
         <div id="requests-list" class="requests-list">
+          <!-- Loaded dynamically -->
+        </div>
+      </div>
+
+      <!-- Appointments View -->
+      <div id="appointments-view" class="portal-view hidden">
+        <div class="page-header">
+          <h1><i class="fas fa-calendar-alt"></i> Terminbuchung</h1>
+        </div>
+
+        <div class="appointments-container">
+          <div class="appointment-booking">
+            <h2><i class="fas fa-calendar-plus"></i> Neuen Termin buchen</h2>
+            <div class="booking-form">
+              <div class="form-group">
+                <label for="appointment-date">Datum</label>
+                <input type="date" id="appointment-date" min="">
+              </div>
+              <div class="form-group">
+                <label>Verfügbare Uhrzeiten</label>
+                <div id="time-slots" class="time-slots">
+                  <p class="text-muted">Wähle zuerst ein Datum</p>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="appointment-type">Art des Termins</label>
+                <select id="appointment-type">
+                  <option value="consultation">Beratungsgespräch</option>
+                  <option value="project-discussion">Projektbesprechung</option>
+                  <option value="support">Support</option>
+                  <option value="other">Sonstiges</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="appointment-notes">Anmerkungen (optional)</label>
+                <textarea id="appointment-notes" rows="3" placeholder="Worum geht es?"></textarea>
+              </div>
+              <button id="book-appointment-btn" class="btn-primary" onclick="bookAppointment()" disabled>
+                <i class="fas fa-calendar-check"></i> Termin buchen
+              </button>
+            </div>
+          </div>
+
+          <div class="my-appointments">
+            <h2><i class="fas fa-list"></i> Meine Termine</h2>
+            <div id="my-appointments-list" class="appointments-list">
+              <!-- Loaded dynamically -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FAQ View -->
+      <div id="faq-view" class="portal-view hidden">
+        <div class="page-header">
+          <h1><i class="fas fa-question-circle"></i> Häufig gestellte Fragen</h1>
+        </div>
+
+        <div id="faq-list" class="faq-list">
           <!-- Loaded dynamically -->
         </div>
       </div>
@@ -81,6 +153,45 @@
           <div class="detail-sidebar">
             <div id="request-info" class="info-card">
               <!-- Loaded dynamically -->
+            </div>
+
+            <!-- Dokumente Section -->
+            <div class="documents-card">
+              <div class="documents-header">
+                <h3><i class="fas fa-file-alt"></i> Dokumente</h3>
+              </div>
+              <div id="documents-list" class="documents-list">
+                <!-- Loaded dynamically -->
+              </div>
+            </div>
+
+            <!-- Bewertung Section (nur bei abgeschlossenen Projekten) -->
+            <div id="review-section" class="review-card hidden">
+              <div class="review-header">
+                <h3><i class="fas fa-star"></i> Bewertung abgeben</h3>
+              </div>
+              <div id="review-form" class="review-form">
+                <div class="star-rating">
+                  <span class="star" data-value="1">★</span>
+                  <span class="star" data-value="2">★</span>
+                  <span class="star" data-value="3">★</span>
+                  <span class="star" data-value="4">★</span>
+                  <span class="star" data-value="5">★</span>
+                </div>
+                <input type="text" id="review-title" placeholder="Titel (optional)" class="review-input">
+                <textarea id="review-content" placeholder="Ihre Bewertung..." rows="4" class="review-textarea"></textarea>
+                <label class="checkbox-label">
+                  <input type="checkbox" id="review-public" checked>
+                  <span>Öffentlich auf Portfolio anzeigen</span>
+                </label>
+                <button id="submit-review-btn" class="btn-primary">
+                  <i class="fas fa-paper-plane"></i> Bewertung senden
+                </button>
+              </div>
+              <div id="review-submitted" class="review-submitted hidden">
+                <i class="fas fa-check-circle"></i>
+                <p>Vielen Dank für Ihre Bewertung!</p>
+              </div>
             </div>
           </div>
 

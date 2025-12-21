@@ -1,6 +1,7 @@
 // ==================== STATE ====================
 let customer = null;
 let currentRequestId = null;
+let currentView = 'requests';
 
 // ==================== DOM ELEMENTS ====================
 const loginScreen = document.getElementById('login-screen');
@@ -119,9 +120,21 @@ async function loadRequests() {
             <span><i class="fas fa-calendar"></i> ${formatDate(req.created_at)}</span>
           </div>
           ${req.deadline ? `
-            <div class="deadline-badge">
-              <i class="fas fa-clock"></i>
-              Deadline: ${formatDate(req.deadline)}
+            <div class="deadline-info ${isDeadlineSoon(req.deadline) ? 'urgent' : ''}">
+              <i class="fas fa-calendar-alt"></i>
+              <span>Deadline: ${formatDate(req.deadline)}</span>
+              ${getDaysRemaining(req.deadline)}
+            </div>
+          ` : ''}
+          ${req.progress > 0 || req.status === 'in_progress' ? `
+            <div class="progress-section">
+              <div class="progress-header">
+                <span><i class="fas fa-tasks"></i> Fortschritt</span>
+                <span class="progress-percent">${req.progress || 0}%</span>
+              </div>
+              <div class="progress-bar-track">
+                <div class="progress-bar-fill" style="width: ${req.progress || 0}%"></div>
+              </div>
             </div>
           ` : ''}
         </div>
@@ -145,6 +158,39 @@ async function openRequest(id) {
 
     // Fill info
     document.getElementById('request-info').innerHTML = `
+      ${(request.progress > 0 || request.status === 'in_progress') ? `
+        <div class="progress-card">
+          <div class="progress-card-header">
+            <span class="progress-card-title">
+              <i class="fas fa-chart-line"></i>
+              Projektfortschritt
+            </span>
+            <span class="progress-card-value">${request.progress || 0}%</span>
+          </div>
+          <div class="progress-card-bar">
+            <div class="progress-card-fill" style="width: ${request.progress || 0}%"></div>
+          </div>
+          <div class="progress-card-milestones">
+            <span class="${(request.progress || 0) >= 0 ? 'active' : ''}">Start</span>
+            <span class="${(request.progress || 0) >= 25 ? 'active' : ''}">25%</span>
+            <span class="${(request.progress || 0) >= 50 ? 'active' : ''}">50%</span>
+            <span class="${(request.progress || 0) >= 75 ? 'active' : ''}">75%</span>
+            <span class="${(request.progress || 0) >= 100 ? 'active' : ''}">Fertig</span>
+          </div>
+        </div>
+      ` : ''}
+      ${request.deadline ? `
+        <div class="deadline-card ${isDeadlineSoon(request.deadline) ? 'urgent' : ''}">
+          <div class="deadline-card-icon">
+            <i class="fas fa-calendar-alt"></i>
+          </div>
+          <div class="deadline-card-content">
+            <span class="deadline-card-label">Deadline</span>
+            <span class="deadline-card-date">${formatDate(request.deadline)}</span>
+            <span class="deadline-card-remaining">${getDaysRemainingText(request.deadline)}</span>
+          </div>
+        </div>
+      ` : ''}
       <div class="info-item">
         <div class="info-label">Projektart</div>
         <div class="info-value">${getProjectTypeIcon(request.project_type)} ${getProjectTypeLabel(request.project_type)}</div>
@@ -163,15 +209,6 @@ async function openRequest(id) {
         <div class="info-label">Zeitrahmen</div>
         <div class="info-value">${getTimelineLabel(request.timeline)}</div>
       </div>
-      ${request.deadline ? `
-        <div class="info-item">
-          <div class="info-label">Deadline</div>
-          <div class="info-value deadline">
-            <i class="fas fa-clock"></i>
-            ${formatDate(request.deadline)}
-          </div>
-        </div>
-      ` : ''}
       <div class="info-item">
         <div class="info-label">Eingereicht am</div>
         <div class="info-value">${formatDateTime(request.created_at)}</div>
@@ -183,6 +220,8 @@ async function openRequest(id) {
     `;
 
     loadMessages(id);
+    loadDocuments(id);
+    initReviewSection(id, request.status);
   } catch (e) {
     alert(e.message);
   }
@@ -207,15 +246,15 @@ async function loadMessages(requestId) {
     container.innerHTML = messages.map(msg => `
       <div class="chat-message ${msg.sender_type}">
         <div>${escapeHtml(msg.content)}</div>
-        ${msg.file_path ? `
-          <a href="${msg.file_path}" target="_blank" class="chat-message-file">
-            <i class="fas fa-file"></i>
-            <span>${escapeHtml(msg.original_name)}</span>
-          </a>
-        ` : ''}
+        ${msg.file_path ? renderFileAttachment(msg.file_path, msg.original_name) : ''}
         <div class="chat-message-time">${formatDateTime(msg.created_at)}</div>
       </div>
     `).join('');
+
+    // Add click handlers for image preview
+    container.querySelectorAll('.file-preview-image').forEach(img => {
+      img.addEventListener('click', () => openImageModal(img.src, img.alt));
+    });
 
     container.scrollTop = container.scrollHeight;
   } catch (e) {
@@ -271,6 +310,147 @@ document.getElementById('file-input').addEventListener('change', (e) => {
   const file = e.target.files[0];
   document.getElementById('file-name').textContent = file ? `Ausgewählt: ${file.name}` : '';
 });
+
+// ==================== FILE PREVIEW ====================
+function getFileType(filename) {
+  const ext = filename.split('.').pop().toLowerCase();
+  const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'];
+  const pdfExts = ['pdf'];
+  const videoExts = ['mp4', 'webm', 'ogg', 'mov'];
+  const audioExts = ['mp3', 'wav', 'ogg', 'flac'];
+  const codeExts = ['js', 'ts', 'html', 'css', 'json', 'py', 'java', 'cpp', 'c', 'php'];
+  const docExts = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt'];
+
+  if (imageExts.includes(ext)) return 'image';
+  if (pdfExts.includes(ext)) return 'pdf';
+  if (videoExts.includes(ext)) return 'video';
+  if (audioExts.includes(ext)) return 'audio';
+  if (codeExts.includes(ext)) return 'code';
+  if (docExts.includes(ext)) return 'document';
+  return 'file';
+}
+
+function getFileIcon(type) {
+  const icons = {
+    'image': 'fa-image',
+    'pdf': 'fa-file-pdf',
+    'video': 'fa-video',
+    'audio': 'fa-music',
+    'code': 'fa-code',
+    'document': 'fa-file-word',
+    'file': 'fa-file'
+  };
+  return icons[type] || 'fa-file';
+}
+
+function renderFileAttachment(filePath, originalName) {
+  const fileType = getFileType(originalName);
+  const fileIcon = getFileIcon(fileType);
+
+  if (fileType === 'image') {
+    return `
+      <div class="file-attachment image-attachment">
+        <img src="${filePath}" alt="${escapeHtml(originalName)}" class="file-preview-image" loading="lazy">
+        <a href="${filePath}" target="_blank" class="file-download-link">
+          <i class="fas fa-download"></i> ${escapeHtml(originalName)}
+        </a>
+      </div>
+    `;
+  }
+
+  if (fileType === 'pdf') {
+    return `
+      <div class="file-attachment pdf-attachment">
+        <div class="pdf-preview">
+          <i class="fas fa-file-pdf"></i>
+          <span>PDF Dokument</span>
+        </div>
+        <div class="file-attachment-info">
+          <a href="${filePath}" target="_blank" class="file-view-link">
+            <i class="fas fa-external-link-alt"></i> Öffnen
+          </a>
+          <a href="${filePath}" download class="file-download-link">
+            <i class="fas fa-download"></i> ${escapeHtml(originalName)}
+          </a>
+        </div>
+      </div>
+    `;
+  }
+
+  if (fileType === 'video') {
+    return `
+      <div class="file-attachment video-attachment">
+        <video controls preload="metadata">
+          <source src="${filePath}" type="video/mp4">
+          Ihr Browser unterstützt kein Video.
+        </video>
+        <a href="${filePath}" download class="file-download-link">
+          <i class="fas fa-download"></i> ${escapeHtml(originalName)}
+        </a>
+      </div>
+    `;
+  }
+
+  if (fileType === 'audio') {
+    return `
+      <div class="file-attachment audio-attachment">
+        <audio controls preload="metadata">
+          <source src="${filePath}">
+          Ihr Browser unterstützt kein Audio.
+        </audio>
+        <a href="${filePath}" download class="file-download-link">
+          <i class="fas fa-download"></i> ${escapeHtml(originalName)}
+        </a>
+      </div>
+    `;
+  }
+
+  // Default file attachment
+  return `
+    <a href="${filePath}" target="_blank" class="chat-message-file">
+      <i class="fas ${fileIcon}"></i>
+      <span>${escapeHtml(originalName)}</span>
+      <i class="fas fa-download download-icon"></i>
+    </a>
+  `;
+}
+
+function openImageModal(src, alt) {
+  const modal = document.createElement('div');
+  modal.className = 'image-modal';
+  modal.innerHTML = `
+    <div class="image-modal-backdrop"></div>
+    <div class="image-modal-content">
+      <button class="image-modal-close"><i class="fas fa-times"></i></button>
+      <img src="${src}" alt="${escapeHtml(alt)}">
+      <div class="image-modal-caption">${escapeHtml(alt)}</div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+  document.body.style.overflow = 'hidden';
+
+  // Close handlers
+  modal.querySelector('.image-modal-backdrop').addEventListener('click', () => closeImageModal(modal));
+  modal.querySelector('.image-modal-close').addEventListener('click', () => closeImageModal(modal));
+  document.addEventListener('keydown', function escHandler(e) {
+    if (e.key === 'Escape') {
+      closeImageModal(modal);
+      document.removeEventListener('keydown', escHandler);
+    }
+  });
+
+  // Animate in
+  requestAnimationFrame(() => modal.classList.add('active'));
+}
+
+function closeImageModal(modal) {
+  modal.classList.remove('active');
+  setTimeout(() => {
+    modal.remove();
+    document.body.style.overflow = '';
+  }, 300);
+}
 
 // ==================== HELPER FUNCTIONS ====================
 function getProjectTypeIcon(type) {
@@ -343,5 +523,508 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
+function isDeadlineSoon(deadline) {
+  if (!deadline) return false;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const deadlineDate = new Date(deadline);
+  const diffTime = deadlineDate - today;
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return diffDays <= 7 && diffDays >= 0;
+}
+
+function getDaysRemaining(deadline) {
+  if (!deadline) return '';
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const deadlineDate = new Date(deadline);
+  const diffTime = deadlineDate - today;
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+  if (diffDays < 0) {
+    return `<span class="days-remaining overdue">${Math.abs(diffDays)} Tage überfällig</span>`;
+  } else if (diffDays === 0) {
+    return `<span class="days-remaining today">Heute fällig!</span>`;
+  } else if (diffDays === 1) {
+    return `<span class="days-remaining soon">Morgen fällig</span>`;
+  } else if (diffDays <= 7) {
+    return `<span class="days-remaining soon">${diffDays} Tage verbleibend</span>`;
+  } else {
+    return `<span class="days-remaining">${diffDays} Tage verbleibend</span>`;
+  }
+}
+
+function getDaysRemainingText(deadline) {
+  if (!deadline) return '';
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const deadlineDate = new Date(deadline);
+  const diffTime = deadlineDate - today;
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+  if (diffDays < 0) {
+    return `${Math.abs(diffDays)} Tage überfällig`;
+  } else if (diffDays === 0) {
+    return 'Heute fällig!';
+  } else if (diffDays === 1) {
+    return 'Morgen fällig';
+  } else {
+    return `${diffDays} Tage verbleibend`;
+  }
+}
+
+// ==================== DOCUMENTS ====================
+async function loadDocuments(requestId) {
+  const container = document.getElementById('documents-list');
+
+  try {
+    const documents = await api(`/customer/documents/${requestId}`);
+
+    if (documents.length === 0) {
+      container.innerHTML = `
+        <div class="documents-empty">
+          <i class="fas fa-file-alt"></i>
+          <p>Keine Dokumente vorhanden</p>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = documents.map(doc => {
+      const iconClass = getDocumentIconClass(doc.type);
+      return `
+        <a href="${doc.file_path || '#'}" class="document-item" target="_blank" ${!doc.file_path ? 'onclick="return false;"' : ''}>
+          <div class="document-icon ${doc.type}">
+            <i class="fas ${iconClass}"></i>
+          </div>
+          <div class="document-info">
+            <div class="document-title">${escapeHtml(doc.title)}</div>
+            <div class="document-meta">${formatDate(doc.created_at)}</div>
+          </div>
+          ${doc.file_path ? '<i class="fas fa-download document-download"></i>' : ''}
+        </a>
+      `;
+    }).join('');
+  } catch (e) {
+    container.innerHTML = `
+      <div class="documents-empty">
+        <i class="fas fa-file-alt"></i>
+        <p>Keine Dokumente vorhanden</p>
+      </div>
+    `;
+  }
+}
+
+function getDocumentIconClass(type) {
+  const icons = {
+    'invoice': 'fa-file-invoice-dollar',
+    'contract': 'fa-file-contract',
+    'quote': 'fa-file-invoice'
+  };
+  return icons[type] || 'fa-file-alt';
+}
+
+// ==================== REVIEWS ====================
+let currentRating = 0;
+
+async function initReviewSection(requestId, status) {
+  const reviewSection = document.getElementById('review-section');
+
+  // Nur bei abgeschlossenen Projekten anzeigen
+  if (status !== 'completed') {
+    reviewSection.classList.add('hidden');
+    return;
+  }
+
+  // Prüfen ob schon eine Bewertung existiert
+  try {
+    const existingReview = await api(`/customer/review/${requestId}`);
+    if (existingReview && existingReview.id) {
+      reviewSection.classList.remove('hidden');
+      document.getElementById('review-form').classList.add('hidden');
+      document.getElementById('review-submitted').classList.remove('hidden');
+      return;
+    }
+  } catch (e) {
+    // Keine Bewertung vorhanden, Formular anzeigen
+  }
+
+  reviewSection.classList.remove('hidden');
+  document.getElementById('review-form').classList.remove('hidden');
+  document.getElementById('review-submitted').classList.add('hidden');
+
+  // Reset form
+  currentRating = 0;
+  updateStars();
+  document.getElementById('review-title').value = '';
+  document.getElementById('review-content').value = '';
+  document.getElementById('review-public').checked = true;
+}
+
+function updateStars() {
+  document.querySelectorAll('.star-rating .star').forEach((star, index) => {
+    if (index < currentRating) {
+      star.classList.add('active');
+    } else {
+      star.classList.remove('active');
+    }
+  });
+}
+
+// Star rating click handlers
+document.querySelectorAll('.star-rating .star').forEach(star => {
+  star.addEventListener('click', () => {
+    currentRating = parseInt(star.dataset.value);
+    updateStars();
+  });
+
+  star.addEventListener('mouseenter', () => {
+    const hoverValue = parseInt(star.dataset.value);
+    document.querySelectorAll('.star-rating .star').forEach((s, index) => {
+      if (index < hoverValue) {
+        s.classList.add('hovered');
+      } else {
+        s.classList.remove('hovered');
+      }
+    });
+  });
+
+  star.addEventListener('mouseleave', () => {
+    document.querySelectorAll('.star-rating .star').forEach(s => {
+      s.classList.remove('hovered');
+    });
+  });
+});
+
+// Submit review
+document.getElementById('submit-review-btn')?.addEventListener('click', async () => {
+  if (!currentRequestId) return;
+
+  if (currentRating === 0) {
+    alert('Bitte geben Sie eine Bewertung ab (1-5 Sterne)');
+    return;
+  }
+
+  const title = document.getElementById('review-title').value.trim();
+  const content = document.getElementById('review-content').value.trim();
+  const isPublic = document.getElementById('review-public').checked;
+
+  if (!content) {
+    alert('Bitte schreiben Sie eine kurze Bewertung');
+    return;
+  }
+
+  try {
+    await api('/customer/review', {
+      method: 'POST',
+      body: {
+        request_id: currentRequestId,
+        rating: currentRating,
+        title,
+        content,
+        is_public: isPublic ? 1 : 0
+      }
+    });
+
+    document.getElementById('review-form').classList.add('hidden');
+    document.getElementById('review-submitted').classList.remove('hidden');
+  } catch (e) {
+    alert(e.message);
+  }
+});
+
+// ==================== PORTAL NAVIGATION ====================
+function initPortalNavigation() {
+  document.querySelectorAll('.portal-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const view = tab.dataset.view;
+      switchView(view);
+    });
+  });
+}
+
+function switchView(view) {
+  currentView = view;
+
+  // Update tabs
+  document.querySelectorAll('.portal-tab').forEach(tab => {
+    tab.classList.toggle('active', tab.dataset.view === view);
+  });
+
+  // Update views
+  document.querySelectorAll('.portal-view').forEach(v => {
+    v.classList.add('hidden');
+  });
+
+  const targetView = document.getElementById(`${view}-view`);
+  if (targetView) {
+    targetView.classList.remove('hidden');
+  }
+
+  // Load content for the view
+  if (view === 'requests') {
+    loadRequests();
+  } else if (view === 'appointments') {
+    loadMyAppointments();
+    initAppointmentDatePicker();
+  } else if (view === 'faq') {
+    loadFAQs();
+  }
+}
+
+// ==================== FAQ ====================
+async function loadFAQs() {
+  const container = document.getElementById('faq-list');
+  if (!container) return;
+
+  container.innerHTML = `
+    <div style="text-align: center; padding: 40px;">
+      <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--primary);"></i>
+    </div>
+  `;
+
+  try {
+    const faqs = await api('/faqs');
+
+    if (faqs.length === 0) {
+      container.innerHTML = `
+        <div class="faq-empty">
+          <i class="fas fa-question-circle"></i>
+          <p>Noch keine FAQs vorhanden</p>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = faqs.map((faq, index) => `
+      <div class="faq-item" data-faq-id="${faq.id}">
+        <div class="faq-question" onclick="toggleFAQ(${index})">
+          <span>${escapeHtml(faq.question)}</span>
+          <i class="fas fa-chevron-down faq-toggle"></i>
+        </div>
+        <div class="faq-answer">
+          <p>${escapeHtml(faq.answer)}</p>
+        </div>
+      </div>
+    `).join('');
+  } catch (e) {
+    container.innerHTML = `
+      <div class="faq-empty">
+        <i class="fas fa-exclamation-triangle"></i>
+        <p>Fehler beim Laden der FAQs</p>
+      </div>
+    `;
+  }
+}
+
+function toggleFAQ(index) {
+  const items = document.querySelectorAll('.faq-item');
+  const item = items[index];
+  if (!item) return;
+
+  const isOpen = item.classList.contains('open');
+
+  // Close all
+  items.forEach(i => i.classList.remove('open'));
+
+  // Toggle current
+  if (!isOpen) {
+    item.classList.add('open');
+  }
+}
+
+// ==================== APPOINTMENTS ====================
+async function loadMyAppointments() {
+  const container = document.getElementById('my-appointments-list');
+  if (!container) return;
+
+  container.innerHTML = `
+    <div style="text-align: center; padding: 20px;">
+      <i class="fas fa-spinner fa-spin" style="color: var(--primary);"></i>
+    </div>
+  `;
+
+  try {
+    const appointments = await api('/customer/appointments');
+
+    if (appointments.length === 0) {
+      container.innerHTML = `
+        <div class="appointments-empty">
+          <i class="fas fa-calendar-times"></i>
+          <p>Keine Termine geplant</p>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = appointments.map(apt => `
+      <div class="appointment-card ${apt.status}">
+        <div class="appointment-date">
+          <i class="fas fa-calendar"></i>
+          <span>${formatDate(apt.date)}</span>
+        </div>
+        <div class="appointment-time">
+          <i class="fas fa-clock"></i>
+          <span>${apt.time_slot}</span>
+        </div>
+        <div class="appointment-type">
+          <i class="fas fa-tag"></i>
+          <span>${getAppointmentTypeLabel(apt.type)}</span>
+        </div>
+        <div class="appointment-status ${apt.status}">
+          ${getAppointmentStatusLabel(apt.status)}
+        </div>
+        ${apt.notes ? `<div class="appointment-notes"><i class="fas fa-sticky-note"></i> ${escapeHtml(apt.notes)}</div>` : ''}
+      </div>
+    `).join('');
+  } catch (e) {
+    container.innerHTML = `
+      <div class="appointments-empty">
+        <i class="fas fa-exclamation-triangle"></i>
+        <p>Fehler beim Laden der Termine</p>
+      </div>
+    `;
+  }
+}
+
+function initAppointmentDatePicker() {
+  const dateInput = document.getElementById('appointment-date');
+  if (!dateInput) return;
+
+  // Set min date to tomorrow
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  dateInput.min = tomorrow.toISOString().split('T')[0];
+
+  // Set max date to 3 months from now
+  const maxDate = new Date();
+  maxDate.setMonth(maxDate.getMonth() + 3);
+  dateInput.max = maxDate.toISOString().split('T')[0];
+
+  dateInput.addEventListener('change', loadAvailableSlots);
+}
+
+async function loadAvailableSlots() {
+  const dateInput = document.getElementById('appointment-date');
+  const slotsContainer = document.getElementById('time-slots');
+
+  if (!dateInput || !slotsContainer) return;
+
+  const selectedDate = dateInput.value;
+  if (!selectedDate) {
+    slotsContainer.innerHTML = '';
+    return;
+  }
+
+  slotsContainer.innerHTML = `
+    <div style="text-align: center; padding: 10px;">
+      <i class="fas fa-spinner fa-spin"></i> Lade verfügbare Zeiten...
+    </div>
+  `;
+
+  try {
+    const slots = await api(`/customer/appointments/slots?date=${selectedDate}`);
+
+    if (slots.length === 0) {
+      slotsContainer.innerHTML = `
+        <div class="no-slots">Keine Termine verfügbar an diesem Tag</div>
+      `;
+      return;
+    }
+
+    slotsContainer.innerHTML = slots.map(slot => `
+      <button type="button" class="time-slot ${slot.available ? '' : 'unavailable'}"
+              data-slot="${slot.time}"
+              ${slot.available ? '' : 'disabled'}
+              onclick="selectTimeSlot(this)">
+        ${slot.time}
+      </button>
+    `).join('');
+  } catch (e) {
+    slotsContainer.innerHTML = `
+      <div class="no-slots">Fehler beim Laden der Zeiten</div>
+    `;
+  }
+}
+
+function selectTimeSlot(button) {
+  document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
+  button.classList.add('selected');
+
+  // Enable the book button
+  const bookBtn = document.getElementById('book-appointment-btn');
+  if (bookBtn) {
+    bookBtn.disabled = false;
+  }
+}
+
+async function bookAppointment() {
+  const dateInput = document.getElementById('appointment-date');
+  const typeSelect = document.getElementById('appointment-type');
+  const notesInput = document.getElementById('appointment-notes');
+  const selectedSlot = document.querySelector('.time-slot.selected');
+
+  if (!dateInput?.value) {
+    alert('Bitte wählen Sie ein Datum');
+    return;
+  }
+
+  if (!selectedSlot) {
+    alert('Bitte wählen Sie eine Uhrzeit');
+    return;
+  }
+
+  const bookBtn = document.getElementById('book-appointment-btn');
+  bookBtn.disabled = true;
+  bookBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Buche...';
+
+  try {
+    await api('/appointments', {
+      method: 'POST',
+      body: {
+        date: dateInput.value,
+        time_slot: selectedSlot.dataset.slot,
+        type: typeSelect?.value || 'consultation',
+        notes: notesInput?.value || ''
+      }
+    });
+
+    // Reset form
+    dateInput.value = '';
+    if (notesInput) notesInput.value = '';
+    document.getElementById('time-slots').innerHTML = '';
+
+    // Show success and reload
+    alert('Termin erfolgreich gebucht!');
+    loadMyAppointments();
+  } catch (e) {
+    alert(e.message);
+  } finally {
+    bookBtn.disabled = false;
+    bookBtn.innerHTML = '<i class="fas fa-calendar-check"></i> Termin buchen';
+  }
+}
+
+function getAppointmentTypeLabel(type) {
+  const labels = {
+    'consultation': 'Beratungsgespräch',
+    'project_discussion': 'Projektbesprechung',
+    'review': 'Review-Meeting',
+    'other': 'Sonstiges'
+  };
+  return labels[type] || type;
+}
+
+function getAppointmentStatusLabel(status) {
+  const labels = {
+    'pending': '<i class="fas fa-clock"></i> Ausstehend',
+    'confirmed': '<i class="fas fa-check"></i> Bestätigt',
+    'cancelled': '<i class="fas fa-times"></i> Abgesagt',
+    'completed': '<i class="fas fa-check-double"></i> Abgeschlossen'
+  };
+  return labels[status] || status;
+}
+
 // ==================== INIT ====================
 checkAuth();
+initPortalNavigation();
