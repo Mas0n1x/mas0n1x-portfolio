@@ -2085,7 +2085,25 @@
 
     </style>
 </head>
-<body>
+<body style="visibility:hidden;">
+    <script>
+      // Check maintenance mode - must run before content is visible
+      (function() {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', '/api/maintenance', false); // synchronous request
+        try {
+          xhr.send();
+          if (xhr.status === 200) {
+            var data = JSON.parse(xhr.responseText);
+            if (data.enabled) {
+              window.location.replace('/maintenance.html');
+              return;
+            }
+          }
+        } catch(e) {}
+        document.body.style.visibility = 'visible';
+      })();
+    </script>
     <!-- Animated Background -->
     <div class="grid-bg"></div>
     <div class="cursor-glow" id="cursorGlow"></div>

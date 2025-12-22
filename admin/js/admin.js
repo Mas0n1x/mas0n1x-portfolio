@@ -67,6 +67,7 @@ function showDashboard() {
   loadProjects();
   loadServices();
   loadRequests();
+  loadMaintenanceStatus();
 }
 
 loginForm.addEventListener('submit', async (e) => {
@@ -496,6 +497,56 @@ async function deleteService(id) {
 }
 
 document.getElementById('add-service-btn').addEventListener('click', () => openServiceModal());
+
+// ==================== MAINTENANCE MODE ====================
+const maintenanceToggle = document.getElementById('maintenance-mode');
+const maintenanceMessageContainer = document.getElementById('maintenance-message-container');
+const maintenanceMessage = document.getElementById('maintenance-message');
+const saveMaintenanceBtn = document.getElementById('save-maintenance-btn');
+
+async function loadMaintenanceStatus() {
+  try {
+    const data = await api('/maintenance');
+    maintenanceToggle.checked = data.enabled;
+    maintenanceMessage.value = data.message || '';
+    maintenanceMessageContainer.style.display = data.enabled ? 'block' : 'none';
+  } catch (e) {
+    console.error('Failed to load maintenance status:', e);
+  }
+}
+
+maintenanceToggle.addEventListener('change', async () => {
+  maintenanceMessageContainer.style.display = maintenanceToggle.checked ? 'block' : 'none';
+
+  try {
+    await api('/maintenance', {
+      method: 'POST',
+      body: {
+        enabled: maintenanceToggle.checked,
+        message: maintenanceMessage.value
+      }
+    });
+    showToast(maintenanceToggle.checked ? 'Wartungsmodus aktiviert!' : 'Wartungsmodus deaktiviert!', 'success');
+  } catch (e) {
+    showToast('Fehler beim Speichern', 'error');
+    maintenanceToggle.checked = !maintenanceToggle.checked;
+  }
+});
+
+saveMaintenanceBtn.addEventListener('click', async () => {
+  try {
+    await api('/maintenance', {
+      method: 'POST',
+      body: {
+        enabled: maintenanceToggle.checked,
+        message: maintenanceMessage.value
+      }
+    });
+    showToast('Wartungsnachricht gespeichert!', 'success');
+  } catch (e) {
+    showToast('Fehler beim Speichern', 'error');
+  }
+});
 
 // ==================== SETTINGS ====================
 document.getElementById('change-password-form').addEventListener('submit', async (e) => {

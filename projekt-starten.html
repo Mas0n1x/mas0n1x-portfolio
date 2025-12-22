@@ -409,7 +409,25 @@
     }
   </style>
 </head>
-<body>
+<body style="visibility:hidden;">
+  <script>
+    // Check maintenance mode
+    (function() {
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', '/api/maintenance', false);
+      try {
+        xhr.send();
+        if (xhr.status === 200) {
+          var data = JSON.parse(xhr.responseText);
+          if (data.enabled) {
+            window.location.replace('/maintenance.html');
+            return;
+          }
+        }
+      } catch(e) {}
+      document.body.style.visibility = 'visible';
+    })();
+  </script>
   <div class="wizard-container">
     <div class="wizard-header">
       <span class="step-indicator">Schritt <span id="current-step">1</span> von 5</span>

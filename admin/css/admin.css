@@ -694,6 +694,61 @@ body {
   width: auto;
 }
 
+/* Toggle Switch */
+.toggle-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.toggle-switch input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  display: inline-block;
+  width: 50px;
+  height: 26px;
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  position: relative;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.toggle-slider::before {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: var(--text-secondary);
+  border-radius: 50%;
+  top: 2px;
+  left: 3px;
+  transition: all 0.3s ease;
+}
+
+.toggle-switch input[type="checkbox"]:checked + .toggle-slider {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.toggle-switch input[type="checkbox"]:checked + .toggle-slider::before {
+  transform: translateX(23px);
+  background: var(--bg-primary);
+}
+
+.toggle-label {
+  font-size: 0.95rem;
+  color: var(--text-primary);
+}
+
 /* ==================== MODAL ==================== */
 .modal {
   position: fixed;

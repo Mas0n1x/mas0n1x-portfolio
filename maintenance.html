@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wartungsmodus - Mas0n1x</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #000000;
+      color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at center, rgba(0, 255, 136, 0.1) 0%, transparent 50%);
+      animation: glow 15s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes glow {
+      0%, 100% { transform: translate(-20%, -20%) rotate(0deg); opacity: 0.3; }
+      50% { transform: translate(10%, 10%) rotate(180deg); opacity: 0.6; }
+    }
+
+    .container {
+      text-align: center;
+      padding: 40px;
+      position: relative;
+      z-index: 1;
+      max-width: 600px;
+    }
+
+    .logo {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 3px solid #00ff88;
+      box-shadow: 0 0 40px rgba(0, 255, 136, 0.3);
+      margin-bottom: 40px;
+      animation: pulse 3s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 40px rgba(0, 255, 136, 0.3); }
+      50% { box-shadow: 0 0 60px rgba(0, 255, 136, 0.5); }
+    }
+
+    .icon {
+      font-size: 4rem;
+      color: #00ff88;
+      margin-bottom: 30px;
+      animation: wrench 2s ease-in-out infinite;
+    }
+
+    @keyframes wrench {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(-15deg); }
+      75% { transform: rotate(15deg); }
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, #00ff88, #00d4ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .message {
+      font-size: 1.2rem;
+      color: #888888;
+      line-height: 1.8;
+      margin-bottom: 40px;
+    }
+
+    .custom-message {
+      background: rgba(0, 255, 136, 0.1);
+      border: 1px solid rgba(0, 255, 136, 0.3);
+      border-radius: 12px;
+      padding: 20px 30px;
+      margin-bottom: 40px;
+      color: #ffffff;
+      font-size: 1.1rem;
+    }
+
+    .progress-bar {
+      width: 200px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+      margin: 0 auto 30px;
+      overflow: hidden;
+    }
+
+    .progress-bar::after {
+      content: '';
+      display: block;
+      width: 40%;
+      height: 100%;
+      background: linear-gradient(90deg, #00ff88, #00d4ff);
+      border-radius: 2px;
+      animation: loading 1.5s ease-in-out infinite;
+    }
+
+    @keyframes loading {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(350%); }
+    }
+
+    .contact {
+      color: #666666;
+      font-size: 0.9rem;
+    }
+
+    .contact a {
+      color: #00ff88;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .contact a:hover {
+      color: #00d4ff;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <img src="/logo.png" alt="Logo" class="logo">
+    <i class="fas fa-tools icon"></i>
+    <h1>Wartungsarbeiten</h1>
+    <p class="message">
+      Wir arbeiten gerade an Verbesserungen.<br>
+      Bitte versuchen Sie es in Kürze erneut.
+    </p>
+    <div id="custom-message" class="custom-message" style="display: none;"></div>
+    <div class="progress-bar"></div>
+    <p class="contact">
+      Bei Fragen: <a href="mailto:kontakt@mas0n1x.de">kontakt@mas0n1x.de</a>
+    </p>
+  </div>
+
+  <script>
+    // Load custom maintenance message
+    fetch('/api/maintenance')
+      .then(res => res.json())
+      .then(data => {
+        if (data.message) {
+          const msgEl = document.getElementById('custom-message');
+          msgEl.textContent = data.message;
+          msgEl.style.display = 'block';
+        }
+      })
+      .catch(() => {});
+  </script>
+</body>
+</html>

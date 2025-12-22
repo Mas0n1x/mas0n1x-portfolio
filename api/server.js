@@ -431,12 +431,17 @@ app.use('/api', (req, res, next) => {
   };
   next();
 });
+// Trust proxy for nginx
+app.set('trust proxy', 1);
+
 app.use(session({
   secret: process.env.SESSION_SECRET || 'mas0n1x-portfolio-secret-change-me',
   resave: false,
   saveUninitialized: false,
   cookie: {
     secure: false, // Set to true in production with HTTPS
+    httpOnly: true,
+    sameSite: 'lax',
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
   }
 }));
@@ -516,6 +521,49 @@ app.post('/api/change-password', requireAuth, (req, res) => {
 
   const newHash = bcrypt.hashSync(newPassword, 10);
   dbRun('UPDATE admin SET password_hash = ? WHERE id = 1', [newHash]);
+  res.json({ success: true });
+});
+
+// ==================== MAINTENANCE MODE ====================
+
+// Check endpoint for nginx auth_request (returns 200 = OK, 403 = maintenance)
+app.get('/api/maintenance-check', (req, res) => {
+  const setting = dbGet("SELECT value FROM settings WHERE key = 'maintenance_mode'");
+  if (setting?.value === 'true') {
+    res.status(403).send('Maintenance');
+  } else {
+    res.status(200).send('OK');
+  }
+});
+
+app.get('/api/maintenance', (req, res) => {
+  const setting = dbGet("SELECT value FROM settings WHERE key = 'maintenance_mode'");
+  const message = dbGet("SELECT value FROM settings WHERE key = 'maintenance_message'");
+  res.json({
+    enabled: setting?.value === 'true',
+    message: message?.value || ''
+  });
+});
+
+app.post('/api/maintenance', requireAuth, (req, res) => {
+  const { enabled, message } = req.body;
+
+  // Upsert maintenance_mode
+  const existing = dbGet("SELECT key FROM settings WHERE key = 'maintenance_mode'");
+  if (existing) {
+    dbRun("UPDATE settings SET value = ? WHERE key = 'maintenance_mode'", [enabled ? 'true' : 'false']);
+  } else {
+    dbRun("INSERT INTO settings (key, value) VALUES ('maintenance_mode', ?)", [enabled ? 'true' : 'false']);
+  }
+
+  // Upsert maintenance_message
+  const existingMsg = dbGet("SELECT key FROM settings WHERE key = 'maintenance_message'");
+  if (existingMsg) {
+    dbRun("UPDATE settings SET value = ? WHERE key = 'maintenance_message'", [message || '']);
+  } else {
+    dbRun("INSERT INTO settings (key, value) VALUES ('maintenance_message', ?)", [message || '']);
+  }
+
   res.json({ success: true });
 });
 

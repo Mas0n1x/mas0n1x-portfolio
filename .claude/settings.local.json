@@ -27,7 +27,24 @@
       "Bash(do curl -s -X DELETE \"http://localhost:3000/api/admin/faqs/$i\" -b cookies.txt)",
       "Bash(powershell -ExecutionPolicy Bypass -File \"c:\\\\Users\\\\bleck\\\\Desktop\\\\Projekte\\\\mas0n1x-portfolio\\\\create_data.ps1\")",
       "Bash(del \"c:\\\\Users\\\\bleck\\\\Desktop\\\\Projekte\\\\mas0n1x-portfolio\\\\api\\\\fix-umlauts.js\")",
-      "Bash(del \"c:\\\\Users\\\\bleck\\\\Desktop\\\\Projekte\\\\mas0n1x-portfolio\\\\cookies.txt\")"
+      "Bash(del \"c:\\\\Users\\\\bleck\\\\Desktop\\\\Projekte\\\\mas0n1x-portfolio\\\\cookies.txt\")",
+      "Bash(npm install:*)",
+      "Bash(sudo apt-get:*)",
+      "Bash(sudo apt-get install:*)",
+      "Bash(npm --version:*)",
+      "Bash(sqlite3:*)",
+      "Bash(ss:*)",
+      "Bash(docker exec:*)",
+      "Bash(docker-compose:*)",
+      "Bash(ls:*)",
+      "Bash(docker cp:*)",
+      "Bash(docker restart:*)",
+      "Bash(docker logs:*)",
+      "Bash(ip route:*)",
+      "Bash(docker stop:*)",
+      "Bash(docker rm:*)",
+      "Bash(docker run:*)",
+      "Bash(chmod:*)"
     ]
   }
 }
