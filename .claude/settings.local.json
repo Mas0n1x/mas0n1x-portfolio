@@ -44,7 +44,8 @@
       "Bash(docker stop:*)",
       "Bash(docker rm:*)",
       "Bash(docker run:*)",
-      "Bash(chmod:*)"
+      "Bash(chmod:*)",
+      "Bash(\" 2>/dev/null\\)\")"
     ]
   }
 }
