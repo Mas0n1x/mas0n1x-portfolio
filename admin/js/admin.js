@@ -876,11 +876,18 @@ async function loadQuickReplies() {
 
 function getCategoryLabel(category) {
   const labels = {
+    'general': 'Allgemein',
     'greeting': 'Begrüßung',
+    'anfrage': 'Anfrage',
+    'angebot': 'Angebot',
+    'projekt': 'Projekt',
     'status': 'Status',
     'followup': 'Nachfassen',
+    'abschluss': 'Abschluss',
     'closing': 'Abschluss',
-    'general': 'Allgemein'
+    'support': 'Support',
+    'payment': 'Zahlung',
+    'wartung': 'Wartung'
   };
   return labels[category] || category;
 }
@@ -903,6 +910,7 @@ function insertQuickReply(templateId) {
                          currentRequestData.name ||
                          (currentRequestData.email ? currentRequestData.email.split('@')[0] : 'Kunde');
 
+    const now = new Date();
     const replacements = {
       '{{KUNDE_NAME}}': customerName,
       '{{KUNDE_EMAIL}}': currentRequestData.email || '',
@@ -915,8 +923,13 @@ function insertQuickReply(templateId) {
       '{{PROJEKT_STATUS}}': getStatusLabel(currentRequestData.status) || '',
       '{{PROJEKT_FORTSCHRITT}}': (currentRequestData.progress || 0) + '%',
       '{{DEADLINE}}': currentRequestData.deadline ? formatDate(currentRequestData.deadline) : 'Nicht festgelegt',
-      '{{DATUM}}': new Date().toLocaleDateString('de-DE'),
-      '{{ANFRAGE_ID}}': currentRequestData.id || ''
+      '{{DATUM}}': now.toLocaleDateString('de-DE'),
+      '{{DATUM_LANG}}': now.toLocaleDateString('de-DE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
+      '{{UHRZEIT}}': now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+      '{{DATUM_ZEIT}}': now.toLocaleString('de-DE'),
+      '{{ANFRAGE_ID}}': currentRequestData.id || '',
+      '{{ERSTELLT_AM}}': currentRequestData.created_at ? formatDate(currentRequestData.created_at) : '',
+      '{{ADMIN_NOTIZEN}}': currentRequestData.admin_notes || ''
     };
 
     for (const [placeholder, value] of Object.entries(replacements)) {

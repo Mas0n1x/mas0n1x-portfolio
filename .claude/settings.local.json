@@ -45,7 +45,11 @@
       "Bash(docker rm:*)",
       "Bash(docker run:*)",
       "Bash(chmod:*)",
-      "Bash(\" 2>/dev/null\\)\")"
+      "Bash(\" 2>/dev/null\\)\")",
+      "Bash(timeout 10 node:*)",
+      "Bash(pkill:*)",
+      "Bash(timeout 5 node:*)",
+      "Bash(lsof:*)"
     ]
   }
 }

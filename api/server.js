@@ -1056,8 +1056,8 @@ app.put('/api/admin/requests/:id', requireAuth, async (req, res) => {
 
     // Log the notification
     dbRun(
-      'INSERT INTO email_logs (recipient, subject, status, created_at) VALUES (?, ?, ?, datetime("now"))',
-      [request.email, `Projektstatus: ${statusLabel}`, 'sent']
+      'INSERT INTO email_logs (type, recipient, subject, status, created_at) VALUES (?, ?, ?, ?, datetime("now"))',
+      ['status_update', request.email, `Projektstatus: ${statusLabel}`, 'sent']
     );
   }
 
@@ -1611,9 +1611,40 @@ app.post('/api/admin/faqs', requireAuth, (req, res) => {
 
 app.put('/api/admin/faqs/:id', requireAuth, (req, res) => {
   const { question, answer, category, sort_order, is_active } = req.body;
+
+  // Build dynamic update query to support partial updates
+  const updates = [];
+  const values = [];
+
+  if (question !== undefined) {
+    updates.push('question = ?');
+    values.push(question);
+  }
+  if (answer !== undefined) {
+    updates.push('answer = ?');
+    values.push(answer);
+  }
+  if (category !== undefined) {
+    updates.push('category = ?');
+    values.push(category);
+  }
+  if (sort_order !== undefined) {
+    updates.push('sort_order = ?');
+    values.push(sort_order);
+  }
+  if (is_active !== undefined) {
+    updates.push('is_active = ?');
+    values.push(is_active ? 1 : 0);
+  }
+
+  if (updates.length === 0) {
+    return res.status(400).json({ error: 'No fields to update' });
+  }
+
+  values.push(req.params.id);
   dbRun(
-    'UPDATE faqs SET question = ?, answer = ?, category = ?, sort_order = ?, is_active = ? WHERE id = ?',
-    [question, answer, category || 'general', sort_order || 0, is_active ? 1 : 0, req.params.id]
+    `UPDATE faqs SET ${updates.join(', ')} WHERE id = ?`,
+    values
   );
   res.json({ success: true });
 });
@@ -1814,8 +1845,8 @@ app.post('/api/admin/send-email', requireAuth, async (req, res) => {
 
   // Log the email
   dbRun(
-    'INSERT INTO email_logs (recipient, subject, status, created_at) VALUES (?, ?, ?, datetime("now"))',
-    [to, subject, success ? 'sent' : 'failed']
+    'INSERT INTO email_logs (type, recipient, subject, status, created_at) VALUES (?, ?, ?, ?, datetime("now"))',
+    ['direct_email', to, subject, success ? 'sent' : 'failed']
   );
 
   if (success) {
@@ -1858,42 +1889,6 @@ app.get('/api/admin/documents', requireAuth, (req, res) => {
 
 app.delete('/api/admin/documents/:id', requireAuth, (req, res) => {
   dbRun('DELETE FROM customer_documents WHERE id = ?', [req.params.id]);
-  res.json({ success: true });
-});
-
-// ==================== FAQ API ====================
-// Public: Get active FAQs
-app.get('/api/faqs', (req, res) => {
-  const faqs = dbAll('SELECT * FROM faqs WHERE is_active = 1 ORDER BY category, sort_order');
-  res.json(faqs);
-});
-
-// Admin: Get all FAQs
-app.get('/api/admin/faqs', requireAuth, (req, res) => {
-  const faqs = dbAll('SELECT * FROM faqs ORDER BY category, sort_order');
-  res.json(faqs);
-});
-
-app.post('/api/admin/faqs', requireAuth, (req, res) => {
-  const { question, answer, category, sort_order } = req.body;
-  const result = dbRun(
-    'INSERT INTO faqs (question, answer, category, sort_order) VALUES (?, ?, ?, ?)',
-    [question, answer, category || 'general', sort_order || 0]
-  );
-  res.json({ success: true, id: result.lastInsertRowid });
-});
-
-app.put('/api/admin/faqs/:id', requireAuth, (req, res) => {
-  const { question, answer, category, sort_order, is_active } = req.body;
-  dbRun(
-    'UPDATE faqs SET question = ?, answer = ?, category = ?, sort_order = ?, is_active = ? WHERE id = ?',
-    [question, answer, category || 'general', sort_order || 0, is_active ? 1 : 0, req.params.id]
-  );
-  res.json({ success: true });
-});
-
-app.delete('/api/admin/faqs/:id', requireAuth, (req, res) => {
-  dbRun('DELETE FROM faqs WHERE id = ?', [req.params.id]);
   res.json({ success: true });
 });
 

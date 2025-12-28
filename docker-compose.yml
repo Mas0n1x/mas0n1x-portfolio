@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: mas0n1x-portfolio-backend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/app/data
+    networks:
+      - portfolio-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/maintenance-check"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  frontend:
+    image: nginx:alpine
+    container_name: mas0n1x-portfolio
+    restart: unless-stopped
+    ports:
+      - "8101:80"
+    volumes:
+      - ./index.html:/usr/share/nginx/html/index.html:ro
+      - ./projekt-starten.html:/usr/share/nginx/html/projekt-starten.html:ro
+      - ./maintenance.html:/usr/share/nginx/html/maintenance.html:ro
+      - ./admin:/usr/share/nginx/html/admin:ro
+      - ./kunde:/usr/share/nginx/html/kunde:ro
+      - ./logo.png:/usr/share/nginx/html/logo.png:ro
+      - ./custom anwendungen.png:/usr/share/nginx/html/custom anwendungen.png:ro
+      - ./custom website.png:/usr/share/nginx/html/custom website.png:ro
+      - ./dashboard.png:/usr/share/nginx/html/dashboard.png:ro
+      - ./generatoren.png:/usr/share/nginx/html/generatoren.png:ro
+      - ./personalsystem.png:/usr/share/nginx/html/personalsystem.png:ro
+      - ./Straftatenrechner.png:/usr/share/nginx/html/Straftatenrechner.png:ro
+      - ./nginx-docker.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - portfolio-network
+
+networks:
+  portfolio-network:
+    driver: bridge

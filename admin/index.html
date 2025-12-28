@@ -1615,14 +1615,37 @@
           <select id="template-category">
             <option value="general">Allgemein</option>
             <option value="greeting">Begrüßung</option>
+            <option value="anfrage">Anfrage</option>
+            <option value="angebot">Angebot</option>
+            <option value="projekt">Projekt</option>
             <option value="status">Status-Updates</option>
-            <option value="payment">Zahlung</option>
+            <option value="followup">Nachfassen</option>
+            <option value="abschluss">Abschluss</option>
             <option value="support">Support</option>
+            <option value="payment">Zahlung</option>
+            <option value="wartung">Wartung</option>
           </select>
         </div>
         <div class="form-group">
           <label for="template-content">Inhalt</label>
           <textarea id="template-content" rows="8" placeholder="Nachrichteninhalt..."></textarea>
+          <div style="margin-top: 12px; padding: 12px; background: rgba(0, 255, 136, 0.05); border: 1px solid rgba(0, 255, 136, 0.2); border-radius: 8px;">
+            <details>
+              <summary style="cursor: pointer; font-weight: 600; color: #00ff88; margin-bottom: 8px;">
+                <i class="fas fa-info-circle"></i> Verfügbare Platzhalter
+              </summary>
+              <div style="font-size: 0.85rem; color: #a0a0a0; line-height: 1.6;">
+                <strong>Kunde:</strong><br>
+                {{KUNDE_NAME}}, {{KUNDE_EMAIL}}, {{KUNDE_TELEFON}}, {{KUNDE_FIRMA}}<br><br>
+                <strong>Projekt:</strong><br>
+                {{PROJEKT_TYP}}, {{PROJEKT_BUDGET}}, {{PROJEKT_ZEITRAHMEN}}, {{PROJEKT_BESCHREIBUNG}}<br>
+                {{PROJEKT_STATUS}}, {{PROJEKT_FORTSCHRITT}}, {{DEADLINE}}<br><br>
+                <strong>Sonstiges:</strong><br>
+                {{ANFRAGE_ID}}, {{DATUM}}, {{DATUM_LANG}}, {{UHRZEIT}}, {{DATUM_ZEIT}}, {{ERSTELLT_AM}}<br><br>
+                <em>Diese Platzhalter werden automatisch durch echte Daten ersetzt.</em>
+              </div>
+            </details>
+          </div>
         </div>
         <div class="modal-footer">
           <button id="save-template-btn" class="btn-primary">
