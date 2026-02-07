@@ -4464,24 +4464,50 @@ const DISCORD_DEFAULTS = {
       '§1 Allgemeines — Dieser Server dient als offizielle Plattform für Support, Projektanfragen und den Austausch rund um Softwareentwicklung.',
       '§1 — Es gelten die offiziellen Discord Nutzungsbedingungen sowie die Discord Community-Richtlinien.',
       '§1 — Unwissenheit über die Regeln schützt nicht vor Konsequenzen.',
+      '§1 — Jeder Nutzer ist für sein eigenes Verhalten auf diesem Server verantwortlich.',
+      '§1 — Das Serverteam behält sich das Recht vor, Regeln jederzeit anzupassen.',
       '§2 Verhalten & Respekt — Behandle alle Mitglieder respektvoll – kein Mobbing, keine Diskriminierung, kein Hass.',
       '§2 — Provokationen, Beleidigungen oder absichtliche Störungen sind verboten.',
       '§2 — Diskriminierende oder beleidigende Inhalte werden nicht toleriert.',
+      '§2 — Toxisches Verhalten, Trolling oder passiv-aggressives Auftreten ist unerwünscht.',
+      '§2 — Respektiere die Meinungen anderer, auch wenn du anderer Ansicht bist.',
       '§3 Sprache & Inhalte — Inhalte müssen jugendfreundlich und gesetzeskonform sein.',
       '§3 — Kein NSFW-/18+ Material, keine extremistischen oder illegalen Inhalte.',
       '§3 — Werbung oder Spam sind nur mit ausdrücklicher Erlaubnis der Serverleitung erlaubt.',
+      '§3 — Keine Kettenbriefe, Pyramid-Schemes oder dubiose Angebote.',
+      '§3 — Die Serversprache ist Deutsch und Englisch.',
       '§4 Sicherheit & Datenschutz — Veröffentliche keine privaten Daten (eigene oder fremde) ohne Einverständnis.',
       '§4 — Betrug, Phishing oder das Teilen schadhafter Dateien ist strengstens untersagt.',
       '§4 — Screenshots oder Aufnahmen von privaten Gesprächen dürfen nur mit Erlaubnis geteilt werden.',
+      '§4 — Teile niemals Passwörter, API-Keys oder andere sensible Daten in öffentlichen Kanälen.',
+      '§4 — Melde verdächtige Accounts oder Nachrichten sofort dem Serverteam.',
       '§5 Kanäle & Themen — Nutze die Kanäle nur für ihren vorgesehenen Zweck.',
       '§5 — Achte auf die Kanalbeschreibungen und halte dich an vorgegebene Themen.',
       '§5 — Spam, Flooding oder unnötiges Pingen anderer Nutzer ist zu unterlassen.',
+      '§5 — Vermeide Off-Topic Diskussionen – nutze dafür den passenden Kanal.',
+      '§5 — Keine übermäßige Verwendung von Caps-Lock, Emojis oder Stickern.',
       '§6 Support & Projekte — Beschreibe dein Anliegen im Ticket so genau wie möglich, damit wir dir schnell helfen können.',
       '§6 — Hab Geduld – unser Team bearbeitet Anfragen so schnell wie möglich.',
       '§6 — Spam in DMs an Teammitglieder ist verboten. Nutze das Ticketsystem.',
-      '§7 Sanktionen — Regelverstöße können zu Verwarnungen, Mutes, Kicks oder permanenten Bans führen.',
-      '§7 — Die Art der Sanktion liegt im Ermessen des Serverteams.',
-      '§7 — Wiederholte Verstöße führen zu einer dauerhaften Entfernung vom Server.',
+      '§6 — Öffne pro Anliegen nur ein Ticket. Doppelte Tickets werden geschlossen.',
+      '§6 — Lies dir die FAQ und bestehende Informationen durch, bevor du ein Ticket erstellst.',
+      '§6 — Bezahlte Projekte unterliegen separaten Vereinbarungen und AGB.',
+      '§7 Geistiges Eigentum — Respektiere das geistige Eigentum anderer – kein Kopieren oder Weitergeben fremder Arbeiten.',
+      '§7 — Teile keinen Code, Designs oder Dateien, die du nicht besitzt oder weitergeben darfst.',
+      '§7 — Von uns erstellte Projekte unterliegen unseren Lizenzbedingungen.',
+      '§7 — Bei Open-Source-Projekten sind die jeweiligen Lizenzen zu beachten.',
+      '§8 Voice-Kanäle — Kein Soundboard-Spam, Stimmverzerrer-Missbrauch oder absichtliche Störgeräusche.',
+      '§8 — Respektiere laufende Gespräche und frag bevor du mitmachst.',
+      '§8 — Streame keine urheberrechtlich geschützten Inhalte.',
+      '§9 Team & Entscheidungen — Den Anweisungen des Serverteams ist Folge zu leisten.',
+      '§9 — Entscheidungen des Teams sind bindend und nicht öffentlich zu diskutieren.',
+      '§9 — Bei Problemen kann jederzeit ein Teammitglied per Ticket kontaktiert werden.',
+      '§9 — Impersonation von Teammitgliedern oder anderen Nutzern ist verboten.',
+      '§10 Sanktionen — Regelverstöße können zu Verwarnungen, Mutes, Kicks oder permanenten Bans führen.',
+      '§10 — Die Art der Sanktion liegt im Ermessen des Serverteams.',
+      '§10 — Wiederholte Verstöße führen zu einer dauerhaften Entfernung vom Server.',
+      '§10 — Umgehung von Sanktionen (z.B. mit Alt-Accounts) führt zu einem permanenten Ban.',
+      '§10 — Falsche Anschuldigungen gegenüber anderen Nutzern oder dem Team werden ebenfalls sanktioniert.',
     ]
   },
   social: {
@@ -4590,6 +4616,7 @@ async function loadDiscordConfig() {
     // GitHub
     if (config.channel_github) document.getElementById('discord-channel-github').value = config.channel_github;
     if (config.github_webhook_secret) document.getElementById('discord-github-secret').value = config.github_webhook_secret;
+    if (config.github_token) document.getElementById('discord-github-token').value = config.github_token;
 
     // Tickets
     if (config.channel_tickets) document.getElementById('discord-channel-tickets').value = config.channel_tickets;
@@ -4757,9 +4784,50 @@ async function saveDiscordGithub() {
       channel_github: document.getElementById('discord-channel-github').value,
       github_webhook_secret: document.getElementById('discord-github-secret').value,
     };
+    const token = document.getElementById('discord-github-token').value;
+    if (token) config.github_token = token;
     await api('/admin/discord/config', { method: 'POST', body: config });
     showToast('GitHub-Einstellungen gespeichert', 'success');
   } catch (e) {
+    showToast(e.message, 'error');
+  }
+}
+
+async function setupGithubAllRepos() {
+  const token = document.getElementById('discord-github-token').value;
+  if (!token) {
+    showToast('Bitte GitHub Token eintragen', 'error');
+    return;
+  }
+
+  const statusDiv = document.getElementById('github-repo-status');
+  statusDiv.style.display = 'block';
+  statusDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Repositories werden abgerufen und Webhooks eingerichtet...';
+
+  try {
+    const result = await api('/admin/discord/github-setup-all', { method: 'POST', body: { token } });
+
+    let html = `<strong>Fertig!</strong> ${result.total} Repositories gefunden.<br><br>`;
+
+    if (result.added.length > 0) {
+      html += `<span style="color:#00ff88;">&#10004; Webhook hinzugefügt (${result.added.length}):</span><br>`;
+      html += result.added.map(r => `&nbsp;&nbsp;- ${r}`).join('<br>') + '<br><br>';
+    }
+
+    if (result.skipped.length > 0) {
+      html += `<span style="color:#ffaa00;">&#8594; Bereits vorhanden (${result.skipped.length}):</span><br>`;
+      html += result.skipped.map(r => `&nbsp;&nbsp;- ${r}`).join('<br>') + '<br><br>';
+    }
+
+    if (result.failed.length > 0) {
+      html += `<span style="color:#ff4444;">&#10008; Fehlgeschlagen (${result.failed.length}):</span><br>`;
+      html += result.failed.map(r => `&nbsp;&nbsp;- ${r.repo}: ${r.error}`).join('<br>') + '<br>';
+    }
+
+    statusDiv.innerHTML = html;
+    showToast(`Webhooks eingerichtet: ${result.added.length} neu, ${result.skipped.length} existierten bereits`, 'success');
+  } catch (e) {
+    statusDiv.innerHTML = `<span style="color:#ff4444;"><i class="fas fa-exclamation-triangle"></i> Fehler: ${e.message}</span>`;
     showToast(e.message, 'error');
   }
 }

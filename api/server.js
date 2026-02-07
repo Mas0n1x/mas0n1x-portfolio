@@ -2494,37 +2494,69 @@ app.post('/api/admin/discord/reset-defaults', requireAuth, (req, res) => {
           { title: '§1 Allgemeines', rules: [
             'Dieser Server dient als offizielle Plattform für Support, Projektanfragen und den Austausch rund um Softwareentwicklung.',
             'Es gelten die offiziellen Discord Nutzungsbedingungen sowie die Discord Community-Richtlinien.',
-            'Unwissenheit über die Regeln schützt nicht vor Konsequenzen.'
+            'Unwissenheit über die Regeln schützt nicht vor Konsequenzen.',
+            'Jeder Nutzer ist für sein eigenes Verhalten auf diesem Server verantwortlich.',
+            'Das Serverteam behält sich das Recht vor, Regeln jederzeit anzupassen.'
           ]},
           { title: '§2 Verhalten & Respekt', rules: [
             'Behandle alle Mitglieder respektvoll – kein Mobbing, keine Diskriminierung, kein Hass.',
             'Provokationen, Beleidigungen oder absichtliche Störungen sind verboten.',
-            'Diskriminierende oder beleidigende Inhalte werden nicht toleriert.'
+            'Diskriminierende oder beleidigende Inhalte werden nicht toleriert.',
+            'Toxisches Verhalten, Trolling oder passiv-aggressives Auftreten ist unerwünscht.',
+            'Respektiere die Meinungen anderer, auch wenn du anderer Ansicht bist.'
           ]},
           { title: '§3 Sprache & Inhalte', rules: [
             'Inhalte müssen jugendfreundlich und gesetzeskonform sein.',
             'Kein NSFW-/18+ Material, keine extremistischen oder illegalen Inhalte.',
-            'Werbung oder Spam sind nur mit ausdrücklicher Erlaubnis der Serverleitung erlaubt.'
+            'Werbung oder Spam sind nur mit ausdrücklicher Erlaubnis der Serverleitung erlaubt.',
+            'Keine Kettenbriefe, Pyramid-Schemes oder dubiose Angebote.',
+            'Die Serversprache ist Deutsch und Englisch.'
           ]},
           { title: '§4 Sicherheit & Datenschutz', rules: [
             'Veröffentliche keine privaten Daten (eigene oder fremde) ohne Einverständnis.',
             'Betrug, Phishing oder das Teilen schadhafter Dateien ist strengstens untersagt.',
-            'Screenshots oder Aufnahmen von privaten Gesprächen dürfen nur mit Erlaubnis geteilt werden.'
+            'Screenshots oder Aufnahmen von privaten Gesprächen dürfen nur mit Erlaubnis geteilt werden.',
+            'Teile niemals Passwörter, API-Keys oder andere sensible Daten in öffentlichen Kanälen.',
+            'Melde verdächtige Accounts oder Nachrichten sofort dem Serverteam.'
           ]},
           { title: '§5 Kanäle & Themen', rules: [
             'Nutze die Kanäle nur für ihren vorgesehenen Zweck.',
             'Achte auf die Kanalbeschreibungen und halte dich an vorgegebene Themen.',
-            'Spam, Flooding oder unnötiges Pingen anderer Nutzer ist zu unterlassen.'
+            'Spam, Flooding oder unnötiges Pingen anderer Nutzer ist zu unterlassen.',
+            'Vermeide Off-Topic Diskussionen – nutze dafür den passenden Kanal.',
+            'Keine übermäßige Verwendung von Caps-Lock, Emojis oder Stickern.'
           ]},
           { title: '§6 Support & Projekte', rules: [
             'Beschreibe dein Anliegen im Ticket so genau wie möglich, damit wir dir schnell helfen können.',
             'Hab Geduld – unser Team bearbeitet Anfragen so schnell wie möglich.',
-            'Spam in DMs an Teammitglieder ist verboten. Nutze das Ticketsystem.'
+            'Spam in DMs an Teammitglieder ist verboten. Nutze das Ticketsystem.',
+            'Öffne pro Anliegen nur ein Ticket. Doppelte Tickets werden geschlossen.',
+            'Lies dir die FAQ und bestehende Informationen durch, bevor du ein Ticket erstellst.',
+            'Bezahlte Projekte unterliegen separaten Vereinbarungen und AGB.'
           ]},
-          { title: '§7 Sanktionen', rules: [
+          { title: '§7 Geistiges Eigentum', rules: [
+            'Respektiere das geistige Eigentum anderer – kein Kopieren oder Weitergeben fremder Arbeiten.',
+            'Teile keinen Code, Designs oder Dateien, die du nicht besitzt oder weitergeben darfst.',
+            'Von uns erstellte Projekte unterliegen unseren Lizenzbedingungen.',
+            'Bei Open-Source-Projekten sind die jeweiligen Lizenzen zu beachten.'
+          ]},
+          { title: '§8 Voice-Kanäle', rules: [
+            'Kein Soundboard-Spam, Stimmverzerrer-Missbrauch oder absichtliche Störgeräusche.',
+            'Respektiere laufende Gespräche und frag bevor du mitmachst.',
+            'Streame keine urheberrechtlich geschützten Inhalte.'
+          ]},
+          { title: '§9 Team & Entscheidungen', rules: [
+            'Den Anweisungen des Serverteams ist Folge zu leisten.',
+            'Entscheidungen des Teams sind bindend und nicht öffentlich zu diskutieren.',
+            'Bei Problemen kann jederzeit ein Teammitglied per Ticket kontaktiert werden.',
+            'Impersonation von Teammitgliedern oder anderen Nutzern ist verboten.'
+          ]},
+          { title: '§10 Sanktionen', rules: [
             'Regelverstöße können zu Verwarnungen, Mutes, Kicks oder permanenten Bans führen.',
             'Die Art der Sanktion liegt im Ermessen des Serverteams.',
-            'Wiederholte Verstöße führen zu einer dauerhaften Entfernung vom Server.'
+            'Wiederholte Verstöße führen zu einer dauerhaften Entfernung vom Server.',
+            'Umgehung von Sanktionen (z.B. mit Alt-Accounts) führt zu einem permanenten Ban.',
+            'Falsche Anschuldigungen gegenüber anderen Nutzern oder dem Team werden ebenfalls sanktioniert.'
           ]}
         ]
       }),
@@ -2687,6 +2719,83 @@ app.delete('/api/admin/discord/logs', requireAuth, (req, res) => {
   try {
     discordBot.clearLogs();
     res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ── GitHub: Setup webhooks on all repos ──────────────────────────
+
+app.post('/api/admin/discord/github-setup-all', requireAuth, async (req, res) => {
+  try {
+    const { token } = req.body;
+    if (!token) return res.status(400).json({ error: 'GitHub Token fehlt' });
+
+    const webhookUrl = discordBot.getConfig('github_webhook_url') || `${req.protocol}://${req.get('host')}/api/webhook/github`;
+    const secret = discordBot.getConfig('github_webhook_secret') || '';
+
+    // Fetch all repos (paginated)
+    let allRepos = [];
+    let page = 1;
+    while (true) {
+      const repoRes = await fetch(`https://api.github.com/user/repos?per_page=100&page=${page}&affiliation=owner`, {
+        headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json', 'User-Agent': 'Mas0n1x-Portfolio' }
+      });
+      if (!repoRes.ok) {
+        const err = await repoRes.json().catch(() => ({}));
+        return res.status(repoRes.status).json({ error: `GitHub API Fehler: ${err.message || repoRes.statusText}` });
+      }
+      const repos = await repoRes.json();
+      if (repos.length === 0) break;
+      allRepos = allRepos.concat(repos);
+      page++;
+    }
+
+    const results = { added: [], skipped: [], failed: [] };
+
+    for (const repo of allRepos) {
+      try {
+        // Check existing webhooks
+        const hooksRes = await fetch(`https://api.github.com/repos/${repo.full_name}/hooks`, {
+          headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json', 'User-Agent': 'Mas0n1x-Portfolio' }
+        });
+
+        if (hooksRes.ok) {
+          const hooks = await hooksRes.json();
+          const exists = hooks.some(h => h.config?.url === webhookUrl);
+          if (exists) {
+            results.skipped.push(repo.full_name);
+            continue;
+          }
+        }
+
+        // Create webhook
+        const createRes = await fetch(`https://api.github.com/repos/${repo.full_name}/hooks`, {
+          method: 'POST',
+          headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json', 'User-Agent': 'Mas0n1x-Portfolio' },
+          body: JSON.stringify({
+            name: 'web',
+            active: true,
+            events: ['push', 'release', 'issues', 'pull_request'],
+            config: { url: webhookUrl, content_type: 'json', secret: secret || undefined, insecure_ssl: '0' }
+          })
+        });
+
+        if (createRes.ok || createRes.status === 201) {
+          results.added.push(repo.full_name);
+        } else {
+          const err = await createRes.json().catch(() => ({}));
+          results.failed.push({ repo: repo.full_name, error: err.message || createRes.statusText });
+        }
+      } catch (e) {
+        results.failed.push({ repo: repo.full_name, error: e.message });
+      }
+    }
+
+    // Save token for future use
+    discordBot.setConfig('github_token', token);
+
+    res.json({ success: true, total: allRepos.length, ...results });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

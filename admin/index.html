@@ -1240,7 +1240,8 @@
           <div class="discord-config-card">
             <h3><i class="fab fa-github"></i> GitHub Webhook</h3>
             <div class="discord-info-box">
-              <i class="fas fa-info-circle"></i> <strong>Setup:</strong> GitHub Repo &rarr; Settings &rarr; Webhooks &rarr; Add webhook. Payload URL und Secret von unten eintragen, Content-Type: <code>application/json</code>
+              <i class="fas fa-info-circle"></i> <strong>Automatisch:</strong> Trage deinen GitHub Personal Access Token ein und klicke auf "Alle Repos verbinden" um den Webhook automatisch auf allen deinen Repositories einzurichten.<br>
+              <i class="fas fa-key"></i> <strong>Token erstellen:</strong> GitHub &rarr; Settings &rarr; Developer settings &rarr; Personal access tokens &rarr; Tokens (classic) &rarr; <code>admin:repo_hook</code> Berechtigung
             </div>
             <div class="form-group">
               <label>Webhook URL</label>
@@ -1262,9 +1263,17 @@
                 <input type="text" id="discord-channel-github" placeholder="Channel-ID">
               </div>
             </div>
-            <div class="discord-actions">
-              <button class="btn-primary" onclick="saveDiscordGithub()"><i class="fas fa-save"></i> Speichern</button>
+            <div class="form-group">
+              <label>GitHub Personal Access Token</label>
+              <div style="display:flex;gap:8px;">
+                <input type="password" id="discord-github-token" placeholder="ghp_xxxxxxxxxxxx" style="flex:1;font-family:'JetBrains Mono',monospace;font-size:0.85rem;">
+              </div>
             </div>
+            <div class="discord-actions" style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="btn-primary" onclick="saveDiscordGithub()"><i class="fas fa-save"></i> Speichern</button>
+              <button class="btn-secondary" onclick="setupGithubAllRepos()" style="background:#333;color:#00ff88;border:1px solid #00ff88;"><i class="fab fa-github"></i> Alle Repos verbinden</button>
+            </div>
+            <div id="github-repo-status" style="display:none;margin-top:12px;padding:12px;border-radius:8px;background:rgba(0,255,136,0.05);border:1px solid rgba(0,255,136,0.2);font-size:0.9rem;"></div>
           </div>
         </div>
 

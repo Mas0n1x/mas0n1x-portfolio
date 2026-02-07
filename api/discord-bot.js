@@ -17,6 +17,8 @@ const DEFAULT_RULES_SECTIONS = [
       'Dieser Server dient als offizielle Plattform für Support, Projektanfragen und den Austausch rund um Softwareentwicklung.',
       'Es gelten die offiziellen Discord [Nutzungsbedingungen](https://discord.com/terms) sowie die Discord [Community-Richtlinien](https://discord.com/guidelines).',
       'Unwissenheit über die Regeln schützt nicht vor Konsequenzen.',
+      'Jeder Nutzer ist für sein eigenes Verhalten auf diesem Server verantwortlich.',
+      'Das Serverteam behält sich das Recht vor, Regeln jederzeit anzupassen.',
     ]
   },
   {
@@ -25,6 +27,8 @@ const DEFAULT_RULES_SECTIONS = [
       'Behandle alle Mitglieder respektvoll – kein Mobbing, keine Diskriminierung, kein Hass.',
       'Provokationen, Beleidigungen oder absichtliche Störungen sind verboten.',
       'Diskriminierende oder beleidigende Inhalte werden nicht toleriert.',
+      'Toxisches Verhalten, Trolling oder passiv-aggressives Auftreten ist unerwünscht.',
+      'Respektiere die Meinungen anderer, auch wenn du anderer Ansicht bist.',
     ]
   },
   {
@@ -33,6 +37,8 @@ const DEFAULT_RULES_SECTIONS = [
       'Inhalte müssen jugendfreundlich und gesetzeskonform sein.',
       'Kein NSFW-/18+ Material, keine extremistischen oder illegalen Inhalte.',
       'Werbung oder Spam sind nur mit ausdrücklicher Erlaubnis der Serverleitung erlaubt.',
+      'Keine Kettenbriefe, Pyramid-Schemes oder dubiose Angebote.',
+      'Die Serversprache ist Deutsch und Englisch.',
     ]
   },
   {
@@ -41,6 +47,8 @@ const DEFAULT_RULES_SECTIONS = [
       'Veröffentliche keine privaten Daten (eigene oder fremde) ohne Einverständnis.',
       'Betrug, Phishing oder das Teilen schadhafter Dateien ist strengstens untersagt.',
       'Screenshots oder Aufnahmen von privaten Gesprächen dürfen nur mit Erlaubnis geteilt werden.',
+      'Teile niemals Passwörter, API-Keys oder andere sensible Daten in öffentlichen Kanälen.',
+      'Melde verdächtige Accounts oder Nachrichten sofort dem Serverteam.',
     ]
   },
   {
@@ -49,6 +57,8 @@ const DEFAULT_RULES_SECTIONS = [
       'Nutze die Kanäle nur für ihren vorgesehenen Zweck.',
       'Achte auf die Kanalbeschreibungen und halte dich an vorgegebene Themen.',
       'Spam, Flooding oder unnötiges Pingen anderer Nutzer ist zu unterlassen.',
+      'Vermeide Off-Topic Diskussionen – nutze dafür den passenden Kanal.',
+      'Keine übermäßige Verwendung von Caps-Lock, Emojis oder Stickern.',
     ]
   },
   {
@@ -57,14 +67,45 @@ const DEFAULT_RULES_SECTIONS = [
       'Beschreibe dein Anliegen im Ticket so genau wie möglich, damit wir dir schnell helfen können.',
       'Hab Geduld – unser Team bearbeitet Anfragen so schnell wie möglich.',
       'Spam in DMs an Teammitglieder ist verboten. Nutze das Ticketsystem.',
+      'Öffne pro Anliegen nur ein Ticket. Doppelte Tickets werden geschlossen.',
+      'Lies dir die FAQ und bestehende Informationen durch, bevor du ein Ticket erstellst.',
+      'Bezahlte Projekte unterliegen separaten Vereinbarungen und AGB.',
     ]
   },
   {
-    title: '§7 Sanktionen',
+    title: '§7 Geistiges Eigentum',
+    rules: [
+      'Respektiere das geistige Eigentum anderer – kein Kopieren oder Weitergeben fremder Arbeiten.',
+      'Teile keinen Code, Designs oder Dateien, die du nicht besitzt oder weitergeben darfst.',
+      'Von uns erstellte Projekte unterliegen unseren Lizenzbedingungen.',
+      'Bei Open-Source-Projekten sind die jeweiligen Lizenzen zu beachten.',
+    ]
+  },
+  {
+    title: '§8 Voice-Kanäle',
+    rules: [
+      'Kein Soundboard-Spam, Stimmverzerrer-Missbrauch oder absichtliche Störgeräusche.',
+      'Respektiere laufende Gespräche und frag bevor du mitmachst.',
+      'Streame keine urheberrechtlich geschützten Inhalte.',
+    ]
+  },
+  {
+    title: '§9 Team & Entscheidungen',
+    rules: [
+      'Den Anweisungen des Serverteams ist Folge zu leisten.',
+      'Entscheidungen des Teams sind bindend und nicht öffentlich zu diskutieren.',
+      'Bei Problemen kann jederzeit ein Teammitglied per Ticket kontaktiert werden.',
+      'Impersonation von Teammitgliedern oder anderen Nutzern ist verboten.',
+    ]
+  },
+  {
+    title: '§10 Sanktionen',
     rules: [
       'Regelverstöße können zu Verwarnungen, Mutes, Kicks oder permanenten Bans führen.',
       'Die Art der Sanktion liegt im Ermessen des Serverteams.',
       'Wiederholte Verstöße führen zu einer dauerhaften Entfernung vom Server.',
+      'Umgehung von Sanktionen (z.B. mit Alt-Accounts) führt zu einem permanenten Ban.',
+      'Falsche Anschuldigungen gegenüber anderen Nutzern oder dem Team werden ebenfalls sanktioniert.',
     ]
   },
 ];
@@ -819,40 +860,50 @@ class DiscordBot {
     if (rulesData?.sections && rulesData.sections.length > 0) {
       sections = rulesData.sections;
     } else if (rulesData?.rules && rulesData.rules.length > 0) {
-      // Convert flat rules to a single section
       sections = [{ title: 'Regeln', rules: rulesData.rules }];
     } else {
       sections = DEFAULT_RULES_SECTIONS;
     }
 
-    // Header container
+    const accentColor = this._parseColor(configColor);
+
+    // ── Header message ──
     const headerContainer = new ContainerBuilder()
-      .setAccentColor(this._parseColor(configColor));
+      .setAccentColor(accentColor);
 
     headerContainer.addTextDisplayComponents(
       new TextDisplayBuilder().setContent(
         `# ${configTitle}\n` +
         'Bitte lies dir die folgenden Regeln sorgfältig durch.\n' +
-        'Mit dem Beitritt zum Server und dem Akzeptieren der Regeln erklärst du dich mit allen Punkten einverstanden.'
+        'Mit dem Beitritt zum Server und dem Akzeptieren der Regeln erklärst du dich mit allen Punkten einverstanden.\n' +
+        'Bei Fragen wende dich an das Serverteam.'
       )
     );
 
-    // Rules container
-    const rulesContainer = new ContainerBuilder()
-      .setAccentColor(this._parseColor(configColor));
+    await channel.send({ components: [headerContainer], flags: CV2_FLAGS });
 
-    sections.forEach((section, idx) => {
-      if (idx > 0) {
-        rulesContainer.addSeparatorComponents(new SeparatorBuilder().setDivider(true));
-      }
+    // ── Rules messages (2 sections per message to stay within 4000 char limit) ──
+    const chunkSize = 2;
+    for (let i = 0; i < sections.length; i += chunkSize) {
+      const chunk = sections.slice(i, i + chunkSize);
+      const container = new ContainerBuilder()
+        .setAccentColor(accentColor);
 
-      const rulesText = section.rules.map(r => `— ${r}`).join('\n');
-      rulesContainer.addTextDisplayComponents(
-        new TextDisplayBuilder().setContent(`### ${section.title}\n${rulesText}`)
-      );
-    });
+      chunk.forEach((section, idx) => {
+        if (idx > 0) {
+          container.addSeparatorComponents(new SeparatorBuilder().setDivider(true));
+        }
 
-    // Footer container with accept info
+        const rulesText = section.rules.map(r => `— ${r}`).join('\n');
+        container.addTextDisplayComponents(
+          new TextDisplayBuilder().setContent(`### ${section.title}\n${rulesText}`)
+        );
+      });
+
+      await channel.send({ components: [container], flags: CV2_FLAGS });
+    }
+
+    // ── Footer message with accept reaction ──
     const footerContainer = new ContainerBuilder()
       .setAccentColor(0x00ff88);
 
@@ -862,12 +913,9 @@ class DiscordBot {
       )
     );
 
-    const sent = await channel.send({
-      components: [headerContainer, rulesContainer, footerContainer],
-      flags: CV2_FLAGS,
-    });
+    const sent = await channel.send({ components: [footerContainer], flags: CV2_FLAGS });
 
-    // Add reaction for auto-role
+    // Add reaction for auto-role on the footer message
     const reactionEmoji = this.getConfig('rules_reaction_emoji') || '✅';
     await sent.react(reactionEmoji);
 
