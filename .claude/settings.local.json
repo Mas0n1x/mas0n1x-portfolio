@@ -58,7 +58,15 @@
       "Bash(do echo -n \"$id: \")",
       "Bash(python3:*)",
       "Bash(docker compose stop:*)",
-      "Bash(docker compose start:*)"
+      "Bash(docker compose start:*)",
+      "Bash(pm2 list:*)",
+      "Bash(systemctl list-units:*)",
+      "Bash(git check-ignore:*)",
+      "Bash(test:*)",
+      "Bash(docker ps:*)",
+      "Bash(mount:*)",
+      "Bash(xxd:*)",
+      "Bash(# Create project requests for each customer \\(needed as FK for reviews\\) for i in 4 5 6 7 8; do case $i in 4\\) TYPE=\"\"website\"\"; BUDGET=\"\"500-1000€\"\"; DESC=\"\"Firmenwebsite\"\" ;; 5\\) TYPE=\"\"discord-bot\"\"; BUDGET=\"\"200-500€\"\"; DESC=\"\"FiveM Discord Bot\"\" ;; 6\\) TYPE=\"\"website\"\"; BUDGET=\"\"1000-2000€\"\"; DESC=\"\"Autohaus Webseite\"\" ;; 7\\) TYPE=\"\"website\"\"; BUDGET=\"\"500-1000€\"\"; DESC=\"\"Event Landing Page\"\" ;; 8\\) TYPE=\"\"backend\"\"; BUDGET=\"\"1000-2000€\"\"; DESC=\"\"Dashboard Backend\"\" ;; esac curl -s -b /tmp/portfolio-cookies.txt -X POST http://localhost:3000/api/admin/requests \\\\ -H \"\"Content-Type: application/json\"\" \\\\ -d \"\"{\\\\\"\"customer_id\\\\\"\":$i,\\\\\"\"project_type\\\\\"\":\\\\\"\"$TYPE\\\\\"\",\\\\\"\"budget\\\\\"\":\\\\\"\"$BUDGET\\\\\"\",\\\\\"\"timeline\\\\\"\":\\\\\"\"2-4 Wochen\\\\\"\",\\\\\"\"description\\\\\"\":\\\\\"\"$DESC\\\\\"\",\\\\\"\"status\\\\\"\":\\\\\"\"completed\\\\\"\"}\"\" echo \"\" \\(customer $i\\)\"\" done # Check if admin endpoint exists, otherwise insert directly curl -s -b /tmp/portfolio-cookies.txt http://localhost:3000/api/admin/requests)"
     ]
   }
 }

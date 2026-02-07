@@ -178,9 +178,18 @@ async function loadProjects() {
     container.innerHTML = projects.map(project => `
       <div class="item-card">
         <div class="item-card-image">
-          ${project.image
-            ? `<img src="${project.image}" alt="${project.title}">`
-            : `<div class="placeholder"><i class="fas fa-image"></i></div>`
+          ${project.logo
+            ? `<img src="${project.logo}" alt="${project.title}" onerror="this.outerHTML='<div class=\\'placeholder\\'><i class=\\'fas fa-image\\'></i></div>'">`
+            : (project.images && project.images.length > 0
+              ? `<img src="${project.images[0].path}" alt="${project.title}" onerror="this.outerHTML='<div class=\\'placeholder\\'><i class=\\'fas fa-image\\'></i></div>'">`
+              : (project.image
+                ? `<img src="${project.image}" alt="${project.title}" onerror="this.outerHTML='<div class=\\'placeholder\\'><i class=\\'fas fa-image\\'></i></div>'">`
+                : `<div class="placeholder"><i class="fas fa-image"></i></div>`
+              ))
+          }
+          ${project.images && project.images.length > 1
+            ? `<span class="image-count-badge"><i class="fas fa-images"></i> ${project.images.length}</span>`
+            : ''
           }
           <span class="status-badge status-${project.status || 'completed'}">${getStatusLabel(project.status)}</span>
         </div>
@@ -216,13 +225,14 @@ async function loadProjects() {
 }
 
 async function openProjectModal(id = null) {
-  let project = { title: '', description: '', tags: [], image: '', link: '', status: 'completed', sort_order: 0, progress: 0 };
+  let project = { title: '', description: '', tags: [], images: [], logo: null, link: '', status: 'completed', sort_order: 0, progress: 0 };
 
   if (id) {
     project = await api(`/projects/${id}`);
   }
 
   const tagsString = Array.isArray(project.tags) ? project.tags.join(', ') : '';
+  const existingImages = project.images || [];
 
   const statusOptions = [
     { value: 'in_progress', label: 'In Arbeit' },
@@ -275,16 +285,42 @@ async function openProjectModal(id = null) {
         </div>
       </div>
       <div class="form-group">
-        <label>Bild</label>
+        <label>Logo (optional)</label>
         <div class="file-input-wrapper">
-          <input type="file" id="project-image" accept="image/*">
+          <input type="file" id="project-logo" accept=".jpg,.jpeg,.png,.gif,.webp,.svg">
           <div class="file-input-label">
-            <i class="fas fa-cloud-upload-alt"></i>
-            <span>Bild auswählen oder hierher ziehen</span>
+            <i class="fas fa-shield-alt"></i>
+            <span>Logo ausw\u00e4hlen</span>
           </div>
         </div>
-        <div class="image-preview" id="image-preview" ${!project.image ? 'style="display:none"' : ''}>
-          ${project.image ? `<img src="${project.image}" alt="Preview">` : ''}
+        <div class="logo-preview-small" id="logo-preview" ${!project.logo ? 'style="display:none"' : ''}>
+          ${project.logo ? `
+            <img src="${project.logo}" alt="Logo Preview" style="width:80px;height:80px;object-fit:contain;" onerror="this.style.display='none'">
+            <button type="button" class="remove-image" data-remove-logo="true">
+              <i class="fas fa-times"></i>
+            </button>
+          ` : ''}
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Bilder (Screenshots)</label>
+        <div class="file-input-wrapper">
+          <input type="file" id="project-images" accept=".jpg,.jpeg,.png,.gif,.webp" multiple>
+          <div class="file-input-label">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <span>Bilder ausw\u00e4hlen (mehrere m\u00f6glich)</span>
+          </div>
+        </div>
+        <div class="images-preview-grid" id="images-preview">
+          ${existingImages.map((img, i) => `
+            <div class="image-preview-item" data-path="${img.path}" draggable="true">
+              <img src="${img.path}" alt="Bild ${i + 1}" style="width:120px;height:90px;max-width:120px;max-height:90px;object-fit:cover;" onerror="this.style.opacity='0.3'">
+              <button type="button" class="remove-image" data-remove-path="${img.path}">
+                <i class="fas fa-times"></i>
+              </button>
+              <div class="drag-handle"><i class="fas fa-grip-vertical"></i></div>
+            </div>
+          `).join('')}
         </div>
       </div>
       <button type="submit" class="btn-primary">
@@ -300,20 +336,109 @@ async function openProjectModal(id = null) {
     progressDisplay.textContent = e.target.value + '%';
   });
 
-  // Image preview
-  const imageInput = document.getElementById('project-image');
-  const imagePreview = document.getElementById('image-preview');
+  // Track removals
+  let imagesToRemove = [];
+  let removeLogo = false;
 
-  imageInput.addEventListener('change', (e) => {
+  // Multi-image preview
+  const imagesInput = document.getElementById('project-images');
+  const imagesPreview = document.getElementById('images-preview');
+
+  imagesInput.addEventListener('change', (e) => {
+    const files = Array.from(e.target.files);
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const div = document.createElement('div');
+        div.className = 'image-preview-item new-image';
+        div.innerHTML = `
+          <img src="${ev.target.result}" alt="Preview">
+          <button type="button" class="remove-image" data-new="true">
+            <i class="fas fa-times"></i>
+          </button>
+          <div class="drag-handle"><i class="fas fa-grip-vertical"></i></div>
+        `;
+        div.querySelector('.remove-image').addEventListener('click', () => div.remove());
+        imagesPreview.appendChild(div);
+      };
+      reader.readAsDataURL(file);
+    });
+  });
+
+  // Logo preview
+  const logoInput = document.getElementById('project-logo');
+  const logoPreview = document.getElementById('logo-preview');
+
+  logoInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = (e) => {
-        imagePreview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
-        imagePreview.style.display = 'block';
+      reader.onload = (ev) => {
+        logoPreview.innerHTML = `
+          <img src="${ev.target.result}" alt="Logo Preview" style="width:80px;height:80px;object-fit:contain;">
+          <button type="button" class="remove-image" data-remove-logo="true">
+            <i class="fas fa-times"></i>
+          </button>
+        `;
+        logoPreview.style.display = 'block';
+        logoPreview.querySelector('.remove-image').addEventListener('click', () => {
+          removeLogo = true;
+          logoPreview.style.display = 'none';
+          logoPreview.innerHTML = '';
+          logoInput.value = '';
+        });
+        removeLogo = false;
       };
       reader.readAsDataURL(file);
     }
+  });
+
+  // Existing image/logo remove buttons
+  imagesPreview.addEventListener('click', (e) => {
+    const btn = e.target.closest('.remove-image');
+    if (!btn) return;
+    const item = btn.closest('.image-preview-item');
+    if (item && item.dataset.path) {
+      imagesToRemove.push(item.dataset.path);
+    }
+    if (item) item.remove();
+  });
+
+  const existingLogoRemoveBtn = logoPreview.querySelector('[data-remove-logo]');
+  if (existingLogoRemoveBtn) {
+    existingLogoRemoveBtn.addEventListener('click', () => {
+      removeLogo = true;
+      logoPreview.style.display = 'none';
+      logoPreview.innerHTML = '';
+    });
+  }
+
+  // Drag and drop reordering
+  let draggedItem = null;
+  imagesPreview.addEventListener('dragstart', (e) => {
+    draggedItem = e.target.closest('.image-preview-item');
+    if (draggedItem) {
+      draggedItem.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    }
+  });
+  imagesPreview.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    if (!draggedItem) return;
+    const items = [...imagesPreview.querySelectorAll('.image-preview-item:not(.dragging)')];
+    const next = items.find(item => {
+      const rect = item.getBoundingClientRect();
+      return e.clientX < rect.left + rect.width / 2;
+    });
+    if (next) {
+      imagesPreview.insertBefore(draggedItem, next);
+    } else {
+      imagesPreview.appendChild(draggedItem);
+    }
+  });
+  imagesPreview.addEventListener('dragend', () => {
+    if (draggedItem) draggedItem.classList.remove('dragging');
+    draggedItem = null;
   });
 
   // Form submit
@@ -329,9 +454,32 @@ async function openProjectModal(id = null) {
     formData.append('sort_order', document.getElementById('project-order').value);
     formData.append('progress', document.getElementById('project-progress').value);
 
-    const imageFile = document.getElementById('project-image').files[0];
-    if (imageFile) {
-      formData.append('image', imageFile);
+    // Append multiple image files
+    const imageFiles = document.getElementById('project-images').files;
+    for (let i = 0; i < imageFiles.length; i++) {
+      formData.append('images', imageFiles[i]);
+    }
+
+    // Append logo file
+    const logoFile = document.getElementById('project-logo').files[0];
+    if (logoFile) {
+      formData.append('logo', logoFile);
+    }
+
+    // Send removal lists
+    if (imagesToRemove.length > 0) {
+      formData.append('remove_images', JSON.stringify(imagesToRemove));
+    }
+    if (removeLogo) {
+      formData.append('remove_logo', 'true');
+    }
+
+    // Send image order (existing image paths in current order)
+    const orderedPaths = Array.from(
+      imagesPreview.querySelectorAll('.image-preview-item[data-path]')
+    ).map(el => el.dataset.path);
+    if (orderedPaths.length > 0) {
+      formData.append('image_order', JSON.stringify(orderedPaths));
     }
 
     try {

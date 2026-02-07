@@ -358,6 +358,30 @@ async function initDatabase() {
     db.run('ALTER TABLE customers ADD COLUMN company TEXT');
   } catch (e) {}
 
+  // Add images (JSON array) and logo columns to projects
+  try {
+    db.run('ALTER TABLE projects ADD COLUMN images TEXT');
+  } catch (e) {}
+  try {
+    db.run('ALTER TABLE projects ADD COLUMN logo TEXT');
+  } catch (e) {}
+
+  // Migrate existing single image data to images array
+  try {
+    const stmt = db.prepare("SELECT id, image, images FROM projects WHERE image IS NOT NULL AND image != '' AND (images IS NULL OR images = '')");
+    const migrateRows = [];
+    while (stmt.step()) {
+      migrateRows.push(stmt.getAsObject());
+    }
+    stmt.free();
+    for (const p of migrateRows) {
+      const imagesJson = JSON.stringify([{ path: p.image, order: 0 }]);
+      dbRun('UPDATE projects SET images = ? WHERE id = ?', [imagesJson, p.id]);
+    }
+  } catch (e) {
+    console.error('Image migration error:', e);
+  }
+
   // Check if admin exists
   const adminCheck = db.exec("SELECT * FROM admin WHERE id = 1");
   if (adminCheck.length === 0 || adminCheck[0].values.length === 0) {
@@ -439,6 +463,10 @@ const upload = multer({
   },
   limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
 });
+const projectUpload = upload.fields([
+  { name: 'images', maxCount: 10 },
+  { name: 'logo', maxCount: 1 }
+]);
 
 // Middleware
 app.use(cors({
@@ -603,7 +631,9 @@ app.get('/api/projects', (req, res) => {
   const projects = dbAll('SELECT * FROM projects ORDER BY sort_order ASC, id DESC');
   res.json(projects.map(p => ({
     ...p,
-    tags: p.tags ? JSON.parse(p.tags) : []
+    tags: p.tags ? JSON.parse(p.tags) : [],
+    images: p.images ? JSON.parse(p.images) : (p.image ? [{ path: p.image, order: 0 }] : []),
+    logo: p.logo || null
   })));
 });
 
@@ -611,26 +641,42 @@ app.get('/api/projects/:id', (req, res) => {
   const project = dbGet('SELECT * FROM projects WHERE id = ?', [parseInt(req.params.id)]);
   if (project) {
     project.tags = project.tags ? JSON.parse(project.tags) : [];
+    project.images = project.images ? JSON.parse(project.images) : (project.image ? [{ path: project.image, order: 0 }] : []);
+    project.logo = project.logo || null;
     res.json(project);
   } else {
     res.status(404).json({ error: 'Project not found' });
   }
 });
 
-app.post('/api/projects', requireAuth, upload.single('image'), (req, res) => {
+app.post('/api/projects', requireAuth, projectUpload, (req, res) => {
   const { title, description, tags, link, status, sort_order, progress } = req.body;
-  const image = req.file ? `/uploads/${req.file.filename}` : null;
+
+  let images = [];
+  if (req.files && req.files['images']) {
+    images = req.files['images'].map((file, index) => ({
+      path: `/uploads/${file.filename}`,
+      order: index
+    }));
+  }
+  const imagesJson = JSON.stringify(images);
+  const image = images.length > 0 ? images[0].path : null;
+
+  const logo = (req.files && req.files['logo'] && req.files['logo'][0])
+    ? `/uploads/${req.files['logo'][0].filename}`
+    : null;
+
   const tagsJson = tags ? JSON.stringify(typeof tags === 'string' ? tags.split(',').map(t => t.trim()) : tags) : '[]';
 
   const result = dbRun(
-    'INSERT INTO projects (title, description, image, tags, link, status, sort_order, progress) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-    [title, description, image, tagsJson, link, status || 'completed', parseInt(sort_order) || 0, parseInt(progress) || 0]
+    'INSERT INTO projects (title, description, image, images, logo, tags, link, status, sort_order, progress) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    [title, description, image, imagesJson, logo, tagsJson, link, status || 'completed', parseInt(sort_order) || 0, parseInt(progress) || 0]
   );
 
   res.json({ id: result.lastInsertRowid, success: true });
 });
 
-app.put('/api/projects/:id', requireAuth, upload.single('image'), (req, res) => {
+app.put('/api/projects/:id', requireAuth, projectUpload, (req, res) => {
   const { title, description, tags, link, status, sort_order, progress } = req.body;
   const project = dbGet('SELECT * FROM projects WHERE id = ?', [parseInt(req.params.id)]);
 
@@ -638,35 +684,97 @@ app.put('/api/projects/:id', requireAuth, upload.single('image'), (req, res) => 
     return res.status(404).json({ error: 'Project not found' });
   }
 
-  let image = project.image;
-  if (req.file) {
-    // Delete old image if exists
-    if (project.image) {
-      const oldPath = path.join(__dirname, '..', project.image);
-      if (fs.existsSync(oldPath)) {
-        fs.unlinkSync(oldPath);
-      }
+  // Parse existing images
+  let existingImages = [];
+  try {
+    existingImages = project.images ? JSON.parse(project.images) : [];
+  } catch (e) {
+    existingImages = project.image ? [{ path: project.image, order: 0 }] : [];
+  }
+
+  // Handle image removals
+  const removeImages = req.body.remove_images
+    ? (typeof req.body.remove_images === 'string' ? JSON.parse(req.body.remove_images) : req.body.remove_images)
+    : [];
+  for (const removePath of removeImages) {
+    const filePath = path.join(__dirname, '..', removePath);
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
     }
-    image = `/uploads/${req.file.filename}`;
+    existingImages = existingImages.filter(img => img.path !== removePath);
+  }
+
+  // Handle image reordering
+  const imageOrder = req.body.image_order
+    ? (typeof req.body.image_order === 'string' ? JSON.parse(req.body.image_order) : req.body.image_order)
+    : null;
+  if (imageOrder) {
+    existingImages = imageOrder
+      .map((imgPath, index) => ({ path: imgPath, order: index }))
+      .filter(img => existingImages.some(ei => ei.path === img.path));
+  }
+
+  // Add newly uploaded images
+  if (req.files && req.files['images']) {
+    const startOrder = existingImages.length;
+    const newImages = req.files['images'].map((file, index) => ({
+      path: `/uploads/${file.filename}`,
+      order: startOrder + index
+    }));
+    existingImages = [...existingImages, ...newImages];
+  }
+
+  // Re-index order
+  existingImages = existingImages.map((img, index) => ({ ...img, order: index }));
+  const imagesJson = JSON.stringify(existingImages);
+  const image = existingImages.length > 0 ? existingImages[0].path : null;
+
+  // Handle logo
+  let logo = project.logo || null;
+  if (req.body.remove_logo === 'true' && project.logo) {
+    const logoPath = path.join(__dirname, '..', project.logo);
+    if (fs.existsSync(logoPath)) fs.unlinkSync(logoPath);
+    logo = null;
+  }
+  if (req.files && req.files['logo'] && req.files['logo'][0]) {
+    if (project.logo) {
+      const oldLogoPath = path.join(__dirname, '..', project.logo);
+      if (fs.existsSync(oldLogoPath)) fs.unlinkSync(oldLogoPath);
+    }
+    logo = `/uploads/${req.files['logo'][0].filename}`;
   }
 
   const tagsJson = tags ? JSON.stringify(typeof tags === 'string' ? tags.split(',').map(t => t.trim()) : tags) : project.tags;
 
   dbRun(
-    'UPDATE projects SET title = ?, description = ?, image = ?, tags = ?, link = ?, status = ?, sort_order = ?, progress = ?, updated_at = datetime("now") WHERE id = ?',
-    [title || project.title, description || project.description, image, tagsJson, link || project.link, status || project.status || 'completed', parseInt(sort_order) || project.sort_order, parseInt(progress) || project.progress || 0, parseInt(req.params.id)]
+    'UPDATE projects SET title = ?, description = ?, image = ?, images = ?, logo = ?, tags = ?, link = ?, status = ?, sort_order = ?, progress = ?, updated_at = datetime("now") WHERE id = ?',
+    [title || project.title, description || project.description, image, imagesJson, logo, tagsJson, link !== undefined ? link : project.link, status || project.status || 'completed', parseInt(sort_order) || project.sort_order, parseInt(progress) || project.progress || 0, parseInt(req.params.id)]
   );
 
   res.json({ success: true });
 });
 
 app.delete('/api/projects/:id', requireAuth, (req, res) => {
-  const project = dbGet('SELECT image FROM projects WHERE id = ?', [parseInt(req.params.id)]);
+  const project = dbGet('SELECT image, images, logo FROM projects WHERE id = ?', [parseInt(req.params.id)]);
 
-  if (project && project.image) {
-    const imagePath = path.join(__dirname, '..', project.image);
-    if (fs.existsSync(imagePath)) {
-      fs.unlinkSync(imagePath);
+  if (project) {
+    // Delete all images
+    try {
+      const images = project.images ? JSON.parse(project.images) : [];
+      for (const img of images) {
+        const imgPath = path.join(__dirname, '..', img.path);
+        if (fs.existsSync(imgPath)) fs.unlinkSync(imgPath);
+      }
+    } catch (e) {
+      if (project.image) {
+        const imagePath = path.join(__dirname, '..', project.image);
+        if (fs.existsSync(imagePath)) fs.unlinkSync(imagePath);
+      }
+    }
+    // Delete logo
+    if (project.logo) {
+      const logoPath = path.join(__dirname, '..', project.logo);
+      if (fs.existsSync(logoPath)) fs.unlinkSync(logoPath);
     }
   }
 
@@ -2019,7 +2127,7 @@ app.get('/kunde', (req, res) => {
 // Public testimonials (approved and public reviews)
 app.get('/api/public/testimonials', (req, res) => {
   const testimonials = dbAll(`
-    SELECT r.id, r.rating, r.title, r.content, r.created_at, c.name as customer_name
+    SELECT r.id, r.rating, r.title, r.content, r.created_at, c.name as customer_name, c.company as customer_company
     FROM reviews r
     LEFT JOIN customers c ON r.customer_id = c.id
     WHERE r.is_approved = 1 AND r.is_public = 1

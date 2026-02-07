@@ -173,6 +173,108 @@
             }
         }
 
+        /* Ambient Background Orbs */
+        .ambient-orbs {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .ambient-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            animation: orbit 30s infinite ease-in-out;
+        }
+
+        .ambient-orb:nth-child(1) {
+            width: 700px;
+            height: 700px;
+            background: var(--accent);
+            top: -15%;
+            right: -10%;
+            opacity: 0.12;
+            animation-duration: 30s;
+        }
+
+        .ambient-orb:nth-child(2) {
+            width: 600px;
+            height: 600px;
+            background: var(--accent-secondary);
+            bottom: 10%;
+            left: -10%;
+            opacity: 0.10;
+            animation-duration: 38s;
+            animation-delay: -8s;
+        }
+
+        .ambient-orb:nth-child(3) {
+            width: 500px;
+            height: 500px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+            top: 40%;
+            right: 15%;
+            opacity: 0.08;
+            animation-duration: 42s;
+            animation-delay: -18s;
+        }
+
+        .ambient-orb:nth-child(4) {
+            width: 550px;
+            height: 550px;
+            background: var(--accent);
+            top: 15%;
+            left: 10%;
+            opacity: 0.06;
+            animation-duration: 35s;
+            animation-delay: -5s;
+        }
+
+        .ambient-orb:nth-child(5) {
+            width: 450px;
+            height: 450px;
+            background: var(--accent-secondary);
+            bottom: 35%;
+            right: -5%;
+            opacity: 0.09;
+            animation-duration: 44s;
+            animation-delay: -22s;
+        }
+
+        .ambient-orb:nth-child(6) {
+            width: 500px;
+            height: 500px;
+            background: linear-gradient(45deg, var(--accent-secondary), var(--accent));
+            top: 70%;
+            left: 20%;
+            opacity: 0.07;
+            animation-duration: 36s;
+            animation-delay: -14s;
+        }
+
+        @keyframes orbit {
+            0%, 100% {
+                transform: translate(0, 0) scale(1);
+            }
+            20% {
+                transform: translate(80px, -50px) scale(1.15);
+            }
+            40% {
+                transform: translate(-40px, 70px) scale(0.85);
+            }
+            60% {
+                transform: translate(-70px, -40px) scale(1.1);
+            }
+            80% {
+                transform: translate(50px, 30px) scale(0.95);
+            }
+        }
+
         /* Navigation - Glass Premium */
         nav {
             position: fixed;
@@ -651,7 +753,7 @@
 
         /* Services Section - Premium Glass Cards */
         #services {
-            background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, var(--bg-primary) 100%);
+            background: transparent;
         }
 
         .services-grid {
@@ -762,12 +864,12 @@
 
         /* Active Projects Section - Premium */
         #active-projects {
-            background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, var(--bg-primary) 100%);
+            background: transparent;
         }
 
         .active-projects-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            display: flex;
+            flex-direction: column;
             gap: 32px;
             max-width: var(--container-max);
             margin: 0 auto;
@@ -781,6 +883,8 @@
             transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
             backdrop-filter: blur(20px);
             position: relative;
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
         }
 
         .active-project-card::before {
@@ -796,7 +900,7 @@
 
         .active-project-card:hover {
             border-color: rgba(0, 212, 255, 0.4);
-            transform: translateY(-12px);
+            transform: translateY(-8px);
             box-shadow: 0 30px 60px rgba(0, 212, 255, 0.15), 0 0 60px rgba(0, 212, 255, 0.05);
         }
 
@@ -805,7 +909,8 @@
         }
 
         .active-project-image {
-            height: 220px;
+            height: 100%;
+            min-height: 280px;
             background: linear-gradient(135deg, var(--bg-tertiary) 0%, rgba(0, 212, 255, 0.02) 100%);
             display: flex;
             align-items: center;
@@ -814,15 +919,16 @@
             overflow: hidden;
         }
 
-        .active-project-image img {
+        .active-project-image img:not(.portfolio-logo-overlay) {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            object-position: center center;
             transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .active-project-card:hover .active-project-image img {
-            transform: scale(1.08);
+        .active-project-card:hover .active-project-image img:not(.portfolio-logo-overlay) {
+            transform: scale(1.05);
         }
 
         .active-project-status {
@@ -855,9 +961,12 @@
         }
 
         .active-project-content {
-            padding: 32px;
+            padding: 40px;
             position: relative;
             z-index: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
         .active-project-content h3 {
@@ -914,7 +1023,7 @@
 
         /* Portfolio Section - Premium Glass Cards */
         #portfolio {
-            background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-primary) 50%, var(--bg-secondary) 100%);
+            background: transparent;
         }
 
         .portfolio-grid {
@@ -973,7 +1082,7 @@
         }
 
         .portfolio-image {
-            height: 240px;
+            aspect-ratio: 16 / 10;
             background: linear-gradient(135deg, var(--bg-tertiary) 0%, rgba(0, 255, 136, 0.02) 100%);
             display: flex;
             align-items: center;
@@ -997,15 +1106,15 @@
             transform: scale(1.15) rotate(-5deg);
         }
 
-        .portfolio-image img {
+        .portfolio-image img:not(.portfolio-logo-overlay) {
             width: 100%;
             height: 100%;
-            object-fit: cover;
-            object-position: top center;
+            object-fit: contain;
+            object-position: center;
             transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .portfolio-card:hover .portfolio-image img {
+        .portfolio-card:hover .portfolio-image img:not(.portfolio-logo-overlay) {
             transform: scale(1.08);
         }
 
@@ -1014,6 +1123,111 @@
             object-position: center;
             background: var(--bg-secondary);
             padding: 20px;
+        }
+
+        /* Image Carousel */
+        .portfolio-carousel,
+        .active-project-carousel {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .carousel-slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: top center;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+        }
+
+        .carousel-slide.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .portfolio-card:hover .carousel-slide.active,
+        .active-project-card:hover .carousel-slide.active {
+            transform: scale(1.08);
+        }
+
+        .active-project-card:hover .carousel-slide.active {
+            transform: scale(1.05);
+        }
+
+        .carousel-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.6);
+            color: #fff;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 2;
+            font-size: 0.8rem;
+        }
+
+        .portfolio-card:hover .carousel-btn,
+        .active-project-card:hover .carousel-btn {
+            opacity: 1;
+        }
+
+        .carousel-btn:hover {
+            background: rgba(0, 0, 0, 0.8);
+        }
+
+        .carousel-prev { left: 8px; }
+        .carousel-next { right: 8px; }
+
+        .carousel-dots {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 6px;
+            z-index: 2;
+        }
+
+        .carousel-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .carousel-dot.active {
+            background: var(--accent);
+        }
+
+        .portfolio-logo-overlay {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            width: 56px;
+            height: 56px;
+            object-fit: contain;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 6px;
+            z-index: 3;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .portfolio-content {
@@ -1060,7 +1274,7 @@
 
         /* About Section - premium layout */
         #about {
-            background: var(--bg-primary);
+            background: transparent;
             position: relative;
         }
 
@@ -1222,7 +1436,7 @@
 
         /* Contact Section - refined */
         #contact {
-            background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+            background: transparent;
             position: relative;
             overflow: hidden;
         }
@@ -1330,7 +1544,7 @@
 
         /* Footer - refined */
         footer {
-            background: var(--bg-primary);
+            background: transparent;
             border-top: 1px solid var(--border);
             padding: 60px 60px 50px;
             position: relative;
@@ -1862,10 +2076,17 @@
             }
 
             .services-grid,
-            .portfolio-grid,
-            .active-projects-grid {
+            .portfolio-grid {
                 grid-template-columns: 1fr;
                 gap: 16px;
+            }
+
+            .active-project-card {
+                grid-template-columns: 1fr;
+            }
+
+            .active-project-image {
+                min-height: 200px;
             }
 
             .contact-links {
@@ -1918,7 +2139,7 @@
 
         /* ==================== TESTIMONIALS - premium cards ==================== */
         #testimonials {
-            background: var(--bg-primary);
+            background: transparent;
             position: relative;
         }
 
@@ -2108,6 +2329,14 @@
     <div class="grid-bg"></div>
     <div class="cursor-glow" id="cursorGlow"></div>
     <div class="particles" id="particles"></div>
+    <div class="ambient-orbs">
+        <div class="ambient-orb"></div>
+        <div class="ambient-orb"></div>
+        <div class="ambient-orb"></div>
+        <div class="ambient-orb"></div>
+        <div class="ambient-orb"></div>
+        <div class="ambient-orb"></div>
+    </div>
 
     <!-- Navigation -->
     <nav id="navbar">
@@ -2660,6 +2889,58 @@
             }
         }
 
+        function getCarouselHtml(images, project, idPrefix) {
+            const logoHtml = project.logo
+                ? `<img src="${project.logo}" alt="${escapeHtml(project.title)} Logo" class="portfolio-logo-overlay">`
+                : '';
+            if (images.length === 0) {
+                return logoHtml || `<i class="fas fa-code" style="font-size: 3rem; color: var(--text-muted);"></i>`;
+            }
+            if (images.length === 1) {
+                return `${logoHtml}<img src="${images[0].path}" alt="${escapeHtml(project.title)} Screenshot" style="width:100%;height:100%;object-fit:cover;object-position:top center;">`;
+            }
+            const cid = `${idPrefix}-${project.id}`;
+            return `${logoHtml}
+                <div class="portfolio-carousel" data-carousel="${cid}">
+                    ${images.map((img, i) => `
+                        <img src="${img.path}" alt="${escapeHtml(project.title)} Screenshot ${i + 1}"
+                             class="carousel-slide ${i === 0 ? 'active' : ''}">
+                    `).join('')}
+                    <button class="carousel-btn carousel-prev" onclick="carouselNav('${cid}', -1)">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="carousel-btn carousel-next" onclick="carouselNav('${cid}', 1)">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                    <div class="carousel-dots">
+                        ${images.map((_, i) => `
+                            <span class="carousel-dot ${i === 0 ? 'active' : ''}"
+                                  onclick="carouselGoTo('${cid}', ${i})"></span>
+                        `).join('')}
+                    </div>
+                </div>`;
+        }
+
+        function carouselNav(cid, direction) {
+            const carousel = document.querySelector(`[data-carousel="${cid}"]`);
+            if (!carousel) return;
+            const slides = carousel.querySelectorAll('.carousel-slide');
+            const dots = carousel.querySelectorAll('.carousel-dot');
+            let current = [...slides].findIndex(s => s.classList.contains('active'));
+            slides[current].classList.remove('active');
+            if (dots[current]) dots[current].classList.remove('active');
+            current = (current + direction + slides.length) % slides.length;
+            slides[current].classList.add('active');
+            if (dots[current]) dots[current].classList.add('active');
+        }
+
+        function carouselGoTo(cid, index) {
+            const carousel = document.querySelector(`[data-carousel="${cid}"]`);
+            if (!carousel) return;
+            carousel.querySelectorAll('.carousel-slide').forEach((s, i) => s.classList.toggle('active', i === index));
+            carousel.querySelectorAll('.carousel-dot').forEach((d, i) => d.classList.toggle('active', i === index));
+        }
+
         function renderActiveProjects(projects) {
             const container = document.getElementById('active-projects-grid');
             const section = document.getElementById('active-projects');
@@ -2670,13 +2951,14 @@
             }
 
             section.style.display = 'block';
-            container.innerHTML = projects.map(project => `
+            container.innerHTML = projects.map(project => {
+                const images = project.images && project.images.length > 0
+                    ? project.images
+                    : (project.image ? [{ path: project.image, order: 0 }] : []);
+                return `
                 <div class="active-project-card reveal active">
                     <div class="active-project-image">
-                        ${project.image
-                            ? `<img src="${project.image}" alt="${escapeHtml(project.title)}">`
-                            : `<i class="fas fa-code" style="font-size: 3rem; color: var(--accent-secondary);"></i>`
-                        }
+                        ${getCarouselHtml(images, project, 'active')}
                         <div class="active-project-status">
                             <span class="pulse-dot"></span>
                             ${project.status === 'in_progress' ? 'In Arbeit' : 'Geplant'}
@@ -2690,7 +2972,7 @@
                         </div>
                     </div>
                 </div>
-            `).join('');
+            `}).join('');
         }
 
         function renderProjects(projects) {
@@ -2701,13 +2983,14 @@
                 return;
             }
 
-            container.innerHTML = projects.map(project => `
+            container.innerHTML = projects.map(project => {
+                const images = project.images && project.images.length > 0
+                    ? project.images
+                    : (project.image ? [{ path: project.image, order: 0 }] : []);
+                return `
                 <div class="portfolio-card reveal active">
                     <div class="portfolio-image">
-                        ${project.image
-                            ? `<img src="${project.image}" alt="${escapeHtml(project.title)} Screenshot">`
-                            : `<i class="fas fa-code"></i>`
-                        }
+                        ${getCarouselHtml(images, project, 'portfolio')}
                     </div>
                     <div class="portfolio-content">
                         <div class="portfolio-tags">
@@ -2717,7 +3000,7 @@
                         <p>${escapeHtml(project.description || '')}</p>
                     </div>
                 </div>
-            `).join('');
+            `}).join('');
         }
 
         function renderServices(services) {
@@ -3119,7 +3402,7 @@
                             <div class="testimonial-author">
                                 <div class="testimonial-avatar">${initials}</div>
                                 <div class="testimonial-author-info">
-                                    <div class="testimonial-author-name">${escapeHtml(t.customer_name || 'Kunde')}</div>
+                                    <div class="testimonial-author-name">${escapeHtml(t.customer_name || 'Kunde')}${t.customer_company ? ` · ${escapeHtml(t.customer_company)}` : ''}</div>
                                     <div class="testimonial-author-date">${date}</div>
                                 </div>
                             </div>
