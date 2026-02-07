@@ -115,6 +115,8 @@ document.querySelectorAll('.nav-item[data-section]').forEach(item => {
       loadAdminAppointments();
     } else if (section === 'faqs') {
       loadAdminFAQs();
+    } else if (section === 'discord') {
+      loadDiscordSection();
     }
   });
 });
@@ -4402,3 +4404,721 @@ document.querySelectorAll('.appointment-filters .filter-btn').forEach(btn => {
     renderAdminAppointments();
   });
 });
+
+// ==================== DISCORD BOT ====================
+
+let discordTabsInitialized = false;
+let discordStatusInterval = null;
+
+function initDiscordTabs() {
+  if (discordTabsInitialized) return;
+  document.querySelectorAll('.discord-tab[data-discord-tab]').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.discord-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.discord-tab-content').forEach(c => c.classList.remove('active'));
+      tab.classList.add('active');
+      const tabId = `discord-tab-${tab.dataset.discordTab}`;
+      document.getElementById(tabId)?.classList.add('active');
+
+      if (tab.dataset.discordTab === 'logs') loadDiscordLogs();
+    });
+  });
+  discordTabsInitialized = true;
+}
+
+async function loadDiscordSection() {
+  initDiscordTabs();
+  await loadDiscordConfig();
+  await loadDiscordStatus();
+
+  // Start status polling
+  if (discordStatusInterval) clearInterval(discordStatusInterval);
+  discordStatusInterval = setInterval(loadDiscordStatus, 15000);
+
+  // Set webhook URL
+  const webhookUrlInput = document.getElementById('discord-webhook-url');
+  if (webhookUrlInput) {
+    const baseUrl = window.location.origin;
+    webhookUrlInput.value = `${baseUrl}/api/webhook/github`;
+  }
+}
+
+// ── Discord Default Content ─────────────────────────────────────
+const DISCORD_DEFAULTS = {
+  welcome: {
+    title: 'Willkommen!',
+    description: 'Willkommen auf dem **Mas0n1x Development** Server, {user}!\nWir freuen uns, dich in unserer Community begrüssen zu dürfen.\nHier findest du professionellen Support, kannst Projekte anfragen und dich mit anderen Entwicklern austauschen.',
+    color: '#00ff88',
+    footer: 'Du bist unser {memberCount}. Mitglied!'
+  },
+  leave: {
+    title: 'Auf Wiedersehen!',
+    description: '**{username}** hat den Server verlassen.\nWir bedanken uns für die gemeinsame Zeit und wünschen alles Gute.',
+    color: '#ff4444'
+  },
+  rules: {
+    title: '📜 Serverregeln',
+    color: '#ff4444',
+    footer: 'Reagiere mit ✅ um die Regeln zu akzeptieren und Zugang zum Server zu erhalten!',
+    rules: [
+      '§1 Allgemeines — Dieser Server dient als offizielle Plattform für Support, Projektanfragen und den Austausch rund um Softwareentwicklung.',
+      '§1 — Es gelten die offiziellen Discord Nutzungsbedingungen sowie die Discord Community-Richtlinien.',
+      '§1 — Unwissenheit über die Regeln schützt nicht vor Konsequenzen.',
+      '§2 Verhalten & Respekt — Behandle alle Mitglieder respektvoll – kein Mobbing, keine Diskriminierung, kein Hass.',
+      '§2 — Provokationen, Beleidigungen oder absichtliche Störungen sind verboten.',
+      '§2 — Diskriminierende oder beleidigende Inhalte werden nicht toleriert.',
+      '§3 Sprache & Inhalte — Inhalte müssen jugendfreundlich und gesetzeskonform sein.',
+      '§3 — Kein NSFW-/18+ Material, keine extremistischen oder illegalen Inhalte.',
+      '§3 — Werbung oder Spam sind nur mit ausdrücklicher Erlaubnis der Serverleitung erlaubt.',
+      '§4 Sicherheit & Datenschutz — Veröffentliche keine privaten Daten (eigene oder fremde) ohne Einverständnis.',
+      '§4 — Betrug, Phishing oder das Teilen schadhafter Dateien ist strengstens untersagt.',
+      '§4 — Screenshots oder Aufnahmen von privaten Gesprächen dürfen nur mit Erlaubnis geteilt werden.',
+      '§5 Kanäle & Themen — Nutze die Kanäle nur für ihren vorgesehenen Zweck.',
+      '§5 — Achte auf die Kanalbeschreibungen und halte dich an vorgegebene Themen.',
+      '§5 — Spam, Flooding oder unnötiges Pingen anderer Nutzer ist zu unterlassen.',
+      '§6 Support & Projekte — Beschreibe dein Anliegen im Ticket so genau wie möglich, damit wir dir schnell helfen können.',
+      '§6 — Hab Geduld – unser Team bearbeitet Anfragen so schnell wie möglich.',
+      '§6 — Spam in DMs an Teammitglieder ist verboten. Nutze das Ticketsystem.',
+      '§7 Sanktionen — Regelverstöße können zu Verwarnungen, Mutes, Kicks oder permanenten Bans führen.',
+      '§7 — Die Art der Sanktion liegt im Ermessen des Serverteams.',
+      '§7 — Wiederholte Verstöße führen zu einer dauerhaften Entfernung vom Server.',
+    ]
+  },
+  social: {
+    title: '🌐 Social Media & Kontakt',
+    description: 'Hier findest du alle wichtigen Links, um mit mir in Kontakt zu treten oder meine Arbeit zu verfolgen.',
+    links: [
+      { emoji: '💬', name: 'Discord', url: 'https://discord.com/users/388425445793857559' },
+      { emoji: '🐙', name: 'GitHub', url: 'https://github.com/Mas0n1x' },
+      { emoji: '📧', name: 'E-Mail', url: 'mailto:bleckermax11@gmail.com' },
+      { emoji: '🌍', name: 'Portfolio', url: 'https://mas0n1x.dev' },
+    ]
+  },
+  products: [
+    { emoji: '💻', name: 'Web-Entwicklung', price: 'ab 499€', color: '#00ff88', description: 'Moderne, responsive Websites und Web-Applikationen mit aktuellen Technologien und Best Practices.', features: '➜ Responsive Design für alle Geräte\n➜ SEO-Optimierung & Performance\n➜ Moderne Frameworks & sauberer Code\n➜ Admin-Dashboards & CMS-Integration' },
+    { emoji: '📱', name: 'App-Entwicklung', price: 'ab 799€', color: '#00d4ff', description: 'Native und Cross-Platform Apps mit intuitiver User Experience.', features: '➜ Cross-Platform Kompatibilität\n➜ Intuitive Benutzeroberfläche\n➜ Offline-Funktionalität\n➜ Push-Benachrichtigungen & Updates' },
+    { emoji: '🤖', name: 'Discord Bots', price: 'ab 199€', color: '#a855f7', description: 'Maßgeschneiderte Discord Bot Entwicklung für Moderation, Unterhaltung und Verwaltung.', features: '➜ Moderation & Auto-Moderation\n➜ Ticket- & Supportsysteme\n➜ Custom Commands & Interaktionen\n➜ Dashboard & Web-Interface' },
+    { emoji: '⚙️', name: 'Backend-Systeme', price: 'ab 599€', color: '#ffaa00', description: 'Skalierbare APIs, Datenbanken und Server-Infrastruktur.', features: '➜ REST & GraphQL APIs\n➜ Datenbank-Design & Optimierung\n➜ Docker & Server-Setup\n➜ Monitoring & Wartung' },
+    { emoji: '🎨', name: 'Frontend-Systeme', price: 'ab 399€', color: '#00ff88', description: 'Interaktive Benutzeroberflächen mit modernen Frameworks und sauberem Code.', features: '➜ Moderne UI/UX Design\n➜ Animationen & Micro-Interactions\n➜ Barrierefreiheit & Accessibility\n➜ Performance-Optimierung' },
+  ],
+  ticketCategories: [
+    { name: 'Allgemeine Frage', emoji: '❓', description: 'Allgemeine Fragen zum Server oder zu Services' },
+    { name: 'Projektanfrage', emoji: '📩', description: 'Neue Projektanfrage oder Auftragsarbeit' },
+    { name: 'Tech-Support', emoji: '🔧', description: 'Technische Hilfe bei bestehendem Projekt' },
+    { name: 'Bug-Report', emoji: '🐛', description: 'Fehler in einem bestehenden Projekt melden' },
+  ],
+  ticketWelcome: 'Beschreibe dein Anliegen so detailliert wie möglich.\nEin Teammitglied wird sich so schnell wie möglich bei dir melden.',
+  rulesEmoji: '✅',
+};
+
+async function loadDiscordConfig() {
+  try {
+    const config = await api('/admin/discord/config');
+
+    // General
+    if (config.guild_id) document.getElementById('discord-guild-id').value = config.guild_id;
+    document.getElementById('discord-bot-enabled').checked = config.bot_enabled === 'true';
+
+    // Welcome
+    document.getElementById('discord-welcome-enabled').checked = config.welcome_enabled !== 'false';
+    if (config.channel_welcome) document.getElementById('discord-channel-welcome').value = config.channel_welcome;
+
+    const welcomeMsg = parseJSON(config.msg_welcome, DISCORD_DEFAULTS.welcome);
+    document.getElementById('discord-welcome-title').value = welcomeMsg.title || DISCORD_DEFAULTS.welcome.title;
+    document.getElementById('discord-welcome-desc').value = welcomeMsg.description || DISCORD_DEFAULTS.welcome.description;
+    document.getElementById('discord-welcome-color').value = welcomeMsg.color || DISCORD_DEFAULTS.welcome.color;
+    document.getElementById('discord-welcome-footer').value = welcomeMsg.footer || DISCORD_DEFAULTS.welcome.footer;
+
+    // Leave
+    document.getElementById('discord-leave-enabled').checked = config.leave_enabled !== 'false';
+    const leaveMsg = parseJSON(config.msg_leave, DISCORD_DEFAULTS.leave);
+    document.getElementById('discord-leave-title').value = leaveMsg.title || DISCORD_DEFAULTS.leave.title;
+    document.getElementById('discord-leave-desc').value = leaveMsg.description || DISCORD_DEFAULTS.leave.description;
+    document.getElementById('discord-leave-color').value = leaveMsg.color || DISCORD_DEFAULTS.leave.color;
+
+    // Rules
+    if (config.channel_rules) document.getElementById('discord-channel-rules').value = config.channel_rules;
+    document.getElementById('discord-rules-emoji').value = config.rules_reaction_emoji || DISCORD_DEFAULTS.rulesEmoji;
+    if (config.role_autorole) document.getElementById('discord-role-autorole').value = config.role_autorole;
+
+    const rulesMsg = parseJSON(config.msg_rules, DISCORD_DEFAULTS.rules);
+    document.getElementById('discord-rules-title').value = rulesMsg.title || DISCORD_DEFAULTS.rules.title;
+    document.getElementById('discord-rules-color').value = rulesMsg.color || DISCORD_DEFAULTS.rules.color;
+    document.getElementById('discord-rules-footer').value = rulesMsg.footer || DISCORD_DEFAULTS.rules.footer;
+
+    // Support both flat rules and sections format
+    let rulesArray = [];
+    if (rulesMsg.sections && rulesMsg.sections.length > 0) {
+      // Convert sections to flat rules for display: "§Title — Rule"
+      rulesMsg.sections.forEach(section => {
+        (section.rules || []).forEach((rule, i) => {
+          const prefix = i === 0 ? section.title : section.title.split(' ')[0];
+          rulesArray.push(`${prefix} — ${rule}`);
+        });
+      });
+    } else if (rulesMsg.rules && rulesMsg.rules.length > 0) {
+      rulesArray = rulesMsg.rules;
+    } else {
+      rulesArray = DISCORD_DEFAULTS.rules.rules;
+    }
+    const rulesList = document.getElementById('discord-rules-list');
+    rulesList.innerHTML = '';
+    rulesArray.forEach(rule => {
+      addDiscordRuleItem(rule);
+    });
+
+    // Social
+    if (config.channel_social) document.getElementById('discord-channel-social').value = config.channel_social;
+    const socialMsg = parseJSON(config.msg_social, DISCORD_DEFAULTS.social);
+    document.getElementById('discord-social-title').value = socialMsg.title || DISCORD_DEFAULTS.social.title;
+    document.getElementById('discord-social-desc').value = socialMsg.description || DISCORD_DEFAULTS.social.description;
+    const socialList = document.getElementById('discord-social-list');
+    socialList.innerHTML = '';
+    const socialLinks = (socialMsg.links && socialMsg.links.length > 0) ? socialMsg.links : DISCORD_DEFAULTS.social.links;
+    socialLinks.forEach(link => {
+      addDiscordSocialLinkItem(link.emoji || '', link.name || '', link.url || '');
+    });
+
+    // Products
+    if (config.channel_products) document.getElementById('discord-channel-products').value = config.channel_products;
+    const products = parseJSON(config.msg_products, null);
+    const productList = (products && products.length > 0) ? products : DISCORD_DEFAULTS.products;
+    const productsList = document.getElementById('discord-products-list');
+    productsList.innerHTML = '';
+    productList.forEach(p => addDiscordProductItem(p));
+
+    // GitHub
+    if (config.channel_github) document.getElementById('discord-channel-github').value = config.channel_github;
+    if (config.github_webhook_secret) document.getElementById('discord-github-secret').value = config.github_webhook_secret;
+
+    // Tickets
+    if (config.channel_tickets) document.getElementById('discord-channel-tickets').value = config.channel_tickets;
+    if (config.role_support) document.getElementById('discord-role-support').value = config.role_support;
+    if (config.channel_ticket_logs) document.getElementById('discord-channel-ticket-logs').value = config.channel_ticket_logs;
+    document.getElementById('discord-ticket-welcome').value = config.ticket_welcome_msg || DISCORD_DEFAULTS.ticketWelcome;
+
+    const ticketCats = parseJSON(config.ticket_categories, null);
+    const ticketCatList = (ticketCats && ticketCats.length > 0) ? ticketCats : DISCORD_DEFAULTS.ticketCategories;
+    const ticketList = document.getElementById('discord-ticket-categories');
+    ticketList.innerHTML = '';
+    ticketCatList.forEach(cat => addDiscordTicketCategoryItem(cat));
+
+    // Moderation
+    if (config.channel_modlog) document.getElementById('discord-channel-modlog').value = config.channel_modlog;
+    document.getElementById('discord-modlog-enabled').checked = config.modlog_enabled !== 'false';
+    document.getElementById('discord-modlog-bans').checked = config.modlog_bans !== 'false';
+    document.getElementById('discord-modlog-timeouts').checked = config.modlog_timeouts !== 'false';
+    document.getElementById('discord-modlog-deletes').checked = config.modlog_message_delete !== 'false';
+    document.getElementById('discord-modlog-roles').checked = config.modlog_role_changes !== 'false';
+
+  } catch (e) {
+    console.error('Error loading discord config:', e);
+  }
+}
+
+async function loadDiscordStatus() {
+  try {
+    const status = await api('/admin/discord/status');
+    const indicator = document.getElementById('discord-status-indicator');
+    const statusText = document.getElementById('discord-status-text');
+    const toggleBtn = document.getElementById('discord-toggle-text');
+
+    if (status.connected) {
+      indicator.className = 'discord-status online';
+      statusText.textContent = 'Online';
+      toggleBtn.textContent = 'Bot stoppen';
+      document.getElementById('discord-stat-guild').textContent = status.guild?.name || '-';
+      document.getElementById('discord-stat-members').textContent = status.memberCount || 0;
+      document.getElementById('discord-stat-ping').textContent = `${status.ping || 0}ms`;
+      document.getElementById('discord-stat-uptime').textContent = formatUptime(status.uptime);
+    } else {
+      indicator.className = 'discord-status offline';
+      statusText.textContent = 'Offline';
+      toggleBtn.textContent = 'Bot starten';
+      document.getElementById('discord-stat-guild').textContent = '-';
+      document.getElementById('discord-stat-members').textContent = '0';
+      document.getElementById('discord-stat-ping').textContent = '0ms';
+      document.getElementById('discord-stat-uptime').textContent = '-';
+    }
+  } catch (e) {
+    console.error('Error loading discord status:', e);
+  }
+}
+
+function formatUptime(ms) {
+  if (!ms) return '-';
+  const seconds = Math.floor(ms / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+  if (days > 0) return `${days}d ${hours % 24}h`;
+  if (hours > 0) return `${hours}h ${minutes % 60}m`;
+  if (minutes > 0) return `${minutes}m`;
+  return `${seconds}s`;
+}
+
+async function toggleDiscordBot() {
+  try {
+    const status = await api('/admin/discord/status');
+    if (status.connected) {
+      await api('/admin/discord/disconnect', { method: 'POST' });
+      showToast('Bot gestoppt', 'success');
+    } else {
+      await api('/admin/discord/connect', { method: 'POST' });
+      showToast('Bot gestartet', 'success');
+    }
+    await loadDiscordStatus();
+  } catch (e) {
+    showToast(e.message, 'error');
+  }
+}
+
+async function resetDiscordDefaults() {
+  if (!confirm('Alle Discord-Nachrichten auf Standardwerte zurücksetzen? Channel-IDs und Token bleiben erhalten.')) return;
+  try {
+    await api('/admin/discord/reset-defaults', { method: 'POST' });
+    showToast('Standardwerte geladen! Seite wird neu geladen...', 'success');
+    setTimeout(() => loadDiscordConfig(), 500);
+  } catch (e) {
+    showToast(e.message, 'error');
+  }
+}
+
+async function saveDiscordConfig() {
+  try {
+    const config = {
+      guild_id: document.getElementById('discord-guild-id').value,
+      bot_enabled: document.getElementById('discord-bot-enabled').checked ? 'true' : 'false',
+    };
+
+    const token = document.getElementById('discord-bot-token').value;
+    if (token) config.bot_token = token;
+
+    await api('/admin/discord/config', { method: 'POST', body: config });
+    showToast('Einstellungen gespeichert', 'success');
+  } catch (e) {
+    showToast(e.message, 'error');
+  }
+}
+
+async function saveDiscordMessages() {
+  try {
+    const config = {
+      welcome_enabled: document.getElementById('discord-welcome-enabled').checked ? 'true' : 'false',
+      channel_welcome: document.getElementById('discord-channel-welcome').value,
+      msg_welcome: JSON.stringify({
+        title: document.getElementById('discord-welcome-title').value,
+        description: document.getElementById('discord-welcome-desc').value,
+        color: document.getElementById('discord-welcome-color').value,
+        footer: document.getElementById('discord-welcome-footer').value,
+      }),
+      leave_enabled: document.getElementById('discord-leave-enabled').checked ? 'true' : 'false',
+      msg_leave: JSON.stringify({
+        title: document.getElementById('discord-leave-title').value,
+        description: document.getElementById('discord-leave-desc').value,
+        color: document.getElementById('discord-leave-color').value,
+      }),
+      channel_rules: document.getElementById('discord-channel-rules').value,
+      rules_reaction_emoji: document.getElementById('discord-rules-emoji').value,
+      role_autorole: document.getElementById('discord-role-autorole').value,
+      msg_rules: JSON.stringify(buildRulesConfig()),
+      channel_social: document.getElementById('discord-channel-social').value,
+      msg_social: JSON.stringify({
+        title: document.getElementById('discord-social-title').value,
+        description: document.getElementById('discord-social-desc').value,
+        links: getDiscordSocialLinks(),
+      }),
+    };
+
+    await api('/admin/discord/config', { method: 'POST', body: config });
+    showToast('Nachrichten gespeichert', 'success');
+  } catch (e) {
+    showToast(e.message, 'error');
+  }
+}
+
+async function saveDiscordProducts() {
+  try {
+    const products = getDiscordProducts();
+    const config = {
+      channel_products: document.getElementById('discord-channel-products').value,
+      msg_products: JSON.stringify(products),
+    };
+    await api('/admin/discord/config', { method: 'POST', body: config });
+    showToast('Produkte gespeichert', 'success');
+  } catch (e) {
+    showToast(e.message, 'error');
+  }
+}
+
+async function saveDiscordGithub() {
+  try {
+    const config = {
+      channel_github: document.getElementById('discord-channel-github').value,
+      github_webhook_secret: document.getElementById('discord-github-secret').value,
+    };
+    await api('/admin/discord/config', { method: 'POST', body: config });
+    showToast('GitHub-Einstellungen gespeichert', 'success');
+  } catch (e) {
+    showToast(e.message, 'error');
+  }
+}
+
+async function saveDiscordTickets() {
+  try {
+    const config = {
+      channel_tickets: document.getElementById('discord-channel-tickets').value,
+      role_support: document.getElementById('discord-role-support').value,
+      channel_ticket_logs: document.getElementById('discord-channel-ticket-logs').value,
+      ticket_welcome_msg: document.getElementById('discord-ticket-welcome').value,
+      ticket_categories: JSON.stringify(getDiscordTicketCategories()),
+    };
+    await api('/admin/discord/config', { method: 'POST', body: config });
+    showToast('Ticket-Einstellungen gespeichert', 'success');
+  } catch (e) {
+    showToast(e.message, 'error');
+  }
+}
+
+async function saveDiscordModeration() {
+  try {
+    const config = {
+      channel_modlog: document.getElementById('discord-channel-modlog').value,
+      modlog_enabled: document.getElementById('discord-modlog-enabled').checked ? 'true' : 'false',
+      modlog_bans: document.getElementById('discord-modlog-bans').checked ? 'true' : 'false',
+      modlog_timeouts: document.getElementById('discord-modlog-timeouts').checked ? 'true' : 'false',
+      modlog_message_delete: document.getElementById('discord-modlog-deletes').checked ? 'true' : 'false',
+      modlog_role_changes: document.getElementById('discord-modlog-roles').checked ? 'true' : 'false',
+    };
+    await api('/admin/discord/config', { method: 'POST', body: config });
+    showToast('Moderation-Einstellungen gespeichert', 'success');
+  } catch (e) {
+    showToast(e.message, 'error');
+  }
+}
+
+// ── Discord Send Actions ────────────────────────────────────────
+
+async function sendDiscordWelcomeTest() {
+  try {
+    await saveDiscordMessages();
+    await api('/admin/discord/send-welcome-test', { method: 'POST' });
+    showToast('Test-Willkommensnachricht gesendet', 'success');
+  } catch (e) {
+    showToast(e.message, 'error');
+  }
+}
+
+async function sendDiscordRules() {
+  try {
+    await saveDiscordMessages();
+    await api('/admin/discord/send-rules', { method: 'POST' });
+    showToast('Regeln gepostet', 'success');
+  } catch (e) {
+    showToast(e.message, 'error');
+  }
+}
+
+async function sendDiscordSocial() {
+  try {
+    await saveDiscordMessages();
+    await api('/admin/discord/send-social', { method: 'POST' });
+    showToast('Social Links gepostet', 'success');
+  } catch (e) {
+    showToast(e.message, 'error');
+  }
+}
+
+async function sendDiscordProducts() {
+  try {
+    await saveDiscordProducts();
+    const channelId = document.getElementById('discord-channel-products').value;
+    if (!channelId) return showToast('Bitte Channel-ID eintragen', 'error');
+    await api('/admin/discord/send-products', { method: 'POST', body: { channelId } });
+    showToast('Produkte gepostet', 'success');
+  } catch (e) {
+    showToast(e.message, 'error');
+  }
+}
+
+async function sendDiscordTicketPanel() {
+  try {
+    await saveDiscordTickets();
+    const channelId = document.getElementById('discord-channel-tickets').value;
+    if (!channelId) return showToast('Bitte Ticket-Kategorie ID eintragen', 'error');
+
+    // Ticket panel needs a text channel, not a category
+    const panelChannel = prompt('Gib die Channel-ID ein, in der das Ticket-Panel gepostet werden soll:');
+    if (!panelChannel) return;
+
+    await api('/admin/discord/send-ticket-panel', { method: 'POST', body: { channelId: panelChannel } });
+    showToast('Ticket-Panel gepostet', 'success');
+  } catch (e) {
+    showToast(e.message, 'error');
+  }
+}
+
+// ── Discord Dynamic Lists ───────────────────────────────────────
+
+function addDiscordRule() {
+  addDiscordRuleItem('');
+}
+
+function addDiscordRuleItem(text) {
+  const list = document.getElementById('discord-rules-list');
+  const item = document.createElement('div');
+  item.className = 'discord-dynamic-item';
+  item.innerHTML = `
+    <div class="form-group">
+      <input type="text" class="discord-rule-input" value="${escapeHtml(text)}" placeholder="Neue Regel...">
+    </div>
+    <button class="btn-icon danger" onclick="this.closest('.discord-dynamic-item').remove()"><i class="fas fa-trash"></i></button>
+  `;
+  list.appendChild(item);
+}
+
+function getDiscordRules() {
+  return Array.from(document.querySelectorAll('.discord-rule-input'))
+    .map(input => input.value.trim())
+    .filter(v => v);
+}
+
+// Convert flat rules list ("§X Title — Rule") back to sections format for the bot
+function buildRulesConfig() {
+  const flatRules = getDiscordRules();
+  const title = document.getElementById('discord-rules-title').value;
+  const color = document.getElementById('discord-rules-color').value;
+  const footer = document.getElementById('discord-rules-footer').value;
+
+  // Try to group rules into sections by §-prefix
+  const sections = [];
+  let currentSection = null;
+
+  for (const rule of flatRules) {
+    // Match patterns like "§1 Title — Rule" or "§1 — Rule"
+    const sectionMatch = rule.match(/^(§\d+)\s+(.*?)\s*—\s*(.*)$/);
+    if (sectionMatch) {
+      const sectionId = sectionMatch[1]; // e.g. "§1"
+      const sectionTitle = sectionMatch[2]; // e.g. "Allgemeines" or ""
+      const ruleText = sectionMatch[3];
+
+      // Check if this is a new section (has a title beyond just §X)
+      const fullTitle = sectionTitle ? `${sectionId} ${sectionTitle}` : sectionId;
+
+      if (!currentSection || (sectionTitle && !currentSection.title.startsWith(fullTitle))) {
+        // New section with a proper title
+        currentSection = { title: fullTitle, rules: [] };
+        sections.push(currentSection);
+      }
+      currentSection.rules.push(ruleText);
+    } else {
+      // No §-prefix — add as standalone rule to a generic section
+      if (!currentSection) {
+        currentSection = { title: 'Regeln', rules: [] };
+        sections.push(currentSection);
+      }
+      currentSection.rules.push(rule);
+    }
+  }
+
+  // If we successfully parsed sections, save in sections format
+  if (sections.length > 0 && sections.some(s => s.title.startsWith('§'))) {
+    return { title, sections, color, footer };
+  }
+
+  // Fallback: save as flat rules
+  return { title, rules: flatRules, color, footer };
+}
+
+function addDiscordSocialLink() {
+  addDiscordSocialLinkItem('', '', '');
+}
+
+function addDiscordSocialLinkItem(emoji, name, url) {
+  const list = document.getElementById('discord-social-list');
+  const item = document.createElement('div');
+  item.className = 'discord-dynamic-item';
+  item.innerHTML = `
+    <div class="form-group" style="flex: 0 0 60px;">
+      <label>Emoji</label>
+      <input type="text" class="discord-social-emoji" value="${escapeHtml(emoji)}" placeholder="🔗" style="text-align: center;">
+    </div>
+    <div class="form-group">
+      <label>Name</label>
+      <input type="text" class="discord-social-name" value="${escapeHtml(name)}" placeholder="z.B. GitHub">
+    </div>
+    <div class="form-group">
+      <label>URL</label>
+      <input type="text" class="discord-social-url" value="${escapeHtml(url)}" placeholder="https://...">
+    </div>
+    <button class="btn-icon danger" onclick="this.closest('.discord-dynamic-item').remove()" style="align-self: flex-end;"><i class="fas fa-trash"></i></button>
+  `;
+  list.appendChild(item);
+}
+
+function getDiscordSocialLinks() {
+  const items = document.querySelectorAll('#discord-social-list .discord-dynamic-item');
+  return Array.from(items).map(item => ({
+    emoji: item.querySelector('.discord-social-emoji')?.value || '',
+    name: item.querySelector('.discord-social-name')?.value || '',
+    url: item.querySelector('.discord-social-url')?.value || '',
+  })).filter(l => l.name && l.url);
+}
+
+function addDiscordProduct() {
+  addDiscordProductItem({});
+}
+
+function addDiscordProductItem(p) {
+  const list = document.getElementById('discord-products-list');
+  const item = document.createElement('div');
+  item.className = 'discord-dynamic-item';
+  item.style.flexDirection = 'column';
+  item.innerHTML = `
+    <div style="display: flex; gap: 12px; width: 100%; flex-wrap: wrap;">
+      <div class="form-group" style="flex: 0 0 60px;">
+        <label>Emoji</label>
+        <input type="text" class="discord-product-emoji" value="${escapeHtml(p.emoji || '')}" placeholder="💻" style="text-align: center;">
+      </div>
+      <div class="form-group" style="flex: 2;">
+        <label>Name</label>
+        <input type="text" class="discord-product-name" value="${escapeHtml(p.name || '')}" placeholder="z.B. Webdesign">
+      </div>
+      <div class="form-group" style="flex: 1;">
+        <label>Preis</label>
+        <input type="text" class="discord-product-price" value="${escapeHtml(p.price || '')}" placeholder="z.B. ab 499€">
+      </div>
+      <div class="form-group" style="flex: 0 0 70px;">
+        <label>Farbe</label>
+        <input type="color" class="discord-product-color" value="${p.color || '#00ff88'}">
+      </div>
+      <button class="btn-icon danger" onclick="this.closest('.discord-dynamic-item').remove()" style="align-self: flex-end;"><i class="fas fa-trash"></i></button>
+    </div>
+    <div class="form-group" style="width: 100%;">
+      <label>Beschreibung</label>
+      <textarea class="discord-product-desc" rows="2" placeholder="Beschreibung des Produkts">${escapeHtml(p.description || '')}</textarea>
+    </div>
+    <div class="form-group" style="width: 100%;">
+      <label>Features (eine pro Zeile)</label>
+      <textarea class="discord-product-features" rows="2" placeholder="Feature 1\nFeature 2">${escapeHtml(p.features || '')}</textarea>
+    </div>
+  `;
+  list.appendChild(item);
+}
+
+function getDiscordProducts() {
+  const items = document.querySelectorAll('#discord-products-list .discord-dynamic-item');
+  return Array.from(items).map(item => ({
+    emoji: item.querySelector('.discord-product-emoji')?.value || '',
+    name: item.querySelector('.discord-product-name')?.value || '',
+    price: item.querySelector('.discord-product-price')?.value || '',
+    color: item.querySelector('.discord-product-color')?.value || '#00ff88',
+    description: item.querySelector('.discord-product-desc')?.value || '',
+    features: item.querySelector('.discord-product-features')?.value || '',
+  })).filter(p => p.name);
+}
+
+function addDiscordTicketCategory() {
+  addDiscordTicketCategoryItem({});
+}
+
+function addDiscordTicketCategoryItem(cat) {
+  const list = document.getElementById('discord-ticket-categories');
+  const item = document.createElement('div');
+  item.className = 'discord-dynamic-item';
+  item.innerHTML = `
+    <div class="form-group" style="flex: 0 0 60px;">
+      <label>Emoji</label>
+      <input type="text" class="discord-ticket-emoji" value="${escapeHtml(cat.emoji || '')}" placeholder="❓" style="text-align: center;">
+    </div>
+    <div class="form-group" style="flex: 1;">
+      <label>Name</label>
+      <input type="text" class="discord-ticket-name" value="${escapeHtml(cat.name || '')}" placeholder="z.B. Frage">
+    </div>
+    <div class="form-group" style="flex: 2;">
+      <label>Beschreibung</label>
+      <input type="text" class="discord-ticket-desc" value="${escapeHtml(cat.description || '')}" placeholder="Kurze Beschreibung">
+    </div>
+    <button class="btn-icon danger" onclick="this.closest('.discord-dynamic-item').remove()" style="align-self: flex-end;"><i class="fas fa-trash"></i></button>
+  `;
+  list.appendChild(item);
+}
+
+function getDiscordTicketCategories() {
+  const items = document.querySelectorAll('#discord-ticket-categories .discord-dynamic-item');
+  return Array.from(items).map(item => ({
+    emoji: item.querySelector('.discord-ticket-emoji')?.value || '',
+    name: item.querySelector('.discord-ticket-name')?.value || '',
+    description: item.querySelector('.discord-ticket-desc')?.value || '',
+  })).filter(c => c.name);
+}
+
+// ── Discord Logs ────────────────────────────────────────────────
+
+async function loadDiscordLogs() {
+  try {
+    const filter = document.getElementById('discord-log-filter')?.value || '';
+    const url = filter ? `/admin/discord/logs?type=${filter}&limit=100` : '/admin/discord/logs?limit=100';
+    const logs = await api(url);
+    const tbody = document.getElementById('discord-logs-body');
+
+    if (!logs.length) {
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 40px;">Keine Logs vorhanden</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = logs.map(log => {
+      let details = '';
+      try {
+        const d = JSON.parse(log.details || '{}');
+        details = Object.entries(d).map(([k, v]) => `${k}: ${v}`).join(', ');
+      } catch (e) { details = log.details || ''; }
+
+      const date = new Date(log.created_at + 'Z');
+      const dateStr = date.toLocaleDateString('de-DE') + ' ' + date.toLocaleTimeString('de-DE');
+
+      return `<tr>
+        <td><span class="discord-log-type ${log.type}">${log.type}</span></td>
+        <td>${escapeHtml(details)}</td>
+        <td>${log.user_id || '-'}</td>
+        <td>${dateStr}</td>
+      </tr>`;
+    }).join('');
+  } catch (e) {
+    console.error('Error loading discord logs:', e);
+  }
+}
+
+async function clearDiscordLogs() {
+  if (!confirm('Alle Discord-Logs wirklich loeschen?')) return;
+  try {
+    await api('/admin/discord/logs', { method: 'DELETE' });
+    showToast('Logs geleert', 'success');
+    loadDiscordLogs();
+  } catch (e) {
+    showToast(e.message, 'error');
+  }
+}
+
+// ── Discord Helpers ─────────────────────────────────────────────
+
+function copyDiscordWebhookUrl() {
+  const input = document.getElementById('discord-webhook-url');
+  navigator.clipboard.writeText(input.value).then(() => {
+    showToast('Webhook-URL kopiert', 'success');
+  });
+}
+
+function generateDiscordWebhookSecret() {
+  const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let secret = '';
+  for (let i = 0; i < 32; i++) {
+    secret += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  document.getElementById('discord-github-secret').value = secret;
+}
+
+function parseJSON(str, fallback) {
+  if (!str) return fallback;
+  try { return JSON.parse(str); } catch (e) { return fallback; }
+}

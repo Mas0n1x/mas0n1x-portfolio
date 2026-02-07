@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="css/admin.css">
+  <link rel="stylesheet" href="css/admin.css?v=2">
 </head>
 <body>
   <!-- Login Screen -->
@@ -41,6 +41,7 @@
         <span>Admin Panel</span>
       </div>
       <nav class="sidebar-nav">
+        <div class="nav-category">Übersicht</div>
         <a href="#" class="nav-item active" data-section="dashboard">
           <i class="fas fa-tachometer-alt"></i> Dashboard
         </a>
@@ -50,39 +51,38 @@
         <a href="#" class="nav-item" data-section="customers">
           <i class="fas fa-users"></i> Kunden
         </a>
+
+        <div class="nav-category">Inhalte</div>
         <a href="#" class="nav-item" data-section="projects">
           <i class="fas fa-folder-open"></i> Projekte
         </a>
         <a href="#" class="nav-item" data-section="services">
           <i class="fas fa-cogs"></i> Services
         </a>
-        <a href="#" class="nav-item" data-section="invoices">
-          <i class="fas fa-file-invoice-dollar"></i> Rechnungen
-        </a>
-        <a href="#" class="nav-item" data-section="calendar">
-          <i class="fas fa-calendar-alt"></i> Kalender
-        </a>
         <a href="#" class="nav-item" data-section="reviews">
           <i class="fas fa-star"></i> Bewertungen
-        </a>
-        <a href="#" class="nav-item" data-section="analytics">
-          <i class="fas fa-chart-bar"></i> Analytics
         </a>
         <a href="#" class="nav-item" data-section="faqs">
           <i class="fas fa-question-circle"></i> FAQs
         </a>
-        <a href="#" class="nav-item" data-section="appointments">
-          <i class="fas fa-calendar-check"></i> Termine
+
+        <div class="nav-category">Finanzen</div>
+        <a href="#" class="nav-item" data-section="invoices">
+          <i class="fas fa-file-invoice-dollar"></i> Rechnungen
+        </a>
+
+        <div class="nav-category">Tools</div>
+        <a href="#" class="nav-item" data-section="discord">
+          <i class="fab fa-discord"></i> Discord-Bot
         </a>
         <a href="#" class="nav-item" data-section="templates">
           <i class="fas fa-file-alt"></i> Vorlagen
         </a>
-        <a href="#" class="nav-item" data-section="contracts">
-          <i class="fas fa-file-signature"></i> Verträge
-        </a>
         <a href="#" class="nav-item" data-section="backups">
           <i class="fas fa-database"></i> Backups
         </a>
+
+        <div class="nav-category">System</div>
         <a href="#" class="nav-item" data-section="legal">
           <i class="fas fa-gavel"></i> Rechtliches
         </a>
@@ -1005,6 +1005,354 @@
         </div>
       </section>
 
+      <!-- Discord Bot Section -->
+      <section id="section-discord" class="content-section">
+        <div class="section-header">
+          <h1><i class="fab fa-discord"></i> Discord-Bot</h1>
+          <div class="header-actions" style="display:flex;align-items:center;gap:12px;">
+            <span id="discord-status-indicator" class="discord-status offline">
+              <i class="fas fa-circle"></i> <span id="discord-status-text">Offline</span>
+            </span>
+            <button class="btn-primary" onclick="toggleDiscordBot()">
+              <i class="fas fa-power-off"></i> <span id="discord-toggle-text">Bot starten</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Status -->
+        <div class="dashboard-stats" style="margin-bottom:24px;">
+          <div class="stat-card primary"><div class="stat-value" id="discord-stat-guild">-</div><div class="stat-label">Server</div></div>
+          <div class="stat-card success"><div class="stat-value" id="discord-stat-members">0</div><div class="stat-label">Mitglieder</div></div>
+          <div class="stat-card info"><div class="stat-value" id="discord-stat-ping">0ms</div><div class="stat-label">Ping</div></div>
+          <div class="stat-card warning"><div class="stat-value" id="discord-stat-uptime">-</div><div class="stat-label">Uptime</div></div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="discord-tabs">
+          <button class="discord-tab active" data-discord-tab="general"><i class="fas fa-cog"></i> Allgemein</button>
+          <button class="discord-tab" data-discord-tab="welcome"><i class="fas fa-door-open"></i> Welcome/Leave</button>
+          <button class="discord-tab" data-discord-tab="rules"><i class="fas fa-scroll"></i> Regeln</button>
+          <button class="discord-tab" data-discord-tab="products"><i class="fas fa-box"></i> Produkte</button>
+          <button class="discord-tab" data-discord-tab="social"><i class="fas fa-share-alt"></i> Social</button>
+          <button class="discord-tab" data-discord-tab="github"><i class="fab fa-github"></i> GitHub</button>
+          <button class="discord-tab" data-discord-tab="tickets"><i class="fas fa-ticket-alt"></i> Tickets</button>
+          <button class="discord-tab" data-discord-tab="moderation"><i class="fas fa-shield-alt"></i> Moderation</button>
+          <button class="discord-tab" data-discord-tab="logs"><i class="fas fa-list"></i> Logs</button>
+        </div>
+
+        <!-- ═══ Tab: Allgemein ═══ -->
+        <div id="discord-tab-general" class="discord-tab-content active">
+          <div class="discord-config-card">
+            <h3><i class="fas fa-key"></i> Bot-Konfiguration</h3>
+            <div class="discord-info-box">
+              <i class="fas fa-info-circle"></i> Der Bot-Token wird via Environment-Variable <code>DISCORD_BOT_TOKEN</code> geladen. Alternativ hier eingeben (ENV hat Vorrang).
+            </div>
+            <div class="form-row" style="display:flex;gap:16px;flex-wrap:wrap;">
+              <div class="form-group" style="flex:2;min-width:250px;">
+                <label>Bot Token</label>
+                <div style="display:flex;gap:8px;">
+                  <input type="password" id="discord-bot-token" placeholder="Token eingeben oder via ENV">
+                  <button type="button" class="btn-icon" onclick="var e=document.getElementById('discord-bot-token');e.type=e.type==='password'?'text':'password'"><i class="fas fa-eye"></i></button>
+                </div>
+              </div>
+              <div class="form-group" style="flex:1;min-width:200px;">
+                <label>Server (Guild) ID</label>
+                <input type="text" id="discord-guild-id" placeholder="z.B. 123456789012345">
+              </div>
+            </div>
+            <div class="discord-toggle-row">
+              <label>Bot automatisch starten</label>
+              <label class="toggle-switch"><input type="checkbox" id="discord-bot-enabled"><span class="toggle-slider"></span></label>
+            </div>
+            <div class="discord-actions">
+              <button class="btn-primary" onclick="saveDiscordConfig()"><i class="fas fa-save"></i> Speichern</button>
+            </div>
+          </div>
+          <div class="discord-config-card" style="margin-top:16px;">
+            <h3><i class="fas fa-undo"></i> Standardwerte laden</h3>
+            <div class="discord-info-box">
+              <i class="fas fa-info-circle"></i> Setzt alle Nachrichten (Welcome, Leave, Regeln, Produkte, Social, Tickets) auf die vordefinierten Standardwerte zurück. Channel-IDs und Token werden nicht verändert.
+            </div>
+            <div class="discord-actions">
+              <button class="btn-warning" onclick="resetDiscordDefaults()"><i class="fas fa-undo"></i> Alle Nachrichten auf Standardwerte zurücksetzen</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ Tab: Welcome / Leave ═══ -->
+        <div id="discord-tab-welcome" class="discord-tab-content">
+          <div class="discord-config-card">
+            <h3><i class="fas fa-hashtag"></i> Channel</h3>
+            <div class="form-group">
+              <label>Welcome/Leave Channel ID</label>
+              <input type="text" id="discord-channel-welcome" placeholder="Channel-ID">
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+            <div class="discord-config-card">
+              <h3><i class="fas fa-door-open"></i> Willkommen</h3>
+              <div class="discord-toggle-row">
+                <label>Aktiviert</label>
+                <label class="toggle-switch"><input type="checkbox" id="discord-welcome-enabled" checked><span class="toggle-slider"></span></label>
+              </div>
+              <div class="form-group">
+                <label>Titel</label>
+                <input type="text" id="discord-welcome-title" value="Willkommen!">
+              </div>
+              <div class="form-group">
+                <label>Text <small style="color:var(--text-muted)">({user} {username} {server} {memberCount})</small></label>
+                <textarea id="discord-welcome-desc" rows="3">Willkommen auf dem Server, {user}! Du bist Mitglied #{memberCount}.</textarea>
+              </div>
+              <div style="display:flex;gap:12px;align-items:flex-end;">
+                <div class="form-group" style="flex:1;"><label>Farbe</label><input type="color" id="discord-welcome-color" value="#00ff88" style="width:100%;height:38px;"></div>
+                <div class="form-group" style="flex:3;"><label>Footer</label><input type="text" id="discord-welcome-footer" value="Mitglied #{memberCount}"></div>
+              </div>
+              <div class="discord-actions">
+                <button class="btn-primary" onclick="saveDiscordMessages()"><i class="fas fa-save"></i> Speichern</button>
+                <button class="btn-secondary" onclick="sendDiscordWelcomeTest()"><i class="fas fa-paper-plane"></i> Test</button>
+              </div>
+            </div>
+            <div class="discord-config-card">
+              <h3><i class="fas fa-door-closed"></i> Abschied</h3>
+              <div class="discord-toggle-row">
+                <label>Aktiviert</label>
+                <label class="toggle-switch"><input type="checkbox" id="discord-leave-enabled" checked><span class="toggle-slider"></span></label>
+              </div>
+              <div class="form-group">
+                <label>Titel</label>
+                <input type="text" id="discord-leave-title" value="Auf Wiedersehen!">
+              </div>
+              <div class="form-group">
+                <label>Text <small style="color:var(--text-muted)">({user} {username} {server} {memberCount})</small></label>
+                <textarea id="discord-leave-desc" rows="3">{username} hat den Server verlassen.</textarea>
+              </div>
+              <div class="form-group">
+                <label>Farbe</label>
+                <input type="color" id="discord-leave-color" value="#ff4444" style="width:100%;height:38px;">
+              </div>
+              <div class="discord-actions">
+                <button class="btn-primary" onclick="saveDiscordMessages()"><i class="fas fa-save"></i> Speichern</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ Tab: Regeln ═══ -->
+        <div id="discord-tab-rules" class="discord-tab-content">
+          <div class="discord-config-card">
+            <h3><i class="fas fa-scroll"></i> Serverregeln & Auto-Rolle</h3>
+            <div class="form-row" style="display:flex;gap:16px;flex-wrap:wrap;">
+              <div class="form-group" style="flex:1;min-width:200px;">
+                <label>Regeln Channel ID</label>
+                <input type="text" id="discord-channel-rules" placeholder="Channel-ID">
+              </div>
+              <div class="form-group" style="flex:1;min-width:200px;">
+                <label>Auto-Rolle ID</label>
+                <input type="text" id="discord-role-autorole" value="1412684258631356416">
+              </div>
+              <div class="form-group" style="flex:0 0 80px;">
+                <label>Emoji</label>
+                <input type="text" id="discord-rules-emoji" value="✅" style="text-align:center;">
+              </div>
+            </div>
+            <div class="form-row" style="display:flex;gap:16px;flex-wrap:wrap;">
+              <div class="form-group" style="flex:2;min-width:200px;">
+                <label>Titel</label>
+                <input type="text" id="discord-rules-title" value="Serverregeln">
+              </div>
+              <div class="form-group" style="flex:0 0 80px;">
+                <label>Farbe</label>
+                <input type="color" id="discord-rules-color" value="#00ff88" style="width:100%;height:38px;">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Footer</label>
+              <input type="text" id="discord-rules-footer" value="Reagiere um die Regeln zu akzeptieren und Zugang zu erhalten!">
+            </div>
+            <div class="form-group">
+              <label>Regeln</label>
+              <div id="discord-rules-list" class="discord-dynamic-list">
+                <div class="discord-dynamic-item"><div class="form-group"><input type="text" class="discord-rule-input" value="Sei respektvoll gegenueber anderen Mitgliedern."></div><button class="btn-icon danger" onclick="this.closest('.discord-dynamic-item').remove()"><i class="fas fa-trash"></i></button></div>
+                <div class="discord-dynamic-item"><div class="form-group"><input type="text" class="discord-rule-input" value="Kein Spam oder Werbung."></div><button class="btn-icon danger" onclick="this.closest('.discord-dynamic-item').remove()"><i class="fas fa-trash"></i></button></div>
+                <div class="discord-dynamic-item"><div class="form-group"><input type="text" class="discord-rule-input" value="Kein NSFW-Content."></div><button class="btn-icon danger" onclick="this.closest('.discord-dynamic-item').remove()"><i class="fas fa-trash"></i></button></div>
+              </div>
+              <button class="btn-secondary" onclick="addDiscordRule()"><i class="fas fa-plus"></i> Regel hinzufuegen</button>
+            </div>
+            <div class="discord-actions">
+              <button class="btn-primary" onclick="saveDiscordMessages()"><i class="fas fa-save"></i> Speichern</button>
+              <button class="btn-secondary" onclick="sendDiscordRules()"><i class="fas fa-paper-plane"></i> Regeln posten</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ Tab: Produkte ═══ -->
+        <div id="discord-tab-products" class="discord-tab-content">
+          <div class="discord-config-card">
+            <h3><i class="fas fa-box"></i> Produkt-Embeds</h3>
+            <div class="form-group">
+              <label>Produkte Channel ID</label>
+              <input type="text" id="discord-channel-products" placeholder="Channel-ID">
+            </div>
+            <div class="form-group">
+              <label>Produkte</label>
+              <div id="discord-products-list" class="discord-dynamic-list"></div>
+              <button class="btn-secondary" onclick="addDiscordProduct()"><i class="fas fa-plus"></i> Produkt hinzufuegen</button>
+            </div>
+            <div class="discord-actions">
+              <button class="btn-primary" onclick="saveDiscordProducts()"><i class="fas fa-save"></i> Speichern</button>
+              <button class="btn-secondary" onclick="sendDiscordProducts()"><i class="fas fa-paper-plane"></i> Alle posten</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ Tab: Social ═══ -->
+        <div id="discord-tab-social" class="discord-tab-content">
+          <div class="discord-config-card">
+            <h3><i class="fas fa-share-alt"></i> Social Links Embed</h3>
+            <div class="form-group">
+              <label>Social Channel ID</label>
+              <input type="text" id="discord-channel-social" placeholder="Channel-ID">
+            </div>
+            <div class="form-row" style="display:flex;gap:16px;flex-wrap:wrap;">
+              <div class="form-group" style="flex:1;min-width:200px;">
+                <label>Titel</label>
+                <input type="text" id="discord-social-title" value="Social Links">
+              </div>
+              <div class="form-group" style="flex:2;min-width:200px;">
+                <label>Beschreibung</label>
+                <input type="text" id="discord-social-desc" value="Folge mir auf meinen Social-Media-Kanaelen!">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Links</label>
+              <div id="discord-social-list" class="discord-dynamic-list"></div>
+              <button class="btn-secondary" onclick="addDiscordSocialLink()"><i class="fas fa-plus"></i> Link hinzufuegen</button>
+            </div>
+            <div class="discord-actions">
+              <button class="btn-primary" onclick="saveDiscordMessages()"><i class="fas fa-save"></i> Speichern</button>
+              <button class="btn-secondary" onclick="sendDiscordSocial()"><i class="fas fa-paper-plane"></i> Posten</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ Tab: GitHub ═══ -->
+        <div id="discord-tab-github" class="discord-tab-content">
+          <div class="discord-config-card">
+            <h3><i class="fab fa-github"></i> GitHub Webhook</h3>
+            <div class="discord-info-box">
+              <i class="fas fa-info-circle"></i> <strong>Setup:</strong> GitHub Repo &rarr; Settings &rarr; Webhooks &rarr; Add webhook. Payload URL und Secret von unten eintragen, Content-Type: <code>application/json</code>
+            </div>
+            <div class="form-group">
+              <label>Webhook URL</label>
+              <div style="display:flex;gap:8px;">
+                <input type="text" id="discord-webhook-url" readonly style="flex:1;font-family:'JetBrains Mono',monospace;font-size:0.85rem;">
+                <button class="btn-secondary" onclick="copyDiscordWebhookUrl()"><i class="fas fa-copy"></i></button>
+              </div>
+            </div>
+            <div class="form-row" style="display:flex;gap:16px;flex-wrap:wrap;">
+              <div class="form-group" style="flex:1;min-width:200px;">
+                <label>Webhook Secret</label>
+                <div style="display:flex;gap:8px;">
+                  <input type="text" id="discord-github-secret" placeholder="Optional">
+                  <button class="btn-secondary" onclick="generateDiscordWebhookSecret()"><i class="fas fa-random"></i></button>
+                </div>
+              </div>
+              <div class="form-group" style="flex:1;min-width:200px;">
+                <label>GitHub Channel ID</label>
+                <input type="text" id="discord-channel-github" placeholder="Channel-ID">
+              </div>
+            </div>
+            <div class="discord-actions">
+              <button class="btn-primary" onclick="saveDiscordGithub()"><i class="fas fa-save"></i> Speichern</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ Tab: Tickets ═══ -->
+        <div id="discord-tab-tickets" class="discord-tab-content">
+          <div class="discord-config-card">
+            <h3><i class="fas fa-ticket-alt"></i> Ticket-System</h3>
+            <div class="discord-info-box">
+              <i class="fas fa-info-circle"></i> Tickets werden komplett in Discord verwaltet. Nutzer erstellen Tickets per Button, Support-Team bearbeitet direkt im Channel.
+            </div>
+            <div class="form-row" style="display:flex;gap:16px;flex-wrap:wrap;">
+              <div class="form-group" style="flex:1;min-width:200px;">
+                <label>Ticket-Kategorie ID (Category)</label>
+                <input type="text" id="discord-channel-tickets" placeholder="Category-ID">
+              </div>
+              <div class="form-group" style="flex:1;min-width:200px;">
+                <label>Support-Rolle ID</label>
+                <input type="text" id="discord-role-support" placeholder="Rollen-ID">
+              </div>
+              <div class="form-group" style="flex:1;min-width:200px;">
+                <label>Ticket-Log Channel ID</label>
+                <input type="text" id="discord-channel-ticket-logs" placeholder="Channel-ID">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Willkommensnachricht im Ticket</label>
+              <textarea id="discord-ticket-welcome" rows="2">Beschreibe dein Anliegen. Ein Teammitglied wird sich so schnell wie moeglich bei dir melden.</textarea>
+            </div>
+            <div class="form-group">
+              <label>Kategorien</label>
+              <div id="discord-ticket-categories" class="discord-dynamic-list"></div>
+              <button class="btn-secondary" onclick="addDiscordTicketCategory()"><i class="fas fa-plus"></i> Kategorie hinzufuegen</button>
+            </div>
+            <div class="discord-actions">
+              <button class="btn-primary" onclick="saveDiscordTickets()"><i class="fas fa-save"></i> Speichern</button>
+              <button class="btn-secondary" onclick="sendDiscordTicketPanel()"><i class="fas fa-paper-plane"></i> Ticket-Panel posten</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ Tab: Moderation ═══ -->
+        <div id="discord-tab-moderation" class="discord-tab-content">
+          <div class="discord-config-card">
+            <h3><i class="fas fa-shield-alt"></i> Moderation Logs</h3>
+            <div class="form-group">
+              <label>Mod-Log Channel ID</label>
+              <input type="text" id="discord-channel-modlog" placeholder="Channel-ID">
+            </div>
+            <div class="discord-toggle-row"><label>Mod-Logs aktiviert</label><label class="toggle-switch"><input type="checkbox" id="discord-modlog-enabled" checked><span class="toggle-slider"></span></label></div>
+            <div class="discord-toggle-row"><label><i class="fas fa-ban"></i> Bans / Unbans</label><label class="toggle-switch"><input type="checkbox" id="discord-modlog-bans" checked><span class="toggle-slider"></span></label></div>
+            <div class="discord-toggle-row"><label><i class="fas fa-clock"></i> Timeouts</label><label class="toggle-switch"><input type="checkbox" id="discord-modlog-timeouts" checked><span class="toggle-slider"></span></label></div>
+            <div class="discord-toggle-row"><label><i class="fas fa-trash"></i> Nachricht geloescht</label><label class="toggle-switch"><input type="checkbox" id="discord-modlog-deletes" checked><span class="toggle-slider"></span></label></div>
+            <div class="discord-toggle-row"><label><i class="fas fa-user-tag"></i> Rollenaenderungen</label><label class="toggle-switch"><input type="checkbox" id="discord-modlog-roles" checked><span class="toggle-slider"></span></label></div>
+            <div class="discord-actions">
+              <button class="btn-primary" onclick="saveDiscordModeration()"><i class="fas fa-save"></i> Speichern</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ Tab: Logs ═══ -->
+        <div id="discord-tab-logs" class="discord-tab-content">
+          <div class="discord-config-card">
+            <h3><i class="fas fa-list"></i> Bot-Aktivitaeten</h3>
+            <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
+              <select id="discord-log-filter" onchange="loadDiscordLogs()">
+                <option value="">Alle</option>
+                <option value="welcome">Welcome</option>
+                <option value="leave">Leave</option>
+                <option value="github">GitHub</option>
+                <option value="ticket">Ticket</option>
+                <option value="modlog">Mod-Log</option>
+                <option value="system">System</option>
+              </select>
+              <button class="btn-secondary" onclick="loadDiscordLogs()"><i class="fas fa-sync"></i> Aktualisieren</button>
+              <button class="btn-danger" onclick="clearDiscordLogs()"><i class="fas fa-trash"></i> Leeren</button>
+            </div>
+            <div style="overflow-x:auto;">
+              <table class="discord-logs-table">
+                <thead><tr><th>Typ</th><th>Details</th><th>User</th><th>Zeitpunkt</th></tr></thead>
+                <tbody id="discord-logs-body">
+                  <tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:40px;">Keine Logs vorhanden</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- Legal Section -->
       <section id="section-legal" class="content-section">
         <div class="section-header">
@@ -1750,6 +2098,6 @@
   <!-- Toast Notifications -->
   <div id="toast-container" class="toast-container"></div>
 
-  <script src="js/admin.js"></script>
+  <script src="js/admin.js?v=2"></script>
 </body>
 </html>

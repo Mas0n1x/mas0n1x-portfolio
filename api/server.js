@@ -6,6 +6,8 @@ const initSqlJs = require('sql.js');
 const bcrypt = require('bcryptjs');
 const multer = require('multer');
 const fs = require('fs');
+const crypto = require('crypto');
+const DiscordBot = require('./discord-bot');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -314,6 +316,27 @@ async function initDatabase() {
     )
   `);
 
+  // Discord Bot tables
+  db.run(`
+    CREATE TABLE IF NOT EXISTS discord_config (
+      key TEXT PRIMARY KEY,
+      value TEXT,
+      updated_at TEXT DEFAULT (datetime('now'))
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS discord_logs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      type TEXT NOT NULL,
+      channel_id TEXT,
+      message_id TEXT,
+      user_id TEXT,
+      details TEXT,
+      created_at TEXT DEFAULT (datetime('now'))
+    )
+  `);
+
   // Add progress column to projects if not exists
   try {
     db.run('ALTER TABLE projects ADD COLUMN progress INTEGER DEFAULT 0');
@@ -385,6 +408,9 @@ function dbRun(sql, params = []) {
   return { lastInsertRowid: lastId };
 }
 
+// Discord Bot instance (initialized after DB)
+let discordBot = null;
+
 // Multer for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -419,7 +445,11 @@ app.use(cors({
   origin: true,
   credentials: true
 }));
-app.use(express.json());
+app.use(express.json({
+  verify: (req, res, buf) => {
+    req.rawBody = buf;
+  }
+}));
 app.use(express.urlencoded({ extended: true }));
 
 // UTF-8 Encoding für API-Responses (deutsche Umlaute)
@@ -2426,8 +2456,287 @@ app.post('/api/admin/restore/:filename', requireAuth, (req, res) => {
   }
 });
 
+// ── Discord Bot API Routes ─────────────────────────────────────────
+
+// Get all discord config
+app.get('/api/admin/discord/config', requireAuth, (req, res) => {
+  try {
+    const config = discordBot.getAllConfig();
+    // Never send the token to frontend
+    delete config.bot_token;
+    config.has_token = !!(process.env.DISCORD_BOT_TOKEN || discordBot.getConfig('bot_token'));
+    res.json(config);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Reset discord config to defaults
+app.post('/api/admin/discord/reset-defaults', requireAuth, (req, res) => {
+  try {
+    const defaults = {
+      msg_welcome: JSON.stringify({
+        title: 'Willkommen!',
+        description: 'Willkommen auf dem **Mas0n1x Development** Server, {user}!\nWir freuen uns, dich in unserer Community begrüssen zu dürfen.\nHier findest du professionellen Support, kannst Projekte anfragen und dich mit anderen Entwicklern austauschen.',
+        color: '#00ff88',
+        footer: 'Du bist unser {memberCount}. Mitglied!'
+      }),
+      msg_leave: JSON.stringify({
+        title: 'Auf Wiedersehen!',
+        description: '**{username}** hat den Server verlassen.\nWir bedanken uns für die gemeinsame Zeit und wünschen alles Gute.',
+        color: '#ff4444'
+      }),
+      msg_rules: JSON.stringify({
+        title: '📜 Serverregeln',
+        color: '#ff4444',
+        footer: 'Reagiere mit ✅ um die Regeln zu akzeptieren und Zugang zum Server zu erhalten!',
+        sections: [
+          { title: '§1 Allgemeines', rules: [
+            'Dieser Server dient als offizielle Plattform für Support, Projektanfragen und den Austausch rund um Softwareentwicklung.',
+            'Es gelten die offiziellen Discord Nutzungsbedingungen sowie die Discord Community-Richtlinien.',
+            'Unwissenheit über die Regeln schützt nicht vor Konsequenzen.'
+          ]},
+          { title: '§2 Verhalten & Respekt', rules: [
+            'Behandle alle Mitglieder respektvoll – kein Mobbing, keine Diskriminierung, kein Hass.',
+            'Provokationen, Beleidigungen oder absichtliche Störungen sind verboten.',
+            'Diskriminierende oder beleidigende Inhalte werden nicht toleriert.'
+          ]},
+          { title: '§3 Sprache & Inhalte', rules: [
+            'Inhalte müssen jugendfreundlich und gesetzeskonform sein.',
+            'Kein NSFW-/18+ Material, keine extremistischen oder illegalen Inhalte.',
+            'Werbung oder Spam sind nur mit ausdrücklicher Erlaubnis der Serverleitung erlaubt.'
+          ]},
+          { title: '§4 Sicherheit & Datenschutz', rules: [
+            'Veröffentliche keine privaten Daten (eigene oder fremde) ohne Einverständnis.',
+            'Betrug, Phishing oder das Teilen schadhafter Dateien ist strengstens untersagt.',
+            'Screenshots oder Aufnahmen von privaten Gesprächen dürfen nur mit Erlaubnis geteilt werden.'
+          ]},
+          { title: '§5 Kanäle & Themen', rules: [
+            'Nutze die Kanäle nur für ihren vorgesehenen Zweck.',
+            'Achte auf die Kanalbeschreibungen und halte dich an vorgegebene Themen.',
+            'Spam, Flooding oder unnötiges Pingen anderer Nutzer ist zu unterlassen.'
+          ]},
+          { title: '§6 Support & Projekte', rules: [
+            'Beschreibe dein Anliegen im Ticket so genau wie möglich, damit wir dir schnell helfen können.',
+            'Hab Geduld – unser Team bearbeitet Anfragen so schnell wie möglich.',
+            'Spam in DMs an Teammitglieder ist verboten. Nutze das Ticketsystem.'
+          ]},
+          { title: '§7 Sanktionen', rules: [
+            'Regelverstöße können zu Verwarnungen, Mutes, Kicks oder permanenten Bans führen.',
+            'Die Art der Sanktion liegt im Ermessen des Serverteams.',
+            'Wiederholte Verstöße führen zu einer dauerhaften Entfernung vom Server.'
+          ]}
+        ]
+      }),
+      msg_social: JSON.stringify({
+        title: '🌐 Social Media & Kontakt',
+        description: 'Hier findest du alle wichtigen Links, um mit mir in Kontakt zu treten oder meine Arbeit zu verfolgen.',
+        links: [
+          { emoji: '💬', name: 'Discord', url: 'https://discord.com/users/388425445793857559', description: 'Direkter Kontakt via Discord' },
+          { emoji: '🐙', name: 'GitHub', url: 'https://github.com/Mas0n1x', description: 'Open-Source Projekte & Code' },
+          { emoji: '📧', name: 'E-Mail', url: 'mailto:bleckermax11@gmail.com', description: 'Geschäftliche Anfragen per E-Mail' },
+          { emoji: '🌍', name: 'Portfolio', url: 'https://mas0n1x.dev', description: 'Mein Portfolio mit allen Projekten' },
+        ]
+      }),
+      msg_products: JSON.stringify([
+        { emoji: '💻', name: 'Web-Entwicklung', price: 'ab 499€', color: '#00ff88', description: 'Moderne, responsive Websites und Web-Applikationen mit aktuellen Technologien und Best Practices. Von einfachen Landing Pages bis zu komplexen Web-Applikationen mit Admin-Dashboards und Kundenportalen.', features: '➜ Responsive Design für alle Geräte\n➜ SEO-Optimierung & Performance\n➜ Moderne Frameworks & sauberer Code\n➜ Admin-Dashboards & CMS-Integration' },
+        { emoji: '📱', name: 'App-Entwicklung', price: 'ab 799€', color: '#00d4ff', description: 'Native und Cross-Platform Apps mit intuitiver User Experience. Individuell entwickelte Anwendungen für Desktop und Mobile, zugeschnitten auf deine Bedürfnisse.', features: '➜ Cross-Platform Kompatibilität\n➜ Intuitive Benutzeroberfläche\n➜ Offline-Funktionalität\n➜ Push-Benachrichtigungen & Updates' },
+        { emoji: '🤖', name: 'Discord Bots', price: 'ab 199€', color: '#a855f7', description: 'Maßgeschneiderte Discord Bot Entwicklung für Moderation, Unterhaltung und Verwaltung. Von einfachen Utility-Bots bis zu komplexen Systemen mit Datenbank-Anbindung.', features: '➜ Moderation & Auto-Moderation\n➜ Ticket- & Supportsysteme\n➜ Custom Commands & Interaktionen\n➜ Dashboard & Web-Interface' },
+        { emoji: '⚙️', name: 'Backend-Systeme', price: 'ab 599€', color: '#ffaa00', description: 'Skalierbare APIs, Datenbanken und Server-Infrastruktur. Robuste Backend-Lösungen die zuverlässig und performant arbeiten.', features: '➜ REST & GraphQL APIs\n➜ Datenbank-Design & Optimierung\n➜ Docker & Server-Setup\n➜ Monitoring & Wartung' },
+        { emoji: '🎨', name: 'Frontend-Systeme', price: 'ab 399€', color: '#00ff88', description: 'Interaktive Benutzeroberflächen mit modernen Frameworks und sauberem Code. Pixel-perfektes Design mit flüssigen Animationen und optimaler User Experience.', features: '➜ Moderne UI/UX Design\n➜ Animationen & Micro-Interactions\n➜ Barrierefreiheit & Accessibility\n➜ Performance-Optimierung' },
+      ]),
+      ticket_categories: JSON.stringify([
+        { name: 'Allgemeine Frage', emoji: '❓', description: 'Allgemeine Fragen zum Server oder zu Services' },
+        { name: 'Projektanfrage', emoji: '📩', description: 'Neue Projektanfrage oder Auftragsarbeit' },
+        { name: 'Tech-Support', emoji: '🔧', description: 'Technische Hilfe bei bestehendem Projekt' },
+        { name: 'Bug-Report', emoji: '🐛', description: 'Fehler in einem bestehenden Projekt melden' },
+      ]),
+      ticket_welcome_msg: 'Beschreibe dein Anliegen so detailliert wie möglich.\nEin Teammitglied wird sich so schnell wie möglich bei dir melden.',
+      rules_reaction_emoji: '✅',
+      welcome_enabled: 'true',
+      leave_enabled: 'true',
+      modlog_enabled: 'true',
+    };
+    discordBot.saveAllConfig(defaults);
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Save discord config
+app.post('/api/admin/discord/config', requireAuth, (req, res) => {
+  try {
+    const config = req.body;
+    // Handle token separately
+    if (config.bot_token) {
+      discordBot.setConfig('bot_token', config.bot_token);
+      delete config.bot_token;
+    }
+    discordBot.saveAllConfig(config);
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Get bot status
+app.get('/api/admin/discord/status', requireAuth, (req, res) => {
+  try {
+    res.json(discordBot.getStatus());
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Connect bot
+app.post('/api/admin/discord/connect', requireAuth, async (req, res) => {
+  try {
+    await discordBot.start();
+    res.json({ success: true, status: discordBot.getStatus() });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Disconnect bot
+app.post('/api/admin/discord/disconnect', requireAuth, async (req, res) => {
+  try {
+    await discordBot.stop();
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Send test welcome message
+app.post('/api/admin/discord/send-welcome-test', requireAuth, async (req, res) => {
+  try {
+    const channelId = req.body.channelId || discordBot.getConfig('channel_welcome');
+    if (!channelId) return res.status(400).json({ error: 'Kein Channel konfiguriert' });
+    const messageId = await discordBot.sendWelcomeTest(channelId);
+    res.json({ success: true, messageId });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Send product embeds
+app.post('/api/admin/discord/send-products', requireAuth, async (req, res) => {
+  try {
+    const channelId = req.body.channelId || discordBot.getConfig('channel_products');
+    if (!channelId) return res.status(400).json({ error: 'Kein Channel konfiguriert' });
+    const messageIds = await discordBot.sendProductEmbeds(channelId);
+    res.json({ success: true, messageIds });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Send social links embed
+app.post('/api/admin/discord/send-social', requireAuth, async (req, res) => {
+  try {
+    const channelId = req.body.channelId || discordBot.getConfig('channel_social');
+    if (!channelId) return res.status(400).json({ error: 'Kein Channel konfiguriert' });
+    const messageId = await discordBot.sendSocialEmbed(channelId);
+    res.json({ success: true, messageId });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Send rules embed
+app.post('/api/admin/discord/send-rules', requireAuth, async (req, res) => {
+  try {
+    const channelId = req.body.channelId || discordBot.getConfig('channel_rules');
+    if (!channelId) return res.status(400).json({ error: 'Kein Channel konfiguriert' });
+    const messageId = await discordBot.sendRulesEmbed(channelId);
+    res.json({ success: true, messageId });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Create ticket panel
+app.post('/api/admin/discord/send-ticket-panel', requireAuth, async (req, res) => {
+  try {
+    const channelId = req.body.channelId;
+    if (!channelId) return res.status(400).json({ error: 'Kein Channel angegeben' });
+    const messageId = await discordBot.createTicketPanel(channelId);
+    res.json({ success: true, messageId });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Get discord logs
+app.get('/api/admin/discord/logs', requireAuth, (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 50;
+    const offset = parseInt(req.query.offset) || 0;
+    const type = req.query.type || null;
+    const logs = discordBot.getLogs(limit, offset, type);
+    res.json(logs);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Clear discord logs
+app.delete('/api/admin/discord/logs', requireAuth, (req, res) => {
+  try {
+    discordBot.clearLogs();
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ── GitHub Webhook (Public) ───────────────────────────────────────
+
+app.post('/api/webhook/github', (req, res) => {
+  try {
+    const secret = discordBot.getConfig('github_webhook_secret') || process.env.GITHUB_WEBHOOK_SECRET;
+
+    if (secret && req.rawBody) {
+      const signature = req.headers['x-hub-signature-256'];
+      if (!signature) return res.status(401).json({ error: 'Missing signature' });
+
+      const hmac = crypto.createHmac('sha256', secret);
+      hmac.update(req.rawBody);
+      const expected = 'sha256=' + hmac.digest('hex');
+
+      if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected))) {
+        return res.status(401).json({ error: 'Invalid signature' });
+      }
+    }
+
+    const event = req.headers['x-github-event'];
+    const payload = req.body;
+
+    if (!event || !payload) {
+      return res.status(400).json({ error: 'Invalid webhook payload' });
+    }
+
+    discordBot.sendGitHubNotification(payload, event);
+    res.status(200).json({ received: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // Start server after database is initialized
 initDatabase().then(() => {
+  // Initialize Discord Bot
+  discordBot = new DiscordBot({ dbGet, dbAll, dbRun });
+
+  // Auto-start bot if enabled
+  const botEnabled = discordBot.getConfig('bot_enabled');
+  const hasToken = !!(process.env.DISCORD_BOT_TOKEN || discordBot.getConfig('bot_token'));
+  if (botEnabled === 'true' && hasToken) {
+    discordBot.start().catch(e => console.error('Discord Bot auto-start failed:', e.message));
+  }
+
   app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
     console.log(`Admin panel: http://localhost:${PORT}/admin`);
