@@ -56,7 +56,9 @@
       "Bash(docker compose restart:*)",
       "Bash(for id in add-project-btn add-service-btn change-password-form import-data-btn back-to-requests save-request-btn send-message-btn chat-file save-impressum-btn)",
       "Bash(do echo -n \"$id: \")",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(docker compose stop:*)",
+      "Bash(docker compose start:*)"
     ]
   }
 }

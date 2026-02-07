@@ -151,6 +151,14 @@ const DEFAULT_SERVICES = [
     price: 'ab 399€',
     color: '#00ff88',
   },
+  {
+    emoji: '🐧',
+    name: 'Linux Server Setup',
+    description: 'Professionelle Einrichtung und Konfiguration von Linux-Servern für Hosting, Gameserver und Entwicklungsumgebungen. Sicher, performant und auf deine Anforderungen zugeschnitten.',
+    features: '➜ Server-Installation & Härtung\n➜ Docker & Container-Setup\n➜ Nginx, Apache & Reverse Proxy\n➜ Monitoring, Backups & Wartung',
+    price: 'ab 149€',
+    color: '#f97316',
+  },
 ];
 
 const DEFAULT_SOCIALS = {
@@ -657,8 +665,8 @@ class DiscordBot {
       ticketContainer.addActionRowComponents(closeRow);
 
       const mentions = supportRoleId ? `<@${interaction.user.id}> <@&${supportRoleId}>` : `<@${interaction.user.id}>`;
+      await ticketChannel.send({ content: mentions });
       await ticketChannel.send({
-        content: mentions,
         components: [ticketContainer],
         flags: CV2_FLAGS,
       });

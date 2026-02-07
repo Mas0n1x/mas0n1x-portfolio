@@ -4526,6 +4526,7 @@ const DISCORD_DEFAULTS = {
     { emoji: '🤖', name: 'Discord Bots', price: 'ab 199€', color: '#a855f7', description: 'Maßgeschneiderte Discord Bot Entwicklung für Moderation, Unterhaltung und Verwaltung.', features: '➜ Moderation & Auto-Moderation\n➜ Ticket- & Supportsysteme\n➜ Custom Commands & Interaktionen\n➜ Dashboard & Web-Interface' },
     { emoji: '⚙️', name: 'Backend-Systeme', price: 'ab 599€', color: '#ffaa00', description: 'Skalierbare APIs, Datenbanken und Server-Infrastruktur.', features: '➜ REST & GraphQL APIs\n➜ Datenbank-Design & Optimierung\n➜ Docker & Server-Setup\n➜ Monitoring & Wartung' },
     { emoji: '🎨', name: 'Frontend-Systeme', price: 'ab 399€', color: '#00ff88', description: 'Interaktive Benutzeroberflächen mit modernen Frameworks und sauberem Code.', features: '➜ Moderne UI/UX Design\n➜ Animationen & Micro-Interactions\n➜ Barrierefreiheit & Accessibility\n➜ Performance-Optimierung' },
+    { emoji: '🐧', name: 'Linux Server Setup', price: 'ab 149€', color: '#f97316', description: 'Professionelle Einrichtung und Konfiguration von Linux-Servern für Hosting, Gameserver und Entwicklungsumgebungen.', features: '➜ Server-Installation & Härtung\n➜ Docker & Container-Setup\n➜ Nginx, Apache & Reverse Proxy\n➜ Monitoring, Backups & Wartung' },
   ],
   ticketCategories: [
     { name: 'Allgemeine Frage', emoji: '❓', description: 'Allgemeine Fragen zum Server oder zu Services' },
