@@ -4766,6 +4766,7 @@ async function loadDiscordConfig() {
     if (config.channel_github) document.getElementById('discord-channel-github').value = config.channel_github;
     if (config.github_webhook_secret) document.getElementById('discord-github-secret').value = config.github_webhook_secret;
     if (config.github_token) document.getElementById('discord-github-token').value = config.github_token;
+    renderGithubOrgs(config.github_orgs);
 
     // Tickets
     if (config.channel_tickets) document.getElementById('discord-channel-tickets').value = config.channel_tickets;
@@ -4975,6 +4976,131 @@ async function setupGithubAllRepos() {
 
     statusDiv.innerHTML = html;
     showToast(`Webhooks eingerichtet: ${result.added.length} neu, ${result.skipped.length} existierten bereits`, 'success');
+  } catch (e) {
+    statusDiv.innerHTML = `<span style="color:#ff4444;"><i class="fas fa-exclamation-triangle"></i> Fehler: ${e.message}</span>`;
+    showToast(e.message, 'error');
+  }
+}
+
+// ── GitHub Organisations ──────────────────────────────────────────
+
+function getGithubOrgs() {
+  const items = document.querySelectorAll('#github-orgs-list .github-org-item');
+  return Array.from(items).map(el => el.dataset.org).filter(Boolean);
+}
+
+function renderGithubOrgs(orgsJson) {
+  const container = document.getElementById('github-orgs-list');
+  container.innerHTML = '';
+  let orgs = [];
+  if (orgsJson) {
+    try { orgs = JSON.parse(orgsJson); } catch { orgs = []; }
+  }
+  orgs.forEach(org => addGithubOrgItem(org));
+}
+
+function addGithubOrgItem(orgName) {
+  const container = document.getElementById('github-orgs-list');
+  const item = document.createElement('div');
+  item.className = 'github-org-item';
+  item.dataset.org = orgName;
+  item.style.cssText = 'display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(0,255,136,0.05);border:1px solid rgba(0,255,136,0.2);border-radius:8px;';
+
+  const icon = document.createElement('i');
+  icon.className = 'fas fa-building';
+  icon.style.color = '#00ff88';
+
+  const link = document.createElement('a');
+  link.href = `https://github.com/${encodeURIComponent(orgName)}`;
+  link.target = '_blank';
+  link.style.cssText = 'color:#00ff88;flex:1;text-decoration:none;font-family:"JetBrains Mono",monospace;font-size:0.9rem;';
+  link.textContent = orgName;
+
+  const removeBtn = document.createElement('button');
+  removeBtn.className = 'btn-secondary';
+  removeBtn.onclick = function() { removeGithubOrg(this); };
+  removeBtn.style.cssText = 'padding:4px 8px;background:#ff4444;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:0.8rem;';
+  removeBtn.innerHTML = '<i class="fas fa-trash"></i>';
+
+  item.appendChild(icon);
+  item.appendChild(link);
+  item.appendChild(removeBtn);
+  container.appendChild(item);
+}
+
+async function addGithubOrg() {
+  const input = document.getElementById('discord-github-org-input');
+  const orgName = input.value.trim();
+  if (!orgName) {
+    showToast('Bitte Organisationsname eingeben', 'error');
+    return;
+  }
+  const existing = getGithubOrgs();
+  if (existing.includes(orgName)) {
+    showToast('Organisation bereits hinzugefügt', 'error');
+    return;
+  }
+  addGithubOrgItem(orgName);
+  input.value = '';
+  // Save immediately
+  const orgs = getGithubOrgs();
+  try {
+    await api('/admin/discord/config', { method: 'POST', body: { github_orgs: JSON.stringify(orgs) } });
+    showToast(`Organisation "${orgName}" hinzugefügt`, 'success');
+  } catch (e) {
+    showToast(e.message, 'error');
+  }
+}
+
+async function removeGithubOrg(btn) {
+  btn.closest('.github-org-item').remove();
+  const orgs = getGithubOrgs();
+  try {
+    await api('/admin/discord/config', { method: 'POST', body: { github_orgs: JSON.stringify(orgs) } });
+    showToast('Organisation entfernt', 'success');
+  } catch (e) {
+    showToast(e.message, 'error');
+  }
+}
+
+async function setupGithubOrgRepos() {
+  const token = document.getElementById('discord-github-token').value;
+  if (!token) {
+    showToast('Bitte GitHub Token eintragen', 'error');
+    return;
+  }
+  const orgs = getGithubOrgs();
+  if (orgs.length === 0) {
+    showToast('Keine Organisationen hinzugefügt', 'error');
+    return;
+  }
+
+  const statusDiv = document.getElementById('github-org-repo-status');
+  statusDiv.style.display = 'block';
+  statusDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Organisations-Repositories werden abgerufen und Webhooks eingerichtet...';
+
+  try {
+    const result = await api('/admin/discord/github-setup-orgs', { method: 'POST', body: { token, orgs } });
+
+    let html = `<strong>Fertig!</strong> ${result.total} Repositories in ${result.orgCount} Organisation(en) gefunden.<br><br>`;
+
+    if (result.added.length > 0) {
+      html += `<span style="color:#00ff88;">&#10004; Webhook hinzugefügt (${result.added.length}):</span><br>`;
+      html += result.added.map(r => `&nbsp;&nbsp;- ${r}`).join('<br>') + '<br><br>';
+    }
+
+    if (result.skipped.length > 0) {
+      html += `<span style="color:#ffaa00;">&#8594; Bereits vorhanden (${result.skipped.length}):</span><br>`;
+      html += result.skipped.map(r => `&nbsp;&nbsp;- ${r}`).join('<br>') + '<br><br>';
+    }
+
+    if (result.failed.length > 0) {
+      html += `<span style="color:#ff4444;">&#10008; Fehlgeschlagen (${result.failed.length}):</span><br>`;
+      html += result.failed.map(r => `&nbsp;&nbsp;- ${r.repo}: ${r.error}`).join('<br>') + '<br>';
+    }
+
+    statusDiv.innerHTML = html;
+    showToast(`Org-Webhooks eingerichtet: ${result.added.length} neu, ${result.skipped.length} existierten bereits`, 'success');
   } catch (e) {
     statusDiv.innerHTML = `<span style="color:#ff4444;"><i class="fas fa-exclamation-triangle"></i> Fehler: ${e.message}</span>`;
     showToast(e.message, 'error');

@@ -1275,6 +1275,26 @@
             </div>
             <div id="github-repo-status" style="display:none;margin-top:12px;padding:12px;border-radius:8px;background:rgba(0,255,136,0.05);border:1px solid rgba(0,255,136,0.2);font-size:0.9rem;"></div>
           </div>
+
+          <div class="discord-config-card" style="margin-top:16px;">
+            <h3><i class="fas fa-building"></i> GitHub Organisationen</h3>
+            <div class="discord-info-box">
+              <i class="fas fa-info-circle"></i> Füge GitHub Organisationen hinzu, um auch deren Repositories mit Webhooks zu verbinden.<br>
+              <i class="fas fa-key"></i> Dein Token benötigt zusätzlich die <code>admin:org_hook</code> Berechtigung für Organisations-Webhooks.
+            </div>
+            <div class="form-group">
+              <label>Organisation hinzufügen</label>
+              <div style="display:flex;gap:8px;">
+                <input type="text" id="discord-github-org-input" placeholder="z.B. LawNet-Team" style="flex:1;font-family:'JetBrains Mono',monospace;font-size:0.85rem;">
+                <button class="btn-secondary" onclick="addGithubOrg()"><i class="fas fa-plus"></i></button>
+              </div>
+            </div>
+            <div id="github-orgs-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+            <div class="discord-actions" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
+              <button class="btn-secondary" onclick="setupGithubOrgRepos()" style="background:#333;color:#00ff88;border:1px solid #00ff88;"><i class="fas fa-building"></i> Org-Repos verbinden</button>
+            </div>
+            <div id="github-org-repo-status" style="display:none;margin-top:12px;padding:12px;border-radius:8px;background:rgba(0,255,136,0.05);border:1px solid rgba(0,255,136,0.2);font-size:0.9rem;"></div>
+          </div>
         </div>
 
         <!-- ═══ Tab: Tickets ═══ -->

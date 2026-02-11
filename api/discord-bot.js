@@ -1064,9 +1064,9 @@ class DiscordBot {
       let line = `${l.emoji || '🔗'} **${l.name}**`;
       if (l.url) {
         if (l.url.startsWith('mailto:')) {
-          line += ` — \`${l.url.replace('mailto:', '')}\``;
+          line += ` — ${l.url.replace('mailto:', '')}`;
         } else {
-          line += ` — [${l.url.replace('https://', '')}](${l.url})`;
+          line += ` — ${l.url}`;
         }
       }
       if (l.description) {

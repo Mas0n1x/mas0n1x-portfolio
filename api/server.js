@@ -2909,6 +2909,84 @@ app.post('/api/admin/discord/github-setup-all', requireAuth, async (req, res) =>
   }
 });
 
+// ── GitHub: Setup webhooks on org repos ──────────────────────────
+
+app.post('/api/admin/discord/github-setup-orgs', requireAuth, async (req, res) => {
+  try {
+    const { token, orgs } = req.body;
+    if (!token) return res.status(400).json({ error: 'GitHub Token fehlt' });
+    if (!orgs || !Array.isArray(orgs) || orgs.length === 0) return res.status(400).json({ error: 'Keine Organisationen angegeben' });
+
+    const webhookUrl = discordBot.getConfig('github_webhook_url') || `${req.protocol}://${req.get('host')}/api/webhook/github`;
+    const secret = discordBot.getConfig('github_webhook_secret') || '';
+
+    let allRepos = [];
+
+    for (const org of orgs) {
+      let page = 1;
+      while (true) {
+        const repoRes = await fetch(`https://api.github.com/orgs/${encodeURIComponent(org)}/repos?per_page=100&page=${page}`, {
+          headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json', 'User-Agent': 'Mas0n1x-Portfolio' }
+        });
+        if (!repoRes.ok) {
+          const err = await repoRes.json().catch(() => ({}));
+          return res.status(repoRes.status).json({ error: `GitHub API Fehler für ${org}: ${err.message || repoRes.statusText}` });
+        }
+        const repos = await repoRes.json();
+        if (repos.length === 0) break;
+        allRepos = allRepos.concat(repos);
+        page++;
+      }
+    }
+
+    const results = { added: [], skipped: [], failed: [] };
+
+    for (const repo of allRepos) {
+      try {
+        const hooksRes = await fetch(`https://api.github.com/repos/${repo.full_name}/hooks`, {
+          headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json', 'User-Agent': 'Mas0n1x-Portfolio' }
+        });
+
+        if (hooksRes.ok) {
+          const hooks = await hooksRes.json();
+          const exists = hooks.some(h => h.config?.url === webhookUrl);
+          if (exists) {
+            results.skipped.push(repo.full_name);
+            continue;
+          }
+        }
+
+        const createRes = await fetch(`https://api.github.com/repos/${repo.full_name}/hooks`, {
+          method: 'POST',
+          headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json', 'User-Agent': 'Mas0n1x-Portfolio' },
+          body: JSON.stringify({
+            name: 'web',
+            active: true,
+            events: ['push', 'release', 'issues', 'pull_request'],
+            config: { url: webhookUrl, content_type: 'json', secret: secret || undefined, insecure_ssl: '0' }
+          })
+        });
+
+        if (createRes.ok || createRes.status === 201) {
+          results.added.push(repo.full_name);
+        } else {
+          const err = await createRes.json().catch(() => ({}));
+          results.failed.push({ repo: repo.full_name, error: err.message || createRes.statusText });
+        }
+      } catch (e) {
+        results.failed.push({ repo: repo.full_name, error: e.message });
+      }
+    }
+
+    discordBot.setConfig('github_token', token);
+    discordBot.setConfig('github_orgs', JSON.stringify(orgs));
+
+    res.json({ success: true, total: allRepos.length, orgCount: orgs.length, ...results });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // ── GitHub Webhook (Public) ───────────────────────────────────────
 
 app.post('/api/webhook/github', (req, res) => {
