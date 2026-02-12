@@ -4664,7 +4664,7 @@ const DISCORD_DEFAULTS = {
     links: [
       { emoji: '💬', name: 'Discord', url: 'https://discord.com/users/388425445793857559' },
       { emoji: '🐙', name: 'GitHub', url: 'https://github.com/Mas0n1x' },
-      { emoji: '📧', name: 'E-Mail', url: 'mailto:bleckermax11@gmail.com' },
+      { emoji: '📧', name: 'E-Mail', url: 'mailto:support@mas0n1x.online' },
       { emoji: '🌍', name: 'Portfolio', url: 'https://mas0n1x.dev' },
     ]
   },

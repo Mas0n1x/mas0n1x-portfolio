@@ -2674,7 +2674,7 @@ app.post('/api/admin/discord/reset-defaults', requireAuth, (req, res) => {
         links: [
           { emoji: '💬', name: 'Discord', url: 'https://discord.com/users/388425445793857559', description: 'Direkter Kontakt via Discord' },
           { emoji: '🐙', name: 'GitHub', url: 'https://github.com/Mas0n1x', description: 'Open-Source Projekte & Code' },
-          { emoji: '📧', name: 'E-Mail', url: 'mailto:bleckermax11@gmail.com', description: 'Geschäftliche Anfragen per E-Mail' },
+          { emoji: '📧', name: 'E-Mail', url: 'mailto:support@mas0n1x.online', description: 'Geschäftliche Anfragen per E-Mail' },
           { emoji: '🌍', name: 'Portfolio', url: 'https://mas0n1x.dev', description: 'Mein Portfolio mit allen Projekten' },
         ]
       }),
