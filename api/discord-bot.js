@@ -1,3 +1,8 @@
+/*
+ * Mas0n1x Portfolio
+ * Copyright (c) 2024-2026 DEV Mas0n1x.
+ * Alle Rechte vorbehalten.
+ */
 const { Client, GatewayIntentBits, EmbedBuilder, ActionRowBuilder,
   ButtonBuilder, ButtonStyle, PermissionsBitField,
   ChannelType, Events, Partials, MessageFlags,
