@@ -1300,6 +1300,25 @@
             </div>
             <div id="github-org-repo-status" style="display:none;margin-top:12px;padding:12px;border-radius:8px;background:rgba(0,255,136,0.05);border:1px solid rgba(0,255,136,0.2);font-size:0.9rem;"></div>
           </div>
+
+          <div class="discord-config-card" style="margin-top:16px;">
+            <h3><i class="fas fa-list-check"></i> Repo-Auswahl für Discord-Posts</h3>
+            <div class="discord-info-box">
+              <i class="fas fa-info-circle"></i> Wähle aus, welche Repositories in den GitHub-Channel gepostet werden. Abgewählte Repos lösen <strong>keine</strong> Discord-Nachricht aus (die Webhooks bei GitHub bleiben erhalten).<br>
+              <i class="fas fa-lightbulb"></i> Sind <strong>alle</strong> Repos ausgewählt, werden automatisch auch neue/zukünftige Repos gepostet.
+            </div>
+            <div class="discord-actions" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+              <button class="btn-secondary" onclick="loadGithubRepoSelection()"><i class="fas fa-sync"></i> Repos laden</button>
+              <button class="btn-secondary" onclick="toggleAllGithubRepos(true)"><i class="fas fa-check-double"></i> Alle</button>
+              <button class="btn-secondary" onclick="toggleAllGithubRepos(false)"><i class="fas fa-xmark"></i> Keine</button>
+              <input type="text" id="github-repo-filter" placeholder="Filtern…" oninput="filterGithubRepoList()" style="flex:1;min-width:160px;">
+            </div>
+            <div id="github-repo-select-list" style="margin-top:12px;display:flex;flex-direction:column;gap:6px;max-height:340px;overflow-y:auto;"></div>
+            <div class="discord-actions" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
+              <button class="btn-primary" onclick="saveGithubRepoSelection()"><i class="fas fa-save"></i> Auswahl speichern</button>
+            </div>
+            <div id="github-repo-select-status" style="display:none;margin-top:12px;padding:12px;border-radius:8px;background:rgba(0,255,136,0.05);border:1px solid rgba(0,255,136,0.2);font-size:0.9rem;"></div>
+          </div>
         </div>
 
         <!-- ═══ Tab: Tickets ═══ -->
@@ -1351,9 +1370,34 @@
             <div class="discord-toggle-row"><label><i class="fas fa-ban"></i> Bans / Unbans</label><label class="toggle-switch"><input type="checkbox" id="discord-modlog-bans" checked><span class="toggle-slider"></span></label></div>
             <div class="discord-toggle-row"><label><i class="fas fa-clock"></i> Timeouts</label><label class="toggle-switch"><input type="checkbox" id="discord-modlog-timeouts" checked><span class="toggle-slider"></span></label></div>
             <div class="discord-toggle-row"><label><i class="fas fa-trash"></i> Nachricht geloescht</label><label class="toggle-switch"><input type="checkbox" id="discord-modlog-deletes" checked><span class="toggle-slider"></span></label></div>
+            <div class="discord-toggle-row"><label><i class="fas fa-pen"></i> Nachricht bearbeitet</label><label class="toggle-switch"><input type="checkbox" id="discord-modlog-edits" checked><span class="toggle-slider"></span></label></div>
             <div class="discord-toggle-row"><label><i class="fas fa-user-tag"></i> Rollenaenderungen</label><label class="toggle-switch"><input type="checkbox" id="discord-modlog-roles" checked><span class="toggle-slider"></span></label></div>
+            <div class="discord-toggle-row"><label><i class="fas fa-id-badge"></i> Nickname-Aenderungen</label><label class="toggle-switch"><input type="checkbox" id="discord-modlog-nickname" checked><span class="toggle-slider"></span></label></div>
+            <div class="discord-toggle-row"><label><i class="fas fa-folder-tree"></i> Channel erstellt/geloescht</label><label class="toggle-switch"><input type="checkbox" id="discord-modlog-channels" checked><span class="toggle-slider"></span></label></div>
+            <div class="discord-toggle-row"><label><i class="fas fa-arrow-right-to-bracket"></i> Beitritte (Modlog)</label><label class="toggle-switch"><input type="checkbox" id="discord-modlog-join"><span class="toggle-slider"></span></label></div>
+            <div class="discord-toggle-row"><label><i class="fas fa-arrow-right-from-bracket"></i> Verlassen (Modlog)</label><label class="toggle-switch"><input type="checkbox" id="discord-modlog-leave"><span class="toggle-slider"></span></label></div>
+            <div class="discord-info-box" style="margin-top:8px;"><i class="fas fa-circle-info"></i> Für Moderator-Anzeige (Wer hat gebannt/gekickt?) benötigt der Bot die Berechtigung <code>Audit-Log ansehen</code>.</div>
             <div class="discord-actions">
               <button class="btn-primary" onclick="saveDiscordModeration()"><i class="fas fa-save"></i> Speichern</button>
+            </div>
+          </div>
+
+          <div class="discord-config-card" style="margin-top:16px;">
+            <h3><i class="fas fa-envelope-open-text"></i> Kundenanfragen</h3>
+            <div class="discord-info-box">
+              <i class="fas fa-info-circle"></i> Bei jeder neuen Projektanfrage über das Portfolio postet der Bot sofort eine Nachricht in den festgelegten Channel.
+            </div>
+            <div class="discord-toggle-row"><label>Anfrage-Benachrichtigung aktiviert</label><label class="toggle-switch"><input type="checkbox" id="discord-requests-enabled" checked><span class="toggle-slider"></span></label></div>
+            <div class="form-group">
+              <label>Anfragen Channel ID</label>
+              <input type="text" id="discord-channel-requests" placeholder="Channel-ID">
+            </div>
+            <div class="form-group">
+              <label>Ping-Rolle (optional)</label>
+              <input type="text" id="discord-requests-ping-role" placeholder="Rollen-ID (optional)">
+            </div>
+            <div class="discord-actions">
+              <button class="btn-primary" onclick="saveDiscordRequests()"><i class="fas fa-save"></i> Speichern</button>
             </div>
           </div>
         </div>

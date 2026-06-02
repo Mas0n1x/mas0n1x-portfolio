@@ -4791,7 +4791,17 @@ async function loadDiscordConfig() {
     document.getElementById('discord-modlog-bans').checked = config.modlog_bans !== 'false';
     document.getElementById('discord-modlog-timeouts').checked = config.modlog_timeouts !== 'false';
     document.getElementById('discord-modlog-deletes').checked = config.modlog_message_delete !== 'false';
+    document.getElementById('discord-modlog-edits').checked = config.modlog_message_edit !== 'false';
     document.getElementById('discord-modlog-roles').checked = config.modlog_role_changes !== 'false';
+    document.getElementById('discord-modlog-nickname').checked = config.modlog_nickname !== 'false';
+    document.getElementById('discord-modlog-channels').checked = config.modlog_channels !== 'false';
+    document.getElementById('discord-modlog-join').checked = config.modlog_member_join === 'true';
+    document.getElementById('discord-modlog-leave').checked = config.modlog_member_leave === 'true';
+
+    // Kundenanfragen
+    if (config.channel_requests) document.getElementById('discord-channel-requests').value = config.channel_requests;
+    if (config.requests_ping_role) document.getElementById('discord-requests-ping-role').value = config.requests_ping_role;
+    document.getElementById('discord-requests-enabled').checked = config.requests_enabled !== 'false';
 
   } catch (e) {
     console.error('Error loading discord config:', e);
@@ -5136,10 +5146,96 @@ async function saveDiscordModeration() {
       modlog_bans: document.getElementById('discord-modlog-bans').checked ? 'true' : 'false',
       modlog_timeouts: document.getElementById('discord-modlog-timeouts').checked ? 'true' : 'false',
       modlog_message_delete: document.getElementById('discord-modlog-deletes').checked ? 'true' : 'false',
+      modlog_message_edit: document.getElementById('discord-modlog-edits').checked ? 'true' : 'false',
       modlog_role_changes: document.getElementById('discord-modlog-roles').checked ? 'true' : 'false',
+      modlog_nickname: document.getElementById('discord-modlog-nickname').checked ? 'true' : 'false',
+      modlog_channels: document.getElementById('discord-modlog-channels').checked ? 'true' : 'false',
+      modlog_member_join: document.getElementById('discord-modlog-join').checked ? 'true' : 'false',
+      modlog_member_leave: document.getElementById('discord-modlog-leave').checked ? 'true' : 'false',
     };
     await api('/admin/discord/config', { method: 'POST', body: config });
     showToast('Moderation-Einstellungen gespeichert', 'success');
+  } catch (e) {
+    showToast(e.message, 'error');
+  }
+}
+
+async function saveDiscordRequests() {
+  try {
+    const config = {
+      channel_requests: document.getElementById('discord-channel-requests').value,
+      requests_ping_role: document.getElementById('discord-requests-ping-role').value,
+      requests_enabled: document.getElementById('discord-requests-enabled').checked ? 'true' : 'false',
+    };
+    await api('/admin/discord/config', { method: 'POST', body: config });
+    showToast('Anfrage-Einstellungen gespeichert', 'success');
+  } catch (e) {
+    showToast(e.message, 'error');
+  }
+}
+
+// ── GitHub Repo-Auswahl ─────────────────────────────────────────
+
+let githubRepoSelection = [];
+
+async function loadGithubRepoSelection() {
+  const listEl = document.getElementById('github-repo-select-list');
+  const statusEl = document.getElementById('github-repo-select-status');
+  listEl.innerHTML = '<p style="opacity:0.6;">Lade Repos…</p>';
+  try {
+    const result = await api('/admin/discord/github-repos');
+    githubRepoSelection = result.repos || [];
+    renderGithubRepoSelection();
+    if (statusEl) {
+      statusEl.style.display = 'block';
+      statusEl.innerHTML = `${result.total} Repos geladen${result.selectAll ? ' · aktuell werden <strong>alle</strong> gepostet' : ''}.`;
+    }
+  } catch (e) {
+    listEl.innerHTML = `<p class="error-message">${e.message}</p>`;
+  }
+}
+
+function renderGithubRepoSelection() {
+  const listEl = document.getElementById('github-repo-select-list');
+  if (!githubRepoSelection.length) {
+    listEl.innerHTML = '<p style="opacity:0.6;">Keine Repos gefunden.</p>';
+    return;
+  }
+  listEl.innerHTML = githubRepoSelection.map((r, i) => `
+    <label class="discord-toggle-row" data-repo-name="${escapeHtml(r.full_name.toLowerCase())}" style="cursor:pointer;">
+      <span>${r.private ? '<i class="fas fa-lock" style="opacity:0.6;"></i> ' : ''}${r.archived ? '<i class="fas fa-box-archive" style="opacity:0.6;"></i> ' : ''}${escapeHtml(r.full_name)}</span>
+      <label class="toggle-switch"><input type="checkbox" data-repo-idx="${i}" ${r.selected ? 'checked' : ''} onchange="githubRepoSelection[${i}].selected=this.checked"><span class="toggle-slider"></span></label>
+    </label>
+  `).join('');
+}
+
+function toggleAllGithubRepos(value) {
+  githubRepoSelection.forEach(r => { r.selected = value; });
+  renderGithubRepoSelection();
+}
+
+function filterGithubRepoList() {
+  const q = (document.getElementById('github-repo-filter').value || '').toLowerCase();
+  document.querySelectorAll('#github-repo-select-list [data-repo-name]').forEach(el => {
+    el.style.display = el.getAttribute('data-repo-name').includes(q) ? '' : 'none';
+  });
+}
+
+async function saveGithubRepoSelection() {
+  const statusEl = document.getElementById('github-repo-select-status');
+  try {
+    const selected = githubRepoSelection.filter(r => r.selected).map(r => r.full_name);
+    // Alle ausgewählt => Allowlist leeren (= alle inkl. zukünftiger Repos posten)
+    const allSelected = selected.length === githubRepoSelection.length;
+    const value = allSelected ? 'all' : JSON.stringify(selected);
+    await api('/admin/discord/config', { method: 'POST', body: { github_repos: value } });
+    showToast('Repo-Auswahl gespeichert', 'success');
+    if (statusEl) {
+      statusEl.style.display = 'block';
+      statusEl.innerHTML = allSelected
+        ? 'Alle Repos ausgewählt – auch zukünftige Repos werden gepostet.'
+        : `${selected.length} von ${githubRepoSelection.length} Repos werden gepostet.`;
+    }
   } catch (e) {
     showToast(e.message, 'error');
   }

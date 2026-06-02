@@ -1081,6 +1081,15 @@ app.post('/api/requests', requireCustomerAuth, (req, res) => {
     [req.session.customerId, projectType, budget, timeline, description]
   );
 
+  // Discord-Benachrichtigung in festgelegten Channel (async, nicht blockierend)
+  if (discordBot) {
+    const customer = dbGet('SELECT name, company, email, phone FROM customers WHERE id = ?', [req.session.customerId]);
+    discordBot.sendRequestNotification(
+      { id: result.lastInsertRowid, project_type: projectType, budget, timeline, description },
+      customer
+    ).catch(e => console.error('Discord request notification error:', e.message));
+  }
+
   res.json({ success: true, requestId: result.lastInsertRowid });
 });
 
@@ -2987,6 +2996,71 @@ app.post('/api/admin/discord/github-setup-orgs', requireAuth, async (req, res) =
     discordBot.setConfig('github_orgs', JSON.stringify(orgs));
 
     res.json({ success: true, total: allRepos.length, orgCount: orgs.length, ...results });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ── GitHub: Repo-Liste mit Auswahl-Status ────────────────────────
+// Liefert alle erreichbaren Repos (User + konfigurierte Orgs) inkl. Flag,
+// ob sie aktuell für Discord-Posts ausgewählt sind (github_repos Allowlist).
+app.get('/api/admin/discord/github-repos', requireAuth, async (req, res) => {
+  try {
+    const token = discordBot.getConfig('github_token');
+    if (!token) return res.status(400).json({ error: 'GitHub Token fehlt – bitte zuerst GitHub einrichten.' });
+
+    const ghHeaders = { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json', 'User-Agent': 'Mas0n1x-Portfolio' };
+    let allRepos = [];
+
+    // Eigene Repos
+    let page = 1;
+    while (true) {
+      const r = await fetch(`https://api.github.com/user/repos?per_page=100&page=${page}&affiliation=owner`, { headers: ghHeaders });
+      if (!r.ok) {
+        const err = await r.json().catch(() => ({}));
+        return res.status(r.status).json({ error: `GitHub API Fehler: ${err.message || r.statusText}` });
+      }
+      const repos = await r.json();
+      if (repos.length === 0) break;
+      allRepos = allRepos.concat(repos);
+      page++;
+    }
+
+    // Org-Repos (falls konfiguriert)
+    const orgs = (() => { try { return JSON.parse(discordBot.getConfig('github_orgs') || '[]'); } catch { return []; } })();
+    for (const org of orgs) {
+      let p = 1;
+      while (true) {
+        const r = await fetch(`https://api.github.com/orgs/${encodeURIComponent(org)}/repos?per_page=100&page=${p}`, { headers: ghHeaders });
+        if (!r.ok) break;
+        const repos = await r.json();
+        if (!Array.isArray(repos) || repos.length === 0) break;
+        allRepos = allRepos.concat(repos);
+        p++;
+      }
+    }
+
+    // Allowlist: null/ungültig => "alle ausgewählt"
+    const selected = (() => { try { return JSON.parse(discordBot.getConfig('github_repos')); } catch { return null; } })();
+    const selectAll = !Array.isArray(selected);
+
+    // Deduplizieren nach full_name
+    const seen = new Set();
+    const list = [];
+    for (const repo of allRepos) {
+      if (seen.has(repo.full_name)) continue;
+      seen.add(repo.full_name);
+      list.push({
+        full_name: repo.full_name,
+        name: repo.name,
+        private: !!repo.private,
+        archived: !!repo.archived,
+        selected: selectAll ? true : selected.includes(repo.full_name),
+      });
+    }
+
+    list.sort((a, b) => a.full_name.localeCompare(b.full_name));
+    res.json({ repos: list, selectAll, total: list.length });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

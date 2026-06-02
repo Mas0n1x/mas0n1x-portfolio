@@ -7,7 +7,7 @@ const { Client, GatewayIntentBits, EmbedBuilder, ActionRowBuilder,
   ButtonBuilder, ButtonStyle, PermissionsBitField,
   ChannelType, Events, Partials, MessageFlags,
   ContainerBuilder, TextDisplayBuilder, SeparatorBuilder,
-  SectionBuilder, ThumbnailBuilder } = require('discord.js');
+  SectionBuilder, ThumbnailBuilder, AuditLogEvent } = require('discord.js');
 const crypto = require('crypto');
 
 // ── Components V2 Flag ──────────────────────────────────────────
@@ -327,6 +327,9 @@ class DiscordBot {
     this.client.on(Events.GuildBanRemove, (ban) => this._onModAction('unban', ban));
     this.client.on(Events.GuildMemberUpdate, (oldMember, newMember) => this._onMemberUpdate(oldMember, newMember));
     this.client.on(Events.MessageDelete, (message) => this._onMessageDelete(message));
+    this.client.on(Events.MessageUpdate, (oldMessage, newMessage) => this._onMessageUpdate(oldMessage, newMessage));
+    this.client.on(Events.ChannelCreate, (channel) => this._onChannelChange('create', channel));
+    this.client.on(Events.ChannelDelete, (channel) => this._onChannelChange('delete', channel));
   }
 
   // ── Welcome (Components V2) ────────────────────────────────────
@@ -429,6 +432,8 @@ class DiscordBot {
   }
 
   async _onMemberJoin(member) {
+    this._modlogMemberFlow('join', member).catch(() => {});
+
     const channelId = this.getConfig('channel_welcome');
     const enabled = this.getConfig('welcome_enabled');
     if (!channelId || enabled === 'false') return;
@@ -460,6 +465,8 @@ class DiscordBot {
   // ── Leave (Components V2) ──────────────────────────────────────
 
   async _onMemberLeave(member) {
+    this._modlogMemberFlow('leave', member).catch(() => {});
+
     const channelId = this.getConfig('channel_welcome');
     const enabled = this.getConfig('leave_enabled');
     if (!channelId || enabled === 'false') return;
@@ -714,79 +721,146 @@ class DiscordBot {
 
   // ── Moderation Logs (Embeds – internal messages) ───────────────
 
-  async _onModAction(type, ban) {
+  // Liefert den Modlog-Channel, sofern aktiviert – sonst null.
+  async _modlogChannel() {
     const channelId = this.getConfig('channel_modlog');
     const enabled = this.getConfig('modlog_enabled');
-    if (!channelId || enabled === 'false') return;
-
+    if (!channelId || enabled === 'false' || !this.client || !this.isConnected) return null;
     try {
       const channel = await this.client.channels.fetch(channelId);
-      if (!channel) return;
+      return channel || null;
+    } catch {
+      return null;
+    }
+  }
 
+  // Ermittelt den ausführenden Moderator über das Audit-Log.
+  async _fetchAuditExecutor(guild, type, targetId) {
+    try {
+      const logs = await guild.fetchAuditLogs({ type, limit: 6 });
+      const entry = logs.entries.find(e =>
+        e.target?.id === targetId && (Date.now() - e.createdTimestamp) < 15000
+      );
+      if (!entry) return null;
+      return { executor: entry.executor, reason: entry.reason || null };
+    } catch {
+      return null; // fehlende ViewAuditLog-Berechtigung o. Ä.
+    }
+  }
+
+  // Account-Alter als lesbarer Discord-Timestamp.
+  _userMeta(user) {
+    const created = Math.floor(user.createdTimestamp / 1000);
+    return `**User:** <@${user.id}> (${user.tag})\n**ID:** \`${user.id}\`\n**Account erstellt:** <t:${created}:R>`;
+  }
+
+  async _onModAction(type, ban) {
+    const channel = await this._modlogChannel();
+    if (!channel) return;
+
+    // Optionale Einzel-Toggles
+    if (type === 'ban' && this.getConfig('modlog_bans') === 'false') return;
+    if (type === 'unban' && this.getConfig('modlog_bans') === 'false') return;
+
+    try {
       const colors = { ban: 0xff4444, unban: 0x00ff88, kick: 0xffaa00, timeout: 0xffaa00 };
-      const labels = { ban: 'Gebannt', unban: 'Entbannt', kick: 'Gekickt', timeout: 'Timeout' };
+      const labels = { ban: '🔨 Gebannt', unban: '♻️ Entbannt', kick: '👢 Gekickt', timeout: '⏳ Timeout' };
+
+      const auditType = type === 'ban' ? AuditLogEvent.MemberBanAdd
+        : type === 'unban' ? AuditLogEvent.MemberBanRemove
+        : null;
+      const audit = auditType ? await this._fetchAuditExecutor(ban.guild, auditType, ban.user.id) : null;
 
       const embed = new EmbedBuilder()
         .setTitle(`Mod-Log: ${labels[type] || type}`)
-        .setDescription(`**User:** ${ban.user.tag} (${ban.user.id})`)
+        .setDescription(this._userMeta(ban.user))
         .setColor(colors[type] || 0xffffff)
+        .setThumbnail(ban.user.displayAvatarURL({ size: 128 }))
         .setTimestamp();
 
-      if (ban.reason) embed.addFields({ name: 'Grund', value: ban.reason });
+      if (audit?.executor) embed.addFields({ name: 'Moderator', value: `<@${audit.executor.id}> (${audit.executor.tag})`, inline: true });
+      const reason = audit?.reason || ban.reason;
+      if (reason) embed.addFields({ name: 'Grund', value: String(reason).substring(0, 1024), inline: false });
 
       const sent = await channel.send({ embeds: [embed] });
-      this.log('modlog', channelId, sent.id, ban.user.id, { type, username: ban.user.tag });
+      this.log('modlog', channel.id, sent.id, ban.user.id, { type, username: ban.user.tag, moderator: audit?.executor?.tag });
     } catch (e) {
       console.error('Mod log error:', e.message);
     }
   }
 
   async _onMemberUpdate(oldMember, newMember) {
-    const channelId = this.getConfig('channel_modlog');
-    const enabled = this.getConfig('modlog_enabled');
-    if (!channelId || enabled === 'false') return;
+    const channel = await this._modlogChannel();
+    if (!channel) return;
 
-    if (!oldMember.communicationDisabledUntilTimestamp && newMember.communicationDisabledUntilTimestamp) {
+    // Timeout gesetzt
+    if (!oldMember.communicationDisabledUntilTimestamp && newMember.communicationDisabledUntilTimestamp
+        && this.getConfig('modlog_timeouts') !== 'false') {
       try {
-        const channel = await this.client.channels.fetch(channelId);
-        if (!channel) return;
-
+        const audit = await this._fetchAuditExecutor(newMember.guild, AuditLogEvent.MemberUpdate, newMember.id);
         const embed = new EmbedBuilder()
-          .setTitle('Mod-Log: Timeout')
-          .setDescription(`**User:** ${newMember.user.tag} (${newMember.user.id})`)
-          .addFields({ name: 'Bis', value: `<t:${Math.floor(newMember.communicationDisabledUntilTimestamp / 1000)}:F>` })
+          .setTitle('Mod-Log: ⏳ Timeout')
+          .setDescription(this._userMeta(newMember.user))
+          .addFields({ name: 'Bis', value: `<t:${Math.floor(newMember.communicationDisabledUntilTimestamp / 1000)}:F>`, inline: true })
           .setColor(0xffaa00)
+          .setThumbnail(newMember.user.displayAvatarURL({ size: 128 }))
           .setTimestamp();
-
+        if (audit?.executor) embed.addFields({ name: 'Moderator', value: `<@${audit.executor.id}>`, inline: true });
+        if (audit?.reason) embed.addFields({ name: 'Grund', value: String(audit.reason).substring(0, 1024) });
         await channel.send({ embeds: [embed] });
-        this.log('modlog', channelId, null, newMember.user.id, { type: 'timeout', username: newMember.user.tag });
+        this.log('modlog', channel.id, null, newMember.user.id, { type: 'timeout', username: newMember.user.tag });
       } catch (e) {
         console.error('Timeout log error:', e.message);
       }
     }
 
+    // Timeout aufgehoben
+    if (oldMember.communicationDisabledUntilTimestamp && !newMember.communicationDisabledUntilTimestamp
+        && this.getConfig('modlog_timeouts') !== 'false') {
+      try {
+        const embed = new EmbedBuilder()
+          .setTitle('Mod-Log: ✅ Timeout aufgehoben')
+          .setDescription(this._userMeta(newMember.user))
+          .setColor(0x00ff88)
+          .setTimestamp();
+        await channel.send({ embeds: [embed] });
+      } catch (e) { console.error('Timeout-clear log error:', e.message); }
+    }
+
+    // Nickname-Änderung
+    if (oldMember.nickname !== newMember.nickname && this.getConfig('modlog_nickname') !== 'false') {
+      try {
+        const embed = new EmbedBuilder()
+          .setTitle('Mod-Log: ✏️ Nickname geändert')
+          .setDescription(`**User:** <@${newMember.id}> (${newMember.user.tag})`)
+          .addFields(
+            { name: 'Vorher', value: oldMember.nickname || '*kein*', inline: true },
+            { name: 'Nachher', value: newMember.nickname || '*kein*', inline: true },
+          )
+          .setColor(0x00d4ff)
+          .setTimestamp();
+        await channel.send({ embeds: [embed] });
+      } catch (e) { console.error('Nickname log error:', e.message); }
+    }
+
+    // Rollenänderungen
     const addedRoles = newMember.roles.cache.filter(r => !oldMember.roles.cache.has(r.id));
     const removedRoles = oldMember.roles.cache.filter(r => !newMember.roles.cache.has(r.id));
 
-    if (addedRoles.size > 0 || removedRoles.size > 0) {
-      const logRoleChanges = this.getConfig('modlog_role_changes');
-      if (logRoleChanges === 'false') return;
-
+    if ((addedRoles.size > 0 || removedRoles.size > 0) && this.getConfig('modlog_role_changes') !== 'false') {
       try {
-        const channel = await this.client.channels.fetch(channelId);
-        if (!channel) return;
-
+        const audit = await this._fetchAuditExecutor(newMember.guild, AuditLogEvent.MemberRoleUpdate, newMember.id);
         const fields = [];
-        if (addedRoles.size > 0) fields.push({ name: 'Hinzugefuegt', value: addedRoles.map(r => r.name).join(', ') });
-        if (removedRoles.size > 0) fields.push({ name: 'Entfernt', value: removedRoles.map(r => r.name).join(', ') });
+        if (addedRoles.size > 0) fields.push({ name: '➕ Hinzugefügt', value: addedRoles.map(r => `<@&${r.id}>`).join(', '), inline: false });
+        if (removedRoles.size > 0) fields.push({ name: '➖ Entfernt', value: removedRoles.map(r => `<@&${r.id}>`).join(', '), inline: false });
+        if (audit?.executor) fields.push({ name: 'Moderator', value: `<@${audit.executor.id}>`, inline: true });
 
         const embed = new EmbedBuilder()
-          .setTitle('Mod-Log: Rollenänderung')
-          .setDescription(`**User:** ${newMember.user.tag}`)
+          .setTitle('Mod-Log: 🎭 Rollenänderung')
+          .setDescription(`**User:** <@${newMember.id}> (${newMember.user.tag})`)
           .addFields(fields)
           .setColor(0x00d4ff)
           .setTimestamp();
-
         await channel.send({ embeds: [embed] });
       } catch (e) {
         console.error('Role change log error:', e.message);
@@ -796,29 +870,112 @@ class DiscordBot {
 
   async _onMessageDelete(message) {
     if (message.partial || message.author?.bot) return;
+    if (this.getConfig('modlog_message_delete') === 'false') return;
 
-    const channelId = this.getConfig('channel_modlog');
-    const enabled = this.getConfig('modlog_enabled');
-    const logDeletes = this.getConfig('modlog_message_delete');
-    if (!channelId || enabled === 'false' || logDeletes === 'false') return;
+    const channel = await this._modlogChannel();
+    if (!channel) return;
 
     try {
-      const channel = await this.client.channels.fetch(channelId);
-      if (!channel) return;
+      const audit = message.guild
+        ? await this._fetchAuditExecutor(message.guild, AuditLogEvent.MessageDelete, message.author?.id)
+        : null;
 
       const embed = new EmbedBuilder()
-        .setTitle('Mod-Log: Nachricht gelöscht')
-        .setDescription(`**Author:** ${message.author?.tag || 'Unbekannt'}\n**Channel:** <#${message.channel.id}>`)
+        .setTitle('Mod-Log: 🗑️ Nachricht gelöscht')
+        .setDescription(`**Autor:** <@${message.author?.id}> (${message.author?.tag || 'Unbekannt'})\n**Channel:** <#${message.channel.id}>`)
         .setColor(0xff4444)
         .setTimestamp();
 
       if (message.content) {
         embed.addFields({ name: 'Inhalt', value: message.content.substring(0, 1024) });
       }
+      if (message.attachments && message.attachments.size > 0) {
+        embed.addFields({ name: 'Anhänge', value: message.attachments.map(a => a.url).join('\n').substring(0, 1024) });
+      }
+      if (audit?.executor && audit.executor.id !== message.author?.id) {
+        embed.addFields({ name: 'Gelöscht von', value: `<@${audit.executor.id}>`, inline: true });
+      }
 
       await channel.send({ embeds: [embed] });
+      this.log('modlog', channel.id, null, message.author?.id, { type: 'message_delete', channel: message.channel.id });
     } catch (e) {
       console.error('Message delete log error:', e.message);
+    }
+  }
+
+  async _onMessageUpdate(oldMessage, newMessage) {
+    if (newMessage.partial || newMessage.author?.bot) return;
+    if (this.getConfig('modlog_message_edit') === 'false') return;
+    if (oldMessage.content === newMessage.content) return; // z. B. nur Embed-Render
+
+    const channel = await this._modlogChannel();
+    if (!channel) return;
+
+    try {
+      const embed = new EmbedBuilder()
+        .setTitle('Mod-Log: ✏️ Nachricht bearbeitet')
+        .setDescription(`**Autor:** <@${newMessage.author?.id}> (${newMessage.author?.tag})\n**Channel:** <#${newMessage.channel.id}> · [Zur Nachricht](${newMessage.url})`)
+        .addFields(
+          { name: 'Vorher', value: (oldMessage.content || '*leer / unbekannt*').substring(0, 1024) },
+          { name: 'Nachher', value: (newMessage.content || '*leer*').substring(0, 1024) },
+        )
+        .setColor(0xffaa00)
+        .setTimestamp();
+      await channel.send({ embeds: [embed] });
+      this.log('modlog', channel.id, null, newMessage.author?.id, { type: 'message_edit', channel: newMessage.channel.id });
+    } catch (e) {
+      console.error('Message edit log error:', e.message);
+    }
+  }
+
+  async _onChannelChange(type, ch) {
+    if (this.getConfig('modlog_channels') === 'false') return;
+    if (!ch.guild) return;
+    const channel = await this._modlogChannel();
+    if (!channel) return;
+
+    try {
+      const created = type === 'create';
+      const audit = await this._fetchAuditExecutor(
+        ch.guild,
+        created ? AuditLogEvent.ChannelCreate : AuditLogEvent.ChannelDelete,
+        ch.id
+      );
+      const embed = new EmbedBuilder()
+        .setTitle(`Mod-Log: ${created ? '📂 Channel erstellt' : '🗑️ Channel gelöscht'}`)
+        .setDescription(`**Channel:** ${created ? `<#${ch.id}>` : `#${ch.name}`}\n**Typ:** \`${ch.type}\``)
+        .setColor(created ? 0x00ff88 : 0xff4444)
+        .setTimestamp();
+      if (audit?.executor) embed.addFields({ name: 'Von', value: `<@${audit.executor.id}>`, inline: true });
+      await channel.send({ embeds: [embed] });
+    } catch (e) {
+      console.error('Channel log error:', e.message);
+    }
+  }
+
+  // Beitritte/Verlassen im Modlog (zusätzlich zum Willkommens-System).
+  async _modlogMemberFlow(type, member) {
+    const key = type === 'join' ? 'modlog_member_join' : 'modlog_member_leave';
+    if (this.getConfig(key) !== 'true') return; // standardmäßig aus
+    const channel = await this._modlogChannel();
+    if (!channel) return;
+
+    try {
+      const join = type === 'join';
+      const embed = new EmbedBuilder()
+        .setTitle(`Mod-Log: ${join ? '📥 Beigetreten' : '📤 Verlassen'}`)
+        .setDescription(this._userMeta(member.user))
+        .setColor(join ? 0x00ff88 : 0xff4444)
+        .setThumbnail(member.user.displayAvatarURL({ size: 128 }))
+        .setTimestamp();
+      if (join) {
+        embed.addFields({ name: 'Mitglieder', value: String(member.guild.memberCount), inline: true });
+      } else if (member.joinedTimestamp) {
+        embed.addFields({ name: 'War dabei seit', value: `<t:${Math.floor(member.joinedTimestamp / 1000)}:R>`, inline: true });
+      }
+      await channel.send({ embeds: [embed] });
+    } catch (e) {
+      console.error('Member-flow modlog error:', e.message);
     }
   }
 
@@ -1212,6 +1369,14 @@ class DiscordBot {
     const channelId = this.getConfig('channel_github');
     if (!this.client || !this.isConnected || !channelId) return;
 
+    // Repo-Allowlist: nur ausgewählte Repos posten.
+    // Kein/ungültiger Wert => alle Repos (rückwärtskompatibel).
+    const allowed = this._parseJSON(this.getConfig('github_repos'), null);
+    const repoFull = payload.repository?.full_name;
+    if (Array.isArray(allowed) && repoFull && !allowed.includes(repoFull)) {
+      return;
+    }
+
     try {
       const channel = await this.client.channels.fetch(channelId);
       if (!channel) return;
@@ -1268,6 +1433,74 @@ class DiscordBot {
       }
     } catch (e) {
       console.error('GitHub notification error:', e.message);
+    }
+  }
+
+  // ── Kundenanfrage-Benachrichtigung ────────────────────────────
+
+  async sendRequestNotification(request, customer) {
+    const channelId = this.getConfig('channel_requests');
+    const enabled = this.getConfig('requests_enabled');
+    if (!this.client || !this.isConnected || !channelId || enabled === 'false') return;
+
+    const PROJECT_LABELS = {
+      'webdesign': '🎨 Webdesign',
+      'custom-app': '🛠️ Custom Anwendung',
+      'discord-bot': '🤖 Discord Bot',
+      'linux-setup': '🐧 Linux-Setup',
+    };
+    const BUDGET_LABELS = {
+      'unter-500': 'Unter 500€',
+      '500-1000': '500€ – 1.000€',
+      '1000-2500': '1.000€ – 2.500€',
+      'ueber-2500': 'Über 2.500€',
+    };
+    const TIMELINE_LABELS = {
+      'asap': 'So schnell wie möglich',
+      '1-2-wochen': '1-2 Wochen',
+      '1-monat': '1 Monat',
+      'flexibel': 'Flexibel',
+    };
+
+    try {
+      const channel = await this.client.channels.fetch(channelId);
+      if (!channel) return;
+
+      const fields = [
+        { name: '📋 Projektart', value: PROJECT_LABELS[request.project_type] || request.project_type || 'Unbekannt', inline: true },
+        { name: '💶 Budget', value: BUDGET_LABELS[request.budget] || request.budget || 'k. A.', inline: true },
+        { name: '⏱️ Zeitrahmen', value: TIMELINE_LABELS[request.timeline] || request.timeline || 'k. A.', inline: true },
+      ];
+
+      if (customer) {
+        const kontakt = [];
+        if (customer.name) kontakt.push(`**Name:** ${customer.name}`);
+        if (customer.company) kontakt.push(`**Firma:** ${customer.company}`);
+        if (customer.email) kontakt.push(`**E-Mail:** ${customer.email}`);
+        if (customer.phone) kontakt.push(`**Telefon:** ${customer.phone}`);
+        if (kontakt.length) fields.push({ name: '👤 Kunde', value: kontakt.join('\n'), inline: false });
+      }
+
+      if (request.description) {
+        fields.push({ name: '📝 Beschreibung', value: String(request.description).substring(0, 1024), inline: false });
+      }
+
+      const embed = new EmbedBuilder()
+        .setTitle('📩 Neue Projektanfrage')
+        .setDescription(`Anfrage **#${request.id}** ist über das Portfolio eingegangen.`)
+        .addFields(fields)
+        .setColor(0x6366f1)
+        .setTimestamp()
+        .setFooter({ text: 'Mas0n1x Portfolio · Projektanfrage' });
+
+      // Optionaler Rollen-Ping (z. B. Team/Admin)
+      const pingRole = this.getConfig('requests_ping_role');
+      const content = pingRole ? `<@&${pingRole}>` : undefined;
+
+      const sent = await channel.send({ content, embeds: [embed] });
+      this.log('request', channelId, sent.id, null, { requestId: request.id, projectType: request.project_type });
+    } catch (e) {
+      console.error('Request notification error:', e.message);
     }
   }
 

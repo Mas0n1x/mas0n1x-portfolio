@@ -9,6 +9,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mas0n1x | Software Developer</title>
+    <script>
+      // Performance: schwache Geräte erkennen und schweren Blur/Animationen abschalten.
+      // Läuft VOR dem ersten Paint, damit es direkt flüssig ist (kein Flash).
+      (function () {
+        try {
+          var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          var weakHw = (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4)
+                       || (navigator.deviceMemory && navigator.deviceMemory <= 4);
+          var forced = localStorage.getItem('perfLiteForced') === '1';
+          if (reduced || weakHw || forced) {
+            document.documentElement.classList.add('perf-lite');
+          }
+        } catch (e) {}
+      })();
+    </script>
     <meta name="description" content="Professionelle Software-Entwicklung: Web, Apps, Discord Bots, Backend & Frontend Systeme">
     <link rel="icon" type="image/png" href="logo.png">
     <link rel="apple-touch-icon" href="logo.png">
@@ -2309,6 +2324,28 @@
             background-clip: text;
         }
 
+        /* ===== Performance-Modus für schwache GPUs / reduced-motion ===== */
+        /* Nutzer mit reduzierter Bewegung: teure Dauer-Animationen aus. */
+        @media (prefers-reduced-motion: reduce) {
+            .ambient-orb, .particle, .hero-glow, .gradient-text { animation: none !important; }
+        }
+
+        /* perf-lite: die großflächigen Blur-Ebenen sind die Hauptlast –
+           jeder Frame zwingt sonst alle backdrop-filter zur Neuberechnung. */
+        html.perf-lite .ambient-orbs,
+        html.perf-lite .particles { display: none !important; }
+        html.perf-lite .hero-glow { animation: none !important; filter: blur(60px); }
+        html.perf-lite .gradient-text { animation: none !important; }
+
+        /* backdrop-filter komplett aus → flüssiges Scrollen. Glas-Flächen
+           haben eigene halbtransparente Hintergründe und bleiben lesbar. */
+        html.perf-lite *,
+        html.perf-lite *::before,
+        html.perf-lite *::after {
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+        }
+        html.perf-lite nav.scrolled { background: rgba(0, 0, 0, 0.95); }
     </style>
 </head>
 <body style="visibility:hidden;">
@@ -2782,6 +2819,34 @@
             particlesContainer.appendChild(particle);
         }
 
+        // Performance-Wächter: misst die echte Bildrate beim Scrollen/Idle.
+        // Erkennt schwache GPUs (auch bei starker CPU) und schaltet dann
+        // dauerhaft in den perf-lite-Modus. Läuft nur, wenn noch nicht aktiv.
+        (function () {
+            if (document.documentElement.classList.contains('perf-lite')) return;
+            let frames = 0;
+            let slow = 0;
+            let last = performance.now();
+            const start = last;
+            function tick(now) {
+                const dt = now - last;
+                last = now;
+                frames++;
+                if (dt > 34) slow++; // Frame langsamer als ~30fps
+                if (now - start < 2500) {
+                    requestAnimationFrame(tick);
+                } else {
+                    const fps = frames / ((now - start) / 1000);
+                    // Viele langsame Frames ODER niedrige Durchschnitts-FPS → abschalten
+                    if (fps < 50 || slow > frames * 0.2) {
+                        document.documentElement.classList.add('perf-lite');
+                        try { localStorage.setItem('perfLiteForced', '1'); } catch (e) {}
+                    }
+                }
+            }
+            requestAnimationFrame(tick);
+        })();
+
         // Typewriter effect
         const typewriterTexts = [
             'Software Developer',
@@ -2822,25 +2887,25 @@
         type();
 
         // Scroll reveal animation
-        function checkReveal() {
-            const reveals = document.querySelectorAll('.reveal');
-            reveals.forEach(element => {
-                const windowHeight = window.innerHeight;
-                const elementTop = element.getBoundingClientRect().top;
-                const revealPoint = 150;
-
-                if (elementTop < windowHeight - revealPoint) {
-                    element.classList.add('active');
-                }
-            });
-        }
-
+        // Reveal-on-Scroll via IntersectionObserver (kein Layout-Thrashing beim Scrollen).
         function initReveal() {
-            checkReveal();
+            const reveals = document.querySelectorAll('.reveal');
+            if (!('IntersectionObserver' in window)) {
+                reveals.forEach(el => el.classList.add('active'));
+                return;
+            }
+            const io = new IntersectionObserver((entries, obs) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                        obs.unobserve(entry.target); // einmalig – danach nicht mehr beobachten
+                    }
+                });
+            }, { rootMargin: '0px 0px -150px 0px', threshold: 0 });
+            reveals.forEach(el => io.observe(el));
         }
 
-        window.addEventListener('scroll', checkReveal);
-        checkReveal(); // Check on load
+        initReveal();
 
         // Smooth scroll for anchor links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
