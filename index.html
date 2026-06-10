@@ -44,6 +44,7 @@
 
   /* ============ Ambient background ============ */
   .bg-fx { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+  #particles { position: absolute; top: 0; left: 0; width: 100%; opacity: 0.7; -webkit-mask-image: linear-gradient(#000 60%, transparent); mask-image: linear-gradient(#000 60%, transparent); }
   .bg-grid {
     position: absolute; inset: 0;
     background-image:
@@ -238,6 +239,24 @@
   .t-title { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 1.1rem; margin-bottom: 10px; }
   .t-empty { grid-column: 1/-1; text-align: center; color: var(--text-3); padding: 50px; font-family: 'JetBrains Mono', monospace; }
 
+  /* ===== Über mich ===== */
+  .about-grid { display: grid; grid-template-columns: 0.85fr 1.15fr; gap: 56px; align-items: center; }
+  .about-card { position: relative; background: linear-gradient(160deg, rgba(255,255,255,0.03), rgba(255,255,255,0.005)); border: 1px solid var(--line); border-radius: 24px; padding: 44px 36px; text-align: center; overflow: hidden; }
+  .about-glow { position: absolute; top: -30%; left: 50%; transform: translateX(-50%); width: 320px; height: 320px; background: radial-gradient(circle, rgba(0,255,136,0.12), transparent 70%); pointer-events: none; }
+  .about-logo { width: 108px; height: 108px; object-fit: contain; margin: 0 auto 20px; border-radius: 50%; border: 1px solid var(--line-strong); padding: 14px; background: rgba(0,0,0,0.35); position: relative; }
+  .about-handle { font-family: 'JetBrains Mono', monospace; font-size: 1.2rem; font-weight: 600; color: var(--mint); position: relative; }
+  .about-role { font-size: 0.84rem; color: var(--text-3); margin: 4px 0 28px; position: relative; }
+  .about-mini { display: flex; justify-content: space-around; gap: 12px; padding-top: 24px; border-top: 1px solid var(--line); position: relative; }
+  .about-mini div { display: flex; flex-direction: column; gap: 4px; }
+  .about-mini strong { font-family: 'Space Grotesk', sans-serif; font-size: 1.4rem; font-variant-numeric: tabular-nums; }
+  .about-mini span { font-family: 'JetBrains Mono', monospace; font-size: 0.66rem; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.05em; }
+  .about-content h2 { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: clamp(1.9rem, 3.5vw, 2.8rem); line-height: 1.05; letter-spacing: -0.02em; margin: 16px 0 18px; }
+  .about-content p { color: var(--text-2); font-size: 1.02rem; margin-bottom: 16px; max-width: 540px; }
+  .about-values { display: flex; flex-direction: column; gap: 12px; margin: 26px 0 30px; }
+  .about-value { display: flex; align-items: center; gap: 12px; font-size: 0.96rem; }
+  .about-value i { color: var(--mint); width: 20px; text-align: center; }
+  @media (max-width: 980px) { .about-grid { grid-template-columns: 1fr; gap: 36px; max-width: 520px; margin: 0 auto; } }
+
   /* ============ CTA / Contact ============ */
   .cta {
     border: 1px solid var(--line); border-radius: 26px; padding: 70px 50px; text-align: center; position: relative; overflow: hidden;
@@ -385,13 +404,14 @@
 <div class="scroll-prog" id="scrollProg"></div>
 <div class="cursor-dot" id="cDot" aria-hidden="true"></div>
 <div class="cursor-ring" id="cRing" aria-hidden="true"></div>
-<div class="bg-fx"><div class="bg-grid"></div><div class="bg-glow"></div></div>
+<div class="bg-fx"><canvas id="particles"></canvas><div class="bg-grid"></div><div class="bg-glow"></div></div>
 
 <nav id="nav">
   <a href="#home" class="logo"><span class="dot"></span>MAS0N1X</a>
   <div class="nav-links" id="navLinks">
     <a href="#leistungen">Leistungen</a>
     <a href="#work">Arbeiten</a>
+    <a href="#about">Über mich</a>
     <a href="#faq">FAQ</a>
     <a href="#kontakt">Kontakt</a>
     <a href="/projekt-starten.html" class="nav-cta">Projekt starten</a>
@@ -457,6 +477,37 @@
   <div class="filters reveal" id="work-filters"></div>
   <div class="work-grid" id="work-grid">
     <p class="t-empty">Projekte werden geladen …</p>
+  </div>
+</section>
+
+<!-- ÜBER MICH -->
+<section id="about" class="wrap">
+  <div class="about-grid">
+    <div class="about-visual reveal">
+      <div class="about-card">
+        <div class="about-glow"></div>
+        <img src="/logo.png" alt="Mas0n1x Logo" class="about-logo">
+        <div class="about-handle">@Mas0n1x</div>
+        <div class="about-role">Founder · Developer · Designer</div>
+        <div class="about-mini">
+          <div><strong data-count="13" data-suffix="+">13+</strong><span>Projekte</span></div>
+          <div><strong>5,0★</strong><span>Bewertung</span></div>
+          <div><strong>100%</strong><span>Solo</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="about-content reveal">
+      <span class="eyebrow">Über mich</span>
+      <h2>Ein Entwickler.<br>Volle Verantwortung.</h2>
+      <p>Ich bin Mas0n1x — Founder, Designer und Entwickler in einer Person. Du arbeitest direkt mit dem, der dein Projekt baut: kurze Wege, ehrliche Kommunikation und Code, der von Anfang bis Ende aus einer Hand kommt — kein Agentur-Apparat, kein Outsourcing.</p>
+      <p>Angefangen mit Tools für die eigene Community, baue ich heute komplette Systeme, die täglich von tausenden Nutzern verwendet werden. Was zählt, ist nicht das schnellste Ergebnis — sondern das, das sich richtig anfühlt und wirklich funktioniert.</p>
+      <div class="about-values">
+        <div class="about-value"><i class="fas fa-bolt"></i> Schnelle, direkte Kommunikation</div>
+        <div class="about-value"><i class="fas fa-code"></i> 100% Eigenentwicklung</div>
+        <div class="about-value"><i class="fas fa-gem"></i> Fokus auf Polish &amp; das „Gefühl"</div>
+      </div>
+      <a href="/projekt-starten.html" class="btn btn-primary">Lass uns reden <i class="fas fa-arrow-right"></i></a>
+    </div>
   </div>
 </section>
 
@@ -813,6 +864,26 @@
     document.addEventListener('mouseover', e => { if (e.target.closest('a,button,.work-card,.faq-q,.b-card,.price-card')) ring.classList.add('hot'); });
     document.addEventListener('mouseout', e => { if (e.target.closest('a,button,.work-card,.faq-q,.b-card,.price-card')) ring.classList.remove('hot'); });
   }
+
+  // ===== Hero-Partikel (Canvas, motion-safe) =====
+  (function particles() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const canvas = document.getElementById('particles'); if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let w, h, pts = [];
+    const COUNT = Math.min(55, Math.floor(innerWidth / 30));
+    function resize() { w = canvas.width = innerWidth; h = canvas.height = Math.min(innerHeight * 1.05, 950); }
+    resize();
+    for (let i = 0; i < COUNT; i++) pts.push({ x: Math.random()*w, y: Math.random()*h, vx: (Math.random()-0.5)*0.3, vy: (Math.random()-0.5)*0.3 });
+    function draw() {
+      ctx.clearRect(0,0,w,h);
+      for (const p of pts) { p.x+=p.vx; p.y+=p.vy; if(p.x<0||p.x>w)p.vx*=-1; if(p.y<0||p.y>h)p.vy*=-1; ctx.beginPath(); ctx.arc(p.x,p.y,1.3,0,6.283); ctx.fillStyle='rgba(0,255,136,0.5)'; ctx.fill(); }
+      for (let i=0;i<pts.length;i++) for (let j=i+1;j<pts.length;j++) { const dx=pts[i].x-pts[j].x, dy=pts[i].y-pts[j].y, d=Math.hypot(dx,dy); if(d<130){ ctx.beginPath(); ctx.moveTo(pts[i].x,pts[i].y); ctx.lineTo(pts[j].x,pts[j].y); ctx.strokeStyle='rgba(0,255,136,'+(0.13*(1-d/130))+')'; ctx.lineWidth=0.5; ctx.stroke(); } }
+      requestAnimationFrame(draw);
+    }
+    draw();
+    let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(resize, 200); }, { passive: true });
+  })();
 
   // ===== Init =====
   loadWork(); loadServices(); loadTestimonials();
