@@ -2305,6 +2305,107 @@ function getActivityIcon(type) {
   return icons[type] || 'fa-circle';
 }
 
+// ==================== GLOBALE SUCHE (Cmd/Ctrl+K) ====================
+const CMD = { open: false, index: 0, results: [], cache: { projects: null, customers: null } };
+
+function getNavCommands() {
+  return [...document.querySelectorAll('.sidebar-nav .nav-item[data-section]')].map(el => ({
+    type: 'Navigation',
+    icon: el.querySelector('i')?.className || 'fas fa-arrow-right',
+    label: el.textContent.trim(),
+    action: () => el.click(),
+  }));
+}
+
+async function cmdLoadData() {
+  if (CMD.cache.projects === null) { try { CMD.cache.projects = await api('/projects'); } catch { CMD.cache.projects = []; } }
+  if (CMD.cache.customers === null) { try { CMD.cache.customers = await api('/customers'); } catch { CMD.cache.customers = []; } }
+}
+
+function buildCommands() {
+  const cmds = getNavCommands();
+  (CMD.cache.projects || []).forEach(p => cmds.push({
+    type: 'Projekt', icon: 'fas fa-folder',
+    label: p.title,
+    action: () => { document.querySelector('[data-section=projects]')?.click(); setTimeout(() => openProjectModal(p.id), 150); },
+  }));
+  (CMD.cache.customers || []).forEach(c => cmds.push({
+    type: 'Kunde', icon: 'fas fa-user',
+    label: c.name || c.email || ('Kunde #' + c.id),
+    action: () => { document.querySelector('[data-section=customers]')?.click(); },
+  }));
+  return cmds;
+}
+
+function renderCmdResults(query) {
+  const container = document.getElementById('cmd-results');
+  if (!container) return;
+  const all = buildCommands();
+  const q = (query || '').trim().toLowerCase();
+  CMD.results = q ? all.filter(c => c.label.toLowerCase().includes(q) || c.type.toLowerCase().includes(q)) : all;
+  CMD.index = 0;
+  if (CMD.results.length === 0) { container.innerHTML = '<div class="cmd-empty">Nichts gefunden</div>'; return; }
+  container.innerHTML = CMD.results.map((c, i) => `
+    <div class="cmd-item ${i === 0 ? 'active' : ''}" data-i="${i}">
+      <i class="${c.icon}"></i>
+      <span class="cmd-label">${escapeHtml(c.label)}</span>
+      <span class="cmd-type">${c.type}</span>
+    </div>`).join('');
+  container.querySelectorAll('.cmd-item').forEach(el => {
+    el.addEventListener('click', () => runCmd(parseInt(el.dataset.i)));
+    el.addEventListener('mouseenter', () => setCmdIndex(parseInt(el.dataset.i)));
+  });
+}
+
+function setCmdIndex(i) {
+  CMD.index = i;
+  document.querySelectorAll('.cmd-item').forEach((el, idx) => el.classList.toggle('active', idx === i));
+}
+
+function runCmd(i) {
+  const cmd = CMD.results[i];
+  closeCmd();
+  if (cmd) cmd.action();
+}
+
+async function openCmd() {
+  CMD.open = true;
+  const palette = document.getElementById('command-palette');
+  const input = document.getElementById('cmd-input');
+  if (!palette || !input) return;
+  palette.classList.remove('hidden');
+  input.value = '';
+  input.focus();
+  renderCmdResults('');
+  await cmdLoadData();
+  renderCmdResults(input.value);
+}
+
+function closeCmd() {
+  CMD.open = false;
+  document.getElementById('command-palette')?.classList.add('hidden');
+}
+
+document.addEventListener('keydown', (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+    e.preventDefault();
+    if (CMD.open) closeCmd(); else openCmd();
+    return;
+  }
+  if (!CMD.open) return;
+  if (e.key === 'Escape') closeCmd();
+  else if (e.key === 'ArrowDown') { e.preventDefault(); setCmdIndex(Math.min(CMD.index + 1, CMD.results.length - 1)); document.querySelector('.cmd-item.active')?.scrollIntoView({ block: 'nearest' }); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); setCmdIndex(Math.max(CMD.index - 1, 0)); document.querySelector('.cmd-item.active')?.scrollIntoView({ block: 'nearest' }); }
+  else if (e.key === 'Enter') { e.preventDefault(); runCmd(CMD.index); }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  const input = document.getElementById('cmd-input');
+  if (input) input.addEventListener('input', () => renderCmdResults(input.value));
+  const palette = document.getElementById('command-palette');
+  if (palette) palette.addEventListener('click', (e) => { if (e.target === palette) closeCmd(); });
+});
+
 // Backup download
 document.getElementById('backup-db-btn')?.addEventListener('click', async () => {
   try {
