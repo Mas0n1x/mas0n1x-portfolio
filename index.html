@@ -316,10 +316,74 @@
     *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
     .reveal { opacity: 1; transform: none; }
     .hero h1, .hero .lede, .hero-eyebrow, .hero-actions, .hero-stats, .terminal { opacity: 1; transform: none; animation: none; }
+    .marquee-track { animation: none !important; }
+    .cursor-dot, .cursor-ring { display: none !important; }
   }
+
+  /* ===== Accessibility ===== */
+  a, button, .work-card, .faq-q, .filter, .price-cta { cursor: pointer; }
+  :focus-visible { outline: 2px solid var(--mint); outline-offset: 3px; border-radius: 4px; }
+  .num, .price-amount strong, .hero-stat .num { font-variant-numeric: tabular-nums; }
+  .skip-link { position: absolute; left: -999px; top: 0; z-index: 2000; background: var(--mint); color: #000; padding: 10px 16px; border-radius: 0 0 8px 0; font-weight: 600; }
+  .skip-link:focus { left: 0; }
+
+  /* ===== Availability badge ===== */
+  .avail { display: inline-flex; align-items: center; gap: 9px; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: var(--mint); padding: 7px 14px; border: 1px solid rgba(0,255,136,0.25); border-radius: 100px; background: rgba(0,255,136,0.05); opacity: 0; animation: rise 0.9s var(--ease) 0s forwards; }
+  .avail-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 0 0 var(--mint-glow); animation: pulse 2s infinite; }
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(0,255,136,0.5); } 70% { box-shadow: 0 0 0 8px rgba(0,255,136,0); } 100% { box-shadow: 0 0 0 0 rgba(0,255,136,0); } }
+
+  /* ===== Marquee ===== */
+  .marquee { overflow: hidden; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 22px 0; background: rgba(255,255,255,0.012); -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); }
+  .marquee-track { display: inline-flex; align-items: center; gap: 28px; white-space: nowrap; animation: scroll-x 32s linear infinite; will-change: transform; }
+  .marquee:hover .marquee-track { animation-play-state: paused; }
+  .marquee-track span { font-family: 'Space Grotesk', sans-serif; font-size: 1.5rem; font-weight: 500; color: var(--text-2); }
+  .marquee-track i { color: var(--mint); font-style: normal; font-size: 0.9rem; }
+  @keyframes scroll-x { to { transform: translateX(-50%); } }
+
+  /* ===== Pricing ===== */
+  .price-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; align-items: start; }
+  .price-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 32px 28px; position: relative; transition: border-color 0.3s var(--ease), transform 0.3s var(--ease); }
+  .price-card:hover { border-color: var(--line-strong); transform: translateY(-4px); }
+  .price-card.featured { border-color: rgba(0,255,136,0.35); background: linear-gradient(170deg, rgba(0,255,136,0.05), rgba(0,212,255,0.02)); box-shadow: 0 0 40px rgba(0,255,136,0.08); }
+  .price-badge { position: absolute; top: -11px; right: 24px; font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; background: var(--mint); color: #000; padding: 5px 12px; border-radius: 100px; font-weight: 600; }
+  .price-name { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.08em; }
+  .price-amount { font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem; color: var(--text-2); margin: 12px 0 4px; }
+  .price-amount strong { font-size: 2.4rem; font-weight: 700; color: var(--text); display: inline; }
+  .price-for { color: var(--text-2); font-size: 0.95rem; margin-bottom: 22px; padding-bottom: 22px; border-bottom: 1px solid var(--line); }
+  .price-feats { list-style: none; margin-bottom: 26px; display: flex; flex-direction: column; gap: 12px; }
+  .price-feats li { display: flex; align-items: center; gap: 11px; font-size: 0.92rem; color: var(--text); }
+  .price-feats i { color: var(--mint); font-size: 0.8rem; }
+  .price-cta { width: 100%; justify-content: center; }
+
+  /* ===== FAQ ===== */
+  .faq-list { max-width: 760px; }
+  .faq-item { border-bottom: 1px solid var(--line); }
+  .faq-q { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 22px 4px; background: none; border: none; color: var(--text); font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem; font-weight: 500; text-align: left; transition: color 0.2s; }
+  .faq-q:hover { color: var(--mint); }
+  .faq-q i { color: var(--mint); font-size: 0.9rem; transition: transform 0.3s var(--ease); flex-shrink: 0; }
+  .faq-item.open .faq-q i { transform: rotate(45deg); }
+  .faq-a { max-height: 0; overflow: hidden; transition: max-height 0.35s var(--ease); }
+  .faq-a p { padding: 0 4px 22px; color: var(--text-2); line-height: 1.7; }
+
+  /* ===== Custom cursor (Desktop) ===== */
+  .cursor-dot, .cursor-ring { position: fixed; top: 0; left: 0; border-radius: 50%; pointer-events: none; z-index: 9999; transform: translate(-50%, -50%); }
+  .cursor-dot { width: 7px; height: 7px; background: var(--mint); }
+  .cursor-ring { width: 34px; height: 34px; border: 1px solid rgba(0,255,136,0.4); transition: width 0.2s, height 0.2s, background 0.2s; }
+  .cursor-ring.hot { width: 52px; height: 52px; background: rgba(0,255,136,0.06); }
+
+  /* ===== Scroll progress ===== */
+  .scroll-prog { position: fixed; top: 0; left: 0; height: 2px; width: 0; background: linear-gradient(90deg, var(--mint), var(--cyan)); z-index: 200; }
+
+  @media (max-width: 980px) { .price-grid { grid-template-columns: 1fr; max-width: 460px; margin: 0 auto; } }
+  @media (max-width: 720px) { .marquee-track span { font-size: 1.2rem; } .cursor-dot, .cursor-ring { display: none; } }
+  @media (pointer: coarse) { .cursor-dot, .cursor-ring { display: none; } }
 </style>
 </head>
 <body>
+<a href="#home" class="skip-link">Zum Inhalt springen</a>
+<div class="scroll-prog" id="scrollProg"></div>
+<div class="cursor-dot" id="cDot" aria-hidden="true"></div>
+<div class="cursor-ring" id="cRing" aria-hidden="true"></div>
 <div class="bg-fx"><div class="bg-grid"></div><div class="bg-glow"></div></div>
 
 <nav id="nav">
@@ -327,7 +391,8 @@
   <div class="nav-links" id="navLinks">
     <a href="#leistungen">Leistungen</a>
     <a href="#work">Arbeiten</a>
-    <a href="#prozess">Prozess</a>
+    <a href="#preise">Preise</a>
+    <a href="#faq">FAQ</a>
     <a href="#kontakt">Kontakt</a>
     <a href="/projekt-starten.html" class="nav-cta">Projekt starten</a>
   </div>
@@ -338,17 +403,17 @@
 <header class="hero wrap" id="home">
   <div class="hero-grid">
     <div>
-      <span class="eyebrow hero-eyebrow">Freelance Software-Studio</span>
+      <span class="avail"><span class="avail-dot"></span>Verfügbar für neue Projekte</span>
       <h1>Ich baue Software,<br>die <span class="grad">verkauft</span>.</h1>
-      <p class="lede">Maßgeschneiderte Web-Apps, KI-Tools, Discord-Bots und Dashboards für Communities und Marken — entwickelt mit Fokus auf Tempo, Polish und Wirkung.</p>
+      <p class="lede">Maßgeschneiderte Web-Apps, KI-Tools, Discord-Bots und Dashboards für Communities und Marken — schnell gebaut, durchdacht designt, gemacht um zu wirken.</p>
       <div class="hero-actions">
         <a href="/projekt-starten.html" class="btn btn-primary">Projekt starten <i class="fas fa-arrow-right"></i></a>
         <a href="#work" class="btn btn-ghost">Arbeiten ansehen</a>
       </div>
       <div class="hero-stats">
-        <div class="hero-stat"><span class="num" id="stat-projects">12+</span><span class="lbl">Projekte</span></div>
-        <div class="hero-stat"><span class="num">2.300+</span><span class="lbl">Aktive Nutzer</span></div>
-        <div class="hero-stat"><span class="num">100%</span><span class="lbl">Eigenentwicklung</span></div>
+        <div class="hero-stat"><span class="num" data-count="12" data-suffix="+" id="stat-projects">12+</span><span class="lbl">Projekte gebaut</span></div>
+        <div class="hero-stat"><span class="num" data-count="2300" data-suffix="+">2.300+</span><span class="lbl">Aktive Nutzer</span></div>
+        <div class="hero-stat"><span class="num" data-count="100" data-suffix="%">100%</span><span class="lbl">Eigenentwicklung</span></div>
       </div>
     </div>
     <div class="terminal" aria-hidden="true">
@@ -357,6 +422,14 @@
     </div>
   </div>
 </header>
+
+<!-- TECH MARQUEE -->
+<div class="marquee" aria-hidden="true">
+  <div class="marquee-track">
+    <span>TypeScript</span><i>✦</i><span>React</span><i>✦</i><span>Next.js</span><i>✦</i><span>Node.js</span><i>✦</i><span>Python</span><i>✦</i><span>Discord.js</span><i>✦</i><span>Docker</span><i>✦</i><span>SQLite</span><i>✦</i><span>Express</span><i>✦</i><span>KI / LLMs</span><i>✦</i><span>Tailwind</span><i>✦</i>
+    <span>TypeScript</span><i>✦</i><span>React</span><i>✦</i><span>Next.js</span><i>✦</i><span>Node.js</span><i>✦</i><span>Python</span><i>✦</i><span>Discord.js</span><i>✦</i><span>Docker</span><i>✦</i><span>SQLite</span><i>✦</i><span>Express</span><i>✦</i><span>KI / LLMs</span><i>✦</i><span>Tailwind</span><i>✦</i>
+  </div>
+</div>
 
 <!-- LEISTUNGEN -->
 <section id="leistungen" class="wrap">
@@ -399,6 +472,86 @@
     <div class="step reveal"><span class="n">02</span><h3>Konzept</h3><p>Klarer Plan: Funktionen, Design-Richtung, Zeitplan und Preis — alles fixiert, bevor es losgeht.</p></div>
     <div class="step reveal"><span class="n">03</span><h3>Bau</h3><p>Ich baue in kurzen Iterationen, du siehst laufend Fortschritt und gibst Feedback.</p></div>
     <div class="step reveal"><span class="n">04</span><h3>Launch</h3><p>Deployment, Übergabe und Support. Dein System läuft — und ich bleibe ansprechbar.</p></div>
+  </div>
+</section>
+
+<!-- PREISE -->
+<section id="preise" class="wrap">
+  <div class="section-head reveal">
+    <span class="eyebrow">Pakete</span>
+    <h2>Klare Pakete, faire Preise</h2>
+    <p>Transparente Richtwerte — den finalen Preis fixieren wir gemeinsam vor Projektstart, ohne versteckte Kosten.</p>
+  </div>
+  <div class="price-grid">
+    <div class="price-card reveal">
+      <span class="price-name">Starter</span>
+      <div class="price-amount">ab <strong>149€</strong></div>
+      <p class="price-for">Tools, Discord-Bots & Generatoren</p>
+      <ul class="price-feats">
+        <li><i class="fas fa-check"></i> Einzelnes Tool oder Bot</li>
+        <li><i class="fas fa-check"></i> Sauberer, wartbarer Code</li>
+        <li><i class="fas fa-check"></i> Deployment inklusive</li>
+        <li><i class="fas fa-check"></i> 14 Tage Support</li>
+      </ul>
+      <a href="/projekt-starten.html" class="btn btn-ghost price-cta">Anfragen</a>
+    </div>
+    <div class="price-card featured reveal">
+      <span class="price-badge">Beliebt</span>
+      <span class="price-name">Pro</span>
+      <div class="price-amount">ab <strong>590€</strong></div>
+      <p class="price-for">Web-Apps, Dashboards & Plattformen</p>
+      <ul class="price-feats">
+        <li><i class="fas fa-check"></i> Maßgeschneiderte Anwendung</li>
+        <li><i class="fas fa-check"></i> Individuelles UI/UX-Design</li>
+        <li><i class="fas fa-check"></i> Datenbank, API & Auth</li>
+        <li><i class="fas fa-check"></i> Admin-Bereich auf Wunsch</li>
+        <li><i class="fas fa-check"></i> 30 Tage Support</li>
+      </ul>
+      <a href="/projekt-starten.html" class="btn btn-primary price-cta">Projekt starten</a>
+    </div>
+    <div class="price-card reveal">
+      <span class="price-name">Custom</span>
+      <div class="price-amount"><strong>auf Anfrage</strong></div>
+      <p class="price-for">Komplexe Systeme & Ökosysteme</p>
+      <ul class="price-feats">
+        <li><i class="fas fa-check"></i> Mehrteilige Systeme</li>
+        <li><i class="fas fa-check"></i> KI-/Automatisierungs-Logik</li>
+        <li><i class="fas fa-check"></i> Skalierbare Architektur</li>
+        <li><i class="fas fa-check"></i> Laufende Betreuung möglich</li>
+      </ul>
+      <a href="/projekt-starten.html" class="btn btn-ghost price-cta">Gespräch vereinbaren</a>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq" class="wrap">
+  <div class="section-head reveal">
+    <span class="eyebrow">FAQ</span>
+    <h2>Häufige Fragen</h2>
+    <p>Was du vor einer Anfrage wissen willst — kurz und ehrlich beantwortet.</p>
+  </div>
+  <div class="faq-list reveal">
+    <div class="faq-item">
+      <button class="faq-q" aria-expanded="false"><span>Was kostet ein Projekt?</span><i class="fas fa-plus"></i></button>
+      <div class="faq-a"><p>Das hängt vom Umfang ab. Kleine Tools starten bei ~149€, Web-Apps bei ~590€. Du bekommst vor dem Start ein festes Angebot — keine Überraschungen.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" aria-expanded="false"><span>Wie lange dauert die Umsetzung?</span><i class="fas fa-plus"></i></button>
+      <div class="faq-a"><p>Kleinere Projekte oft in wenigen Tagen, größere in 2–6 Wochen. Du siehst während des Baus laufend Fortschritt und kannst Feedback geben.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" aria-expanded="false"><span>Gehört mir der Code?</span><i class="fas fa-plus"></i></button>
+      <div class="faq-a"><p>Ja. Nach vollständiger Bezahlung gehört dir das Ergebnis inklusive Quellcode. Du bist nicht an mich gebunden.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" aria-expanded="false"><span>Gibt es Support nach dem Launch?</span><i class="fas fa-plus"></i></button>
+      <div class="faq-a"><p>Jedes Paket enthält Support nach dem Go-Live. Darüber hinaus biete ich auf Wunsch laufende Wartung und Weiterentwicklung an.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" aria-expanded="false"><span>Arbeitest du auch an bestehenden Systemen?</span><i class="fas fa-plus"></i></button>
+      <div class="faq-a"><p>Klar. Ich übernehme bestehende Projekte, baue Features ein oder modernisiere veraltete Codebases.</p></div>
+    </div>
   </div>
 </section>
 
@@ -669,6 +822,41 @@
   // ===== Cookie =====
   function acceptCookies() { localStorage.setItem('cookie_ok', '1'); document.getElementById('cookie').classList.remove('show'); }
   if (!localStorage.getItem('cookie_ok')) setTimeout(() => document.getElementById('cookie').classList.add('show'), 1200);
+
+  // ===== Count-up (Stats) =====
+  function countUp(el) {
+    const target = parseInt(el.dataset.count), suf = el.dataset.suffix || '';
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { el.textContent = target.toLocaleString('de-DE') + suf; return; }
+    const dur = 1400, t0 = performance.now();
+    (function tick(now) {
+      const p = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(target * e).toLocaleString('de-DE') + suf;
+      if (p < 1) requestAnimationFrame(tick);
+    })(performance.now());
+  }
+  const statObs = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { countUp(e.target); statObs.unobserve(e.target); } }), { threshold: 0.5 });
+  document.querySelectorAll('[data-count]').forEach(el => statObs.observe(el));
+
+  // ===== FAQ accordion =====
+  document.querySelectorAll('.faq-q').forEach(q => q.addEventListener('click', () => {
+    const item = q.closest('.faq-item'), a = item.querySelector('.faq-a'), isOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item.open').forEach(o => { o.classList.remove('open'); o.querySelector('.faq-a').style.maxHeight = null; o.querySelector('.faq-q').setAttribute('aria-expanded', 'false'); });
+    if (!isOpen) { item.classList.add('open'); a.style.maxHeight = a.scrollHeight + 'px'; q.setAttribute('aria-expanded', 'true'); }
+  }));
+
+  // ===== Scroll progress =====
+  const sp = document.getElementById('scrollProg');
+  window.addEventListener('scroll', () => { const h = document.documentElement.scrollHeight - innerHeight; sp.style.width = (h > 0 ? scrollY / h * 100 : 0) + '%'; }, { passive: true });
+
+  // ===== Custom cursor (Desktop, fine pointer, motion-safe) =====
+  if (window.matchMedia('(pointer: fine)').matches && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const dot = document.getElementById('cDot'), ring = document.getElementById('cRing');
+    let rx = innerWidth/2, ry = innerHeight/2, tx = rx, ty = ry;
+    window.addEventListener('mousemove', e => { tx = e.clientX; ty = e.clientY; dot.style.transform = `translate(${tx}px,${ty}px) translate(-50%,-50%)`; });
+    (function loop(){ rx += (tx-rx)*0.18; ry += (ty-ry)*0.18; ring.style.transform = `translate(${rx}px,${ry}px) translate(-50%,-50%)`; requestAnimationFrame(loop); })();
+    document.addEventListener('mouseover', e => { if (e.target.closest('a,button,.work-card,.faq-q,.b-card,.price-card')) ring.classList.add('hot'); });
+    document.addEventListener('mouseout', e => { if (e.target.closest('a,button,.work-card,.faq-q,.b-card,.price-card')) ring.classList.remove('hot'); });
+  }
 
   // ===== Init =====
   loadWork(); loadServices(); loadTestimonials();
