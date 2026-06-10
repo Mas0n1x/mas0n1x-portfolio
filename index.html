@@ -33,10 +33,10 @@
   @keyframes spin{to{transform:rotate(360deg)}}
   @keyframes blink{50%{opacity:0}}
   .wrap{max-width:var(--container);margin:0 auto;padding:0 28px}
-  section{padding:110px 0;position:relative}
+  section{padding:150px 0;position:relative}
   /* eigenständige Trennlinie zwischen Sektionen (fadet nicht mit) */
-  .divider{max-width:var(--container);margin:0 auto;height:1px;background:linear-gradient(90deg,transparent,var(--line2) 35%,var(--line2) 65%,transparent);position:relative}
-  .divider::after{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(45deg);width:6px;height:6px;background:var(--mint);box-shadow:0 0 12px var(--glow)}
+  .divider{max-width:calc(var(--container) - 40px);margin:0 auto;height:1px;background:linear-gradient(90deg,transparent,var(--line2) 35%,var(--line2) 65%,transparent);position:relative}
+  .divider::after{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(45deg);width:7px;height:7px;background:var(--mint);box-shadow:0 0 12px var(--glow)}
   /* HUD frame util */
   .hud{position:relative;border:1px solid var(--line);background:var(--panel)}
   .hud::before,.hud::after{content:'';position:absolute;width:14px;height:14px;border:1px solid var(--line2)}
@@ -79,17 +79,8 @@
   .hstats{display:flex;gap:34px;margin-top:42px}
   .hstats .n{font-family:'Space Grotesk',sans-serif;font-size:1.8rem;font-weight:600;font-variant-numeric:tabular-nums}
   .hstats .l{font-family:var(--mono);font-size:.68rem;color:var(--text3);text-transform:uppercase;letter-spacing:.08em}
-  /* innere Elemente: nur Bewegung (Sichtbarkeit steuert die Sektion) */
-  .reveal{transform:translateY(30px);transition:transform .85s cubic-bezier(.16,1,.3,1);transition-delay:var(--rd,0ms)}
-  .reveal.in{transform:none}
-  .sechead h2{clip-path:inset(0 0 115% 0);transition:clip-path 1.05s cubic-bezier(.16,1,.3,1) .06s}
-  .sechead.in h2,.reveal.in h2{clip-path:inset(0 0 -15% 0)}
-  /* Projektkarten: eigener Fade, da einzeln getriggert */
-  .acard.reveal{opacity:0;transform:translateY(40px) scale(.97);transition:opacity .7s ease,transform .7s cubic-bezier(.16,1,.3,1)}
-  .acard.reveal.in{opacity:1;transform:none}
-  /* Bereich-Reveal: ganze Sektion ist erst unsichtbar und blendet beim Reinscrollen komplett ein */
-  .sect{opacity:0;transform:translateY(64px);transition:opacity .9s cubic-bezier(.16,1,.3,1),transform .9s cubic-bezier(.16,1,.3,1);will-change:opacity,transform}
-  .sect.in{opacity:1;transform:none}
+  /* Bereiche: Sichtbarkeit scroll-gekoppelt — JS setzt opacity/transform live an der Scroll-Position */
+  .sect{opacity:0;will-change:opacity,transform}
   /* build terminal */
   .jterm{position:relative;opacity:0;transform:translateY(20px);animation:rise 1s ease .5s forwards}
   @keyframes rise{to{opacity:1;transform:none}}
@@ -188,6 +179,7 @@
   @media(max-width:720px){.navl{display:none}.burg{display:block}section{padding:80px 0}.proc{grid-template-columns:1fr}.pstep::after{display:none}.hstats{gap:24px}}
   @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition-duration:.01ms!important}.reveal{opacity:1;transform:none}.sect{opacity:1;transform:none}.jterm{opacity:1;transform:none}}
 </style>
+<noscript><style>.sect{opacity:1!important;transform:none!important}</style></noscript>
 </head>
 <body>
 <div class="fx"><div class="fx-grid"></div><div class="fx-scan"></div><div class="fx-glow"></div><div class="fx-spot" id="fxSpot"></div></div>
@@ -344,13 +336,31 @@
   // scroll progress
   const sprog=document.getElementById('sprog');
   addEventListener('scroll',()=>{const h=document.documentElement.scrollHeight-innerHeight;sprog.style.width=(h>0?scrollY/h*100:0)+'%';},{passive:true});
-  // reveal v2 (mit Stagger)
+  // scroll-gekoppelter Bereich-Reveal: Sichtbarkeit haengt direkt an der Scroll-Position
   const REDM=matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const io=new IntersectionObserver(es=>es.forEach(e=>{const on=e.isIntersecting;e.target.classList.toggle('in',on);e.target.querySelectorAll('.reveal').forEach(ch=>ch.classList.toggle('in',on));}),{threshold:0,rootMargin:'0px 0px -12% 0px'});
-  function staggerIn(c){[...c.children].forEach((ch,i)=>{if(ch.classList.contains('reveal'))ch.style.setProperty('--rd',(i*85)+'ms');});}
-  document.querySelectorAll('[data-stagger]').forEach(staggerIn);
-  function observeReveals(root){(root||document).querySelectorAll('.sect').forEach(e=>io.observe(e));}
-  observeReveals();
+  const sects=[...document.querySelectorAll('.sect')];
+  let revTick=false;
+  function updateReveal(){
+    revTick=false;
+    const vh=innerHeight;
+    for(const s of sects){
+      const r=s.getBoundingClientRect();
+      let p;
+      if(r.top>=vh||r.bottom<=0)p=0;
+      else if(r.top>vh*0.6)p=(vh-r.top)/(vh*0.4);      // tritt von unten ein
+      else if(r.bottom<vh*0.4)p=r.bottom/(vh*0.4);     // tritt oben aus
+      else p=1;                                         // voll im Blick
+      p=p<0?0:p>1?1:p;
+      if(REDM){s.style.opacity='1';s.style.transform='none';}
+      else{s.style.opacity=p.toFixed(3);s.style.transform='translateY('+((1-p)*46).toFixed(1)+'px)';}
+    }
+  }
+  function onRevScroll(){if(!revTick){revTick=true;requestAnimationFrame(updateReveal);}}
+  function staggerIn(){}
+  function observeReveals(){}
+  updateReveal();
+  addEventListener('scroll',onRevScroll,{passive:true});
+  addEventListener('resize',onRevScroll,{passive:true});
   // scroll-spy
   const navlinks=[...navl.querySelectorAll('a[href^="#"]')];
   const spy=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){navlinks.forEach(a=>a.classList.toggle('act',a.getAttribute('href')==='#'+e.target.id));}}),{rootMargin:'-45% 0px -50% 0px'});
@@ -360,7 +370,7 @@
   const so=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){cu(e.target);so.unobserve(e.target);}}),{threshold:.5});document.querySelectorAll('[data-count]').forEach(e=>so.observe(e));
   function esc(t){if(!t)return'';const d=document.createElement('div');d.textContent=t;return d.innerHTML;}
   // work archive
-  async function load(){const g=document.getElementById('arch-grid');try{const r=await fetch('/api/projects');if(!r.ok)throw 0;const ps=await r.json();const cn=document.querySelector('[data-count="13"]');if(cn)cn.dataset.count=ps.length;g.innerHTML=ps.map((p,i)=>{const im=(p.images&&p.images.length)?p.images:(p.image?[{path:p.image}]:[]);const st={in_progress:'IN ARBEIT',completed:'AKTIV',planned:'GEPLANT'}[p.status]||'AKTIV';return `<div class="acard reveal" data-i="${i}"><div class="athumb">${im.length?`<img src="${im[0].path}" alt="${esc(p.title)}" loading="lazy">`:(p.logo?`<img class="alogo" src="${p.logo}" alt="${esc(p.title)}">`:'<i class="fas fa-code ph"></i>')}<span class="aidx">// ${String(i+1).padStart(2,'0')}</span><span class="astat">${st}</span></div><div class="abody"><div class="atags">${(p.tags||[]).slice(0,4).map(t=>`<span class="atag">${esc(t)}</span>`).join('')}</div><h3>${esc(p.title)}</h3><p>${esc(p.description||'')}</p><span class="amore">Details ▸</span></div></div>`;}).join('');g.querySelectorAll('.acard').forEach(c=>c.onclick=()=>od(ps[+c.dataset.i]));staggerIn(g);if(document.getElementById('arch').classList.contains('in'))g.querySelectorAll('.reveal').forEach(c=>c.classList.add('in'));}catch(e){g.innerHTML='<p style="color:var(--text3);grid-column:1/-1">Projekte aktuell nicht erreichbar.</p>';}}
+  async function load(){const g=document.getElementById('arch-grid');try{const r=await fetch('/api/projects');if(!r.ok)throw 0;const ps=await r.json();const cn=document.querySelector('[data-count="13"]');if(cn)cn.dataset.count=ps.length;g.innerHTML=ps.map((p,i)=>{const im=(p.images&&p.images.length)?p.images:(p.image?[{path:p.image}]:[]);const st={in_progress:'IN ARBEIT',completed:'AKTIV',planned:'GEPLANT'}[p.status]||'AKTIV';return `<div class="acard reveal" data-i="${i}"><div class="athumb">${im.length?`<img src="${im[0].path}" alt="${esc(p.title)}" loading="lazy">`:(p.logo?`<img class="alogo" src="${p.logo}" alt="${esc(p.title)}">`:'<i class="fas fa-code ph"></i>')}<span class="aidx">// ${String(i+1).padStart(2,'0')}</span><span class="astat">${st}</span></div><div class="abody"><div class="atags">${(p.tags||[]).slice(0,4).map(t=>`<span class="atag">${esc(t)}</span>`).join('')}</div><h3>${esc(p.title)}</h3><p>${esc(p.description||'')}</p><span class="amore">Details ▸</span></div></div>`;}).join('');g.querySelectorAll('.acard').forEach(c=>c.onclick=()=>od(ps[+c.dataset.i]));updateReveal();}catch(e){g.innerHTML='<p style="color:var(--text3);grid-column:1/-1">Projekte aktuell nicht erreichbar.</p>';}}
   function od(p){if(!p)return;const im=(p.images&&p.images.length)?p.images:(p.image?[{path:p.image}]:[]);const detail=esc(p.detail||p.description||'').replace(/\n/g,'<br>');const code=(p.repo_url&&!p.private)?`<a href="${esc(p.repo_url)}" target="_blank" rel="noopener" class="btn btn-g"><i class="fab fa-github"></i> Code</a>`:'';const meta=[p.language,p.stars?('★ '+p.stars):''].filter(Boolean).map(m=>`<span class="atag">${esc(m)}</span>`).join('');document.getElementById('db').innerHTML=`${im.length?`<div class="mgal">${im.map(x=>`<img src="${x.path}" alt="${esc(p.title)}" loading="lazy">`).join('')}</div>`:''}<h2>${esc(p.title)}</h2><div class="atags">${(p.tags||[]).map(t=>`<span class="atag">${esc(t)}</span>`).join('')}${meta}</div><p class="mdesc">${detail}</p><div class="acts" style="display:flex;gap:12px;flex-wrap:wrap">${p.link?`<a href="${esc(p.link)}" target="_blank" rel="noopener" class="btn btn-p">Ansehen <i class="fas fa-external-link-alt"></i></a>`:''}${code}</div>`;document.getElementById('dm').classList.add('open');document.body.style.overflow='hidden';lenis&&lenis.stop();}
   function cd(){document.getElementById('dm').classList.remove('open');document.body.style.overflow='';lenis&&lenis.start();}
   // legal
@@ -400,7 +410,7 @@
     requestAnimationFrame(raf);
     document.querySelectorAll('a[href^="#"]').forEach(a=>{const id=a.getAttribute('href');if(id.length>1)a.addEventListener('click',e=>{const tg=document.querySelector(id);if(tg){e.preventDefault();lenis.scrollTo(tg,{offset:-64});}});});
     const grid=document.querySelector('.fx-grid');
-    lenis.on('scroll',({scroll})=>{if(grid)grid.style.backgroundPosition='0 '+(scroll*0.18)+'px';});
+    lenis.on('scroll',({scroll})=>{if(grid)grid.style.backgroundPosition='0 '+(scroll*0.18)+'px';updateReveal();});
   })();
   // mouse-spotlight (folgt der Maus, rAF-gedrosselt)
   (function(){
