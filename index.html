@@ -83,6 +83,9 @@
   .sechead h2{clip-path:inset(0 0 115% 0);transition:clip-path 1.05s cubic-bezier(.16,1,.3,1) .06s}
   .sechead.in h2,.reveal.in h2{clip-path:inset(0 0 -15% 0)}
   .acard.reveal{transform:translateY(40px) scale(.97)}.acard.reveal.in{transform:none}
+  /* Bereich-Reveal: ganze Sektion erscheint beim Reinscrollen */
+  .sect{opacity:0;transform:translateY(60px);transition:opacity 1s cubic-bezier(.16,1,.3,1),transform 1s cubic-bezier(.16,1,.3,1)}
+  .sect.in{opacity:1;transform:none}
   /* build terminal */
   .jterm{position:relative;opacity:0;transform:translateY(20px);animation:rise 1s ease .5s forwards}
   @keyframes rise{to{opacity:1;transform:none}}
@@ -179,7 +182,7 @@
   .sprog{position:fixed;top:0;left:0;height:2px;background:linear-gradient(90deg,var(--mint),var(--cyan));z-index:200;width:0}
   @media(max-width:980px){.hgrid{grid-template-columns:1fr;gap:40px}.caps{grid-template-columns:1fr}.proc{grid-template-columns:repeat(2,1fr)}.pstep:nth-child(2)::after{display:none}.abt{grid-template-columns:1fr}}
   @media(max-width:720px){.navl{display:none}.burg{display:block}section{padding:80px 0}.proc{grid-template-columns:1fr}.pstep::after{display:none}.hstats{gap:24px}}
-  @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition-duration:.01ms!important}.reveal{opacity:1;transform:none}.jterm{opacity:1;transform:none}}
+  @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition-duration:.01ms!important}.reveal{opacity:1;transform:none}.sect{opacity:1;transform:none}.jterm{opacity:1;transform:none}}
 </style>
 </head>
 <body>
@@ -219,7 +222,7 @@
   </div>
 </header>
 
-<section id="cap" class="wrap">
+<section id="cap" class="wrap sect">
   <div class="sechead reveal">
     <span class="eyebrow">Leistungen</span>
     <h2>Was ich baue</h2>
@@ -233,7 +236,7 @@
   </div>
 </section>
 
-<section id="arch" class="wrap">
+<section id="arch" class="wrap sect">
   <div class="sechead reveal">
     <span class="eyebrow">Projekte</span>
     <h2>Ausgewählte Arbeiten</h2>
@@ -242,7 +245,7 @@
   <div class="arch" id="arch-grid"><p style="color:var(--text3);font-family:var(--mono);grid-column:1/-1">Lade Projekte …</p></div>
 </section>
 
-<section id="op" class="wrap">
+<section id="op" class="wrap sect">
   <div class="sechead reveal">
     <span class="eyebrow">Über mich</span>
     <h2>Mas0n1x</h2>
@@ -271,7 +274,7 @@
   </div>
 </section>
 
-<section id="faq" class="wrap">
+<section id="faq" class="wrap sect">
   <div class="sechead ctr reveal">
     <span class="eyebrow">FAQ</span>
     <h2>Häufige Fragen</h2>
@@ -286,7 +289,7 @@
   </div>
 </section>
 
-<section id="proc" class="wrap">
+<section id="proc" class="wrap sect">
   <div class="sechead ctr reveal">
     <span class="eyebrow">Ablauf</span>
     <h2>So arbeiten wir zusammen</h2>
@@ -300,7 +303,7 @@
   </div>
 </section>
 
-<section id="conn" class="wrap">
+<section id="conn" class="wrap sect">
   <div class="hud conn reveal">
     <h2>Lass uns dein System bauen.</h2>
     <p>Erzähl mir in 2 Minuten, was du brauchst — ich melde mich mit einer ehrlichen Einschätzung.</p>
@@ -329,10 +332,10 @@
   addEventListener('scroll',()=>{const h=document.documentElement.scrollHeight-innerHeight;sprog.style.width=(h>0?scrollY/h*100:0)+'%';},{passive:true});
   // reveal v2 (mit Stagger)
   const REDM=matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}}),{threshold:.14,rootMargin:'0px 0px -6% 0px'});
+  const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);if(e.target.classList.contains('sect'))e.target.querySelectorAll('.reveal:not(.in):not(.acard)').forEach(ch=>{ch.classList.add('in');io.unobserve(ch);});}}),{threshold:0,rootMargin:'0px 0px -12% 0px'});
   function staggerIn(c){[...c.children].forEach((ch,i)=>{if(ch.classList.contains('reveal'))ch.style.setProperty('--rd',(i*85)+'ms');});}
   document.querySelectorAll('[data-stagger]').forEach(staggerIn);
-  function observeReveals(root){(root||document).querySelectorAll('.reveal:not(.in)').forEach(e=>io.observe(e));}
+  function observeReveals(root){(root||document).querySelectorAll('.reveal:not(.in),.sect:not(.in)').forEach(e=>io.observe(e));}
   observeReveals();
   // scroll-spy
   const navlinks=[...navl.querySelectorAll('a[href^="#"]')];
