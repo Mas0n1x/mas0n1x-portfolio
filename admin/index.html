@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <!--
   Mas0n1x Portfolio
   Copyright (c) 2024-2026 DEV Mas0n1x.
@@ -47,7 +47,7 @@
         <span>Admin Panel</span>
       </div>
       <nav class="sidebar-nav">
-        <div class="nav-category">Ãœbersicht</div>
+        <div class="nav-category">Übersicht</div>
         <a href="#" class="nav-item active" data-section="dashboard">
           <i class="fas fa-tachometer-alt"></i> Dashboard
         </a>
@@ -121,8 +121,8 @@
 
         <!-- Willkommen -->
         <div class="dashboard-welcome">
-          <h2>Willkommen zurÃ¼ck!</h2>
-          <p>Hier ist deine Ãœbersicht fÃ¼r heute.</p>
+          <h2>Willkommen zurück!</h2>
+          <p>Hier ist deine Übersicht für heute.</p>
         </div>
 
         <!-- Statistik-Karten -->
@@ -161,21 +161,21 @@
         <div class="dashboard-row">
           <div class="dashboard-card">
             <div class="card-header">
-              <h3><i class="fas fa-euro-sign"></i> Umsatz-Ãœbersicht</h3>
+              <h3><i class="fas fa-euro-sign"></i> Umsatz-Übersicht</h3>
             </div>
             <div class="card-body">
               <div class="chart-split">
                 <div class="donut-wrap">
                   <canvas id="revenue-donut"></canvas>
                   <div class="donut-center">
-                    <span class="donut-value" id="dash-revenue-total">0,00 â‚¬</span>
+                    <span class="donut-value" id="dash-revenue-total">0,00 €</span>
                     <span class="donut-sub">Gesamt</span>
                   </div>
                 </div>
                 <div class="chart-legend">
-                  <div class="legend-row"><span class="legend-dot paid"></span><span class="legend-label">Bezahlt</span><span class="legend-value success" id="dash-revenue-paid">0,00 â‚¬</span></div>
-                  <div class="legend-row"><span class="legend-dot open"></span><span class="legend-label">Offen</span><span class="legend-value warning" id="dash-revenue-open">0,00 â‚¬</span></div>
-                  <div class="legend-row"><span class="legend-dot overdue"></span><span class="legend-label">ÃœberfÃ¤llig</span><span class="legend-value danger" id="dash-revenue-overdue">0,00 â‚¬</span></div>
+                  <div class="legend-row"><span class="legend-dot paid"></span><span class="legend-label">Bezahlt</span><span class="legend-value success" id="dash-revenue-paid">0,00 €</span></div>
+                  <div class="legend-row"><span class="legend-dot open"></span><span class="legend-label">Offen</span><span class="legend-value warning" id="dash-revenue-open">0,00 €</span></div>
+                  <div class="legend-row"><span class="legend-dot overdue"></span><span class="legend-label">Überfällig</span><span class="legend-value danger" id="dash-revenue-overdue">0,00 €</span></div>
                 </div>
               </div>
             </div>
@@ -200,14 +200,14 @@
           </div>
         </div>
 
-        <!-- Letzte AktivitÃ¤ten -->
+        <!-- Letzte Aktivitäten -->
         <div class="dashboard-card">
           <div class="card-header">
-            <h3><i class="fas fa-clock"></i> Letzte AktivitÃ¤ten</h3>
+            <h3><i class="fas fa-clock"></i> Letzte Aktivitäten</h3>
           </div>
           <div class="card-body">
             <div id="dash-activities" class="activity-list">
-              <p class="empty-text">Keine AktivitÃ¤ten vorhanden</p>
+              <p class="empty-text">Keine Aktivitäten vorhanden</p>
             </div>
           </div>
         </div>
@@ -233,7 +233,7 @@
               </button>
               <button class="quick-action-btn" onclick="document.querySelector('[data-section=requests]').click();">
                 <i class="fas fa-inbox"></i>
-                <span>Anfragen prÃ¼fen</span>
+                <span>Anfragen prüfen</span>
               </button>
             </div>
           </div>
@@ -258,7 +258,7 @@
       <section id="section-request-detail" class="content-section">
         <div class="section-header">
           <button id="back-to-requests" class="btn-secondary">
-            <i class="fas fa-arrow-left"></i> ZurÃ¼ck
+            <i class="fas fa-arrow-left"></i> Zurück
           </button>
           <h1 id="request-detail-title"><i class="fas fa-file-alt"></i> Anfrage Details</h1>
         </div>
@@ -300,8 +300,8 @@
               </div>
               <div class="form-group">
                 <label><i class="fas fa-sticky-note"></i> Private Notizen</label>
-                <textarea id="request-admin-notes" placeholder="Private Notizen zu diesem Projekt... (nur fÃ¼r dich sichtbar)" rows="4"></textarea>
-                <small class="form-hint">Diese Notizen sind nur im Admin-Panel sichtbar, nicht fÃ¼r den Kunden.</small>
+                <textarea id="request-admin-notes" placeholder="Private Notizen zu diesem Projekt... (nur für dich sichtbar)" rows="4"></textarea>
+                <small class="form-hint">Diese Notizen sind nur im Admin-Panel sichtbar, nicht für den Kunden.</small>
               </div>
               <button id="save-request-btn" class="btn-primary">
                 <i class="fas fa-save"></i> Speichern
@@ -413,7 +413,7 @@
             </div>
             <div class="customer-actions">
               <button id="delete-customer-btn" class="btn-danger">
-                <i class="fas fa-trash"></i> Kunde lÃ¶schen
+                <i class="fas fa-trash"></i> Kunde löschen
               </button>
             </div>
           </div>
@@ -502,7 +502,7 @@
             </div>
             <div class="form-group">
               <label>Adresse</label>
-              <textarea id="invoice-from-address" rows="2" placeholder="MusterstraÃŸe 1&#10;12345 Musterstadt"></textarea>
+              <textarea id="invoice-from-address" rows="2" placeholder="Musterstraße 1&#10;12345 Musterstadt"></textarea>
             </div>
             <div class="form-row">
               <div class="form-group">
@@ -515,14 +515,14 @@
               </div>
             </div>
 
-            <h4>EmpfÃ¤nger (Kunde)</h4>
+            <h4>Empfänger (Kunde)</h4>
             <div class="form-group">
               <label>Name / Firma</label>
               <input type="text" id="invoice-to-name" placeholder="Kunde GmbH">
             </div>
             <div class="form-group">
               <label>Adresse</label>
-              <textarea id="invoice-to-address" rows="2" placeholder="KundenstraÃŸe 2&#10;54321 Kundenstadt"></textarea>
+              <textarea id="invoice-to-address" rows="2" placeholder="Kundenstraße 2&#10;54321 Kundenstadt"></textarea>
             </div>
 
             <h4>Positionen</h4>
@@ -538,7 +538,7 @@
                     <input type="number" class="item-qty" value="1" min="1">
                   </div>
                   <div class="form-group" style="flex: 1;">
-                    <label>Preis (â‚¬)</label>
+                    <label>Preis (€)</label>
                     <input type="number" class="item-price" value="0" step="0.01" min="0">
                   </div>
                   <button type="button" class="btn-icon danger remove-item" style="align-self: flex-end; margin-bottom: 16px;">
@@ -548,7 +548,7 @@
               </div>
             </div>
             <button type="button" id="add-invoice-item" class="btn-secondary" style="margin-bottom: 20px;">
-              <i class="fas fa-plus"></i> Position hinzufÃ¼gen
+              <i class="fas fa-plus"></i> Position hinzufügen
             </button>
 
             <h4>Zahlungsinformationen</h4>
@@ -561,8 +561,8 @@
               <textarea id="invoice-bank" rows="3" placeholder="IBAN: DE12 3456 7890 1234 5678 90&#10;BIC: ABCDEFGH&#10;Bank: Musterbank"></textarea>
             </div>
             <div class="form-group">
-              <label>ZusÃ¤tzliche Hinweise</label>
-              <textarea id="invoice-notes" rows="2" placeholder="z.B. Vielen Dank fÃ¼r Ihren Auftrag!"></textarea>
+              <label>Zusätzliche Hinweise</label>
+              <textarea id="invoice-notes" rows="2" placeholder="z.B. Vielen Dank für Ihren Auftrag!"></textarea>
             </div>
 
             <div class="form-group">
@@ -610,7 +610,7 @@
               </div>
 
               <div class="form-group">
-                <label>GÃ¼ltigkeit (Tage)</label>
+                <label>Gültigkeit (Tage)</label>
                 <input type="number" id="quote-validity" value="30" min="1">
               </div>
 
@@ -621,7 +621,7 @@
               </div>
               <div class="form-group">
                 <label>Adresse</label>
-                <textarea id="quote-from-address" rows="2" placeholder="MusterstraÃŸe 1&#10;12345 Musterstadt"></textarea>
+                <textarea id="quote-from-address" rows="2" placeholder="Musterstraße 1&#10;12345 Musterstadt"></textarea>
               </div>
               <div class="form-row">
                 <div class="form-group">
@@ -634,14 +634,14 @@
                 </div>
               </div>
 
-              <h4>EmpfÃ¤nger (Kunde)</h4>
+              <h4>Empfänger (Kunde)</h4>
               <div class="form-group">
                 <label>Name / Firma</label>
                 <input type="text" id="quote-to-name" placeholder="Kunde GmbH">
               </div>
               <div class="form-group">
                 <label>Adresse</label>
-                <textarea id="quote-to-address" rows="2" placeholder="KundenstraÃŸe 2&#10;54321 Kundenstadt"></textarea>
+                <textarea id="quote-to-address" rows="2" placeholder="Kundenstraße 2&#10;54321 Kundenstadt"></textarea>
               </div>
 
               <h4>Projektbeschreibung</h4>
@@ -677,17 +677,17 @@
                 </div>
               </div>
               <button type="button" id="add-quote-item" class="btn-secondary" style="margin-bottom: 20px;">
-                <i class="fas fa-plus"></i> Position hinzufÃ¼gen
+                <i class="fas fa-plus"></i> Position hinzufügen
               </button>
 
               <h4>Zeitrahmen</h4>
               <div class="form-row">
                 <div class="form-group">
-                  <label>GeschÃ¤tzte Dauer</label>
+                  <label>Geschätzte Dauer</label>
                   <input type="text" id="quote-duration" placeholder="z.B. 2-3 Wochen">
                 </div>
                 <div class="form-group">
-                  <label>FrÃ¼hester Starttermin</label>
+                  <label>Frühester Starttermin</label>
                   <input type="date" id="quote-start-date">
                 </div>
               </div>
@@ -700,8 +700,8 @@
                 </label>
               </div>
               <div class="form-group">
-                <label>ZusÃ¤tzliche Hinweise</label>
-                <textarea id="quote-notes" rows="3" placeholder="z.B. ZahlungsmodalitÃ¤ten, Ã„nderungsvorbehalte..."></textarea>
+                <label>Zusätzliche Hinweise</label>
+                <textarea id="quote-notes" rows="3" placeholder="z.B. Zahlungsmodalitäten, Änderungsvorbehalte..."></textarea>
               </div>
             </div>
 
@@ -735,7 +735,7 @@
                   <option value="">Alle Status</option>
                   <option value="offen">Offen</option>
                   <option value="bezahlt">Bezahlt</option>
-                  <option value="ueberfaellig">ÃœberfÃ¤llig</option>
+                  <option value="ueberfaellig">Überfällig</option>
                 </select>
               </div>
             </div>
@@ -747,16 +747,16 @@
                 <span class="archive-stat-label">Rechnungen</span>
               </div>
               <div class="archive-stat-card success">
-                <span class="archive-stat-value" id="archive-paid-amount">0,00 â‚¬</span>
+                <span class="archive-stat-value" id="archive-paid-amount">0,00 €</span>
                 <span class="archive-stat-label">Bezahlt</span>
               </div>
               <div class="archive-stat-card warning">
-                <span class="archive-stat-value" id="archive-open-amount">0,00 â‚¬</span>
+                <span class="archive-stat-value" id="archive-open-amount">0,00 €</span>
                 <span class="archive-stat-label">Offen</span>
               </div>
               <div class="archive-stat-card danger">
-                <span class="archive-stat-value" id="archive-overdue-amount">0,00 â‚¬</span>
-                <span class="archive-stat-label">ÃœberfÃ¤llig</span>
+                <span class="archive-stat-value" id="archive-overdue-amount">0,00 €</span>
+                <span class="archive-stat-label">Überfällig</span>
               </div>
             </div>
 
@@ -780,7 +780,7 @@
         </div>
         <div class="info-box">
           <i class="fas fa-info-circle"></i>
-          <span>Behalte den Ãœberblick Ã¼ber alle Deadlines und Termine deiner Projekte.</span>
+          <span>Behalte den Überblick über alle Deadlines und Termine deiner Projekte.</span>
         </div>
 
         <!-- Calendar Navigation -->
@@ -828,7 +828,7 @@
         </div>
         <div class="info-box">
           <i class="fas fa-info-circle"></i>
-          <span>Verwalte Kundenbewertungen. Genehmigte Bewertungen kÃ¶nnen auf der Portfolio-Seite angezeigt werden.</span>
+          <span>Verwalte Kundenbewertungen. Genehmigte Bewertungen können auf der Portfolio-Seite angezeigt werden.</span>
         </div>
 
         <!-- Reviews Stats -->
@@ -871,7 +871,7 @@
         </div>
         <div class="info-box">
           <i class="fas fa-info-circle"></i>
-          <span>Erstelle Vorlagen fÃ¼r hÃ¤ufig verwendete Nachrichten. Diese kÃ¶nnen beim Schreiben von Nachrichten schnell eingefÃ¼gt werden.</span>
+          <span>Erstelle Vorlagen für häufig verwendete Nachrichten. Diese können beim Schreiben von Nachrichten schnell eingefügt werden.</span>
         </div>
 
         <!-- Templates Stats -->
@@ -900,7 +900,7 @@
       <!-- Contracts Section -->
       <section id="section-contracts" class="content-section">
         <div class="section-header">
-          <h1><i class="fas fa-file-signature"></i> Vertragsvorlagen & VertrÃ¤ge</h1>
+          <h1><i class="fas fa-file-signature"></i> Vertragsvorlagen & Verträge</h1>
           <button id="add-contract-template-btn" class="btn-primary">
             <i class="fas fa-plus"></i> Neue Vorlage
           </button>
@@ -916,7 +916,7 @@
             <i class="fas fa-file-alt"></i> Vorlagen
           </button>
           <button class="contract-tab" data-contract-tab="generated">
-            <i class="fas fa-file-signature"></i> Generierte VertrÃ¤ge
+            <i class="fas fa-file-signature"></i> Generierte Verträge
           </button>
         </div>
 
@@ -943,14 +943,14 @@
               <div class="stat-icon"><i class="fas fa-file-signature"></i></div>
               <div class="stat-info">
                 <span class="stat-value" id="total-contracts">0</span>
-                <span class="stat-label">VertrÃ¤ge</span>
+                <span class="stat-label">Verträge</span>
               </div>
             </div>
             <div class="stat-card warning">
               <div class="stat-icon"><i class="fas fa-clock"></i></div>
               <div class="stat-info">
                 <span class="stat-value" id="draft-contracts">0</span>
-                <span class="stat-label">EntwÃ¼rfe</span>
+                <span class="stat-label">Entwürfe</span>
               </div>
             </div>
             <div class="stat-card success">
@@ -977,7 +977,7 @@
         </div>
         <div class="info-box">
           <i class="fas fa-info-circle"></i>
-          <span>Verwalte manuelle und automatische Backups deiner Datenbank. Automatische Backups werden tÃ¤glich erstellt wenn aktiviert.</span>
+          <span>Verwalte manuelle und automatische Backups deiner Datenbank. Automatische Backups werden täglich erstellt wenn aktiviert.</span>
         </div>
 
         <!-- Backup Settings -->
@@ -986,13 +986,13 @@
           <div class="form-group">
             <label class="checkbox-label">
               <input type="checkbox" id="backup-enabled">
-              <span>Automatische tÃ¤gliche Backups aktivieren</span>
+              <span>Automatische tägliche Backups aktivieren</span>
             </label>
           </div>
           <div class="form-group">
             <label class="checkbox-label">
               <input type="checkbox" id="auto-payment-reminders">
-              <span>Automatische Zahlungserinnerungen bei Ã¼berfÃ¤lligen Rechnungen</span>
+              <span>Automatische Zahlungserinnerungen bei überfälligen Rechnungen</span>
             </label>
           </div>
           <button id="save-backup-settings-btn" class="btn-primary" style="margin-top: 10px;">
@@ -1067,7 +1067,7 @@
           <button class="discord-tab" data-discord-tab="logs"><i class="fas fa-list"></i> Logs</button>
         </div>
 
-        <!-- â•â•â• Tab: Allgemein â•â•â• -->
+        <!-- ═══ Tab: Allgemein ═══ -->
         <div id="discord-tab-general" class="discord-tab-content active">
           <div class="discord-config-card">
             <h3><i class="fas fa-key"></i> Bot-Konfiguration</h3>
@@ -1098,15 +1098,15 @@
           <div class="discord-config-card" style="margin-top:16px;">
             <h3><i class="fas fa-undo"></i> Standardwerte laden</h3>
             <div class="discord-info-box">
-              <i class="fas fa-info-circle"></i> Setzt alle Nachrichten (Welcome, Leave, Regeln, Produkte, Social, Tickets) auf die vordefinierten Standardwerte zurÃ¼ck. Channel-IDs und Token werden nicht verÃ¤ndert.
+              <i class="fas fa-info-circle"></i> Setzt alle Nachrichten (Welcome, Leave, Regeln, Produkte, Social, Tickets) auf die vordefinierten Standardwerte zurück. Channel-IDs und Token werden nicht verändert.
             </div>
             <div class="discord-actions">
-              <button class="btn-warning" onclick="resetDiscordDefaults()"><i class="fas fa-undo"></i> Alle Nachrichten auf Standardwerte zurÃ¼cksetzen</button>
+              <button class="btn-warning" onclick="resetDiscordDefaults()"><i class="fas fa-undo"></i> Alle Nachrichten auf Standardwerte zurücksetzen</button>
             </div>
           </div>
         </div>
 
-        <!-- â•â•â• Tab: Welcome / Leave â•â•â• -->
+        <!-- ═══ Tab: Welcome / Leave ═══ -->
         <div id="discord-tab-welcome" class="discord-tab-content">
           <div class="discord-config-card">
             <h3><i class="fas fa-hashtag"></i> Channel</h3>
@@ -1164,7 +1164,7 @@
           </div>
         </div>
 
-        <!-- â•â•â• Tab: Regeln â•â•â• -->
+        <!-- ═══ Tab: Regeln ═══ -->
         <div id="discord-tab-rules" class="discord-tab-content">
           <div class="discord-config-card">
             <h3><i class="fas fa-scroll"></i> Serverregeln & Auto-Rolle</h3>
@@ -1179,7 +1179,7 @@
               </div>
               <div class="form-group" style="flex:0 0 80px;">
                 <label>Emoji</label>
-                <input type="text" id="discord-rules-emoji" value="âœ…" style="text-align:center;">
+                <input type="text" id="discord-rules-emoji" value="✅" style="text-align:center;">
               </div>
             </div>
             <div class="form-row" style="display:flex;gap:16px;flex-wrap:wrap;">
@@ -1212,7 +1212,7 @@
           </div>
         </div>
 
-        <!-- â•â•â• Tab: Produkte â•â•â• -->
+        <!-- ═══ Tab: Produkte ═══ -->
         <div id="discord-tab-products" class="discord-tab-content">
           <div class="discord-config-card">
             <h3><i class="fas fa-box"></i> Produkt-Embeds</h3>
@@ -1232,12 +1232,12 @@
           </div>
         </div>
 
-        <!-- â•â•â• Tab: Aktive Projekte â•â•â• -->
+        <!-- ═══ Tab: Aktive Projekte ═══ -->
         <div id="discord-tab-projects" class="discord-tab-content">
           <div class="discord-config-card">
             <h3><i class="fas fa-rocket"></i> Aktive Projekte posten</h3>
             <div class="discord-info-box">
-              <i class="fas fa-info-circle"></i> Postet alle Projekte mit Status <strong>aktiv</strong> aus der Projektverwaltung als Embeds in den gewÃ¤hlten Channel â€” inkl. Fortschrittsbalken, Tech-Tags und Link. Die Liste wird live aus der Datenbank gelesen.
+              <i class="fas fa-info-circle"></i> Postet alle Projekte mit Status <strong>aktiv</strong> aus der Projektverwaltung als Embeds in den gewählten Channel — inkl. Fortschrittsbalken, Tech-Tags und Link. Die Liste wird live aus der Datenbank gelesen.
             </div>
             <div class="form-group">
               <label>Projekte Channel ID</label>
@@ -1249,7 +1249,7 @@
           </div>
         </div>
 
-        <!-- â•â•â• Tab: Social â•â•â• -->
+        <!-- ═══ Tab: Social ═══ -->
         <div id="discord-tab-social" class="discord-tab-content">
           <div class="discord-config-card">
             <h3><i class="fas fa-share-alt"></i> Social Links Embed</h3>
@@ -1279,7 +1279,7 @@
           </div>
         </div>
 
-        <!-- â•â•â• Tab: GitHub â•â•â• -->
+        <!-- ═══ Tab: GitHub ═══ -->
         <div id="discord-tab-github" class="discord-tab-content">
           <div class="discord-config-card">
             <h3><i class="fab fa-github"></i> GitHub Webhook</h3>
@@ -1323,11 +1323,11 @@
           <div class="discord-config-card" style="margin-top:16px;">
             <h3><i class="fas fa-building"></i> GitHub Organisationen</h3>
             <div class="discord-info-box">
-              <i class="fas fa-info-circle"></i> FÃ¼ge GitHub Organisationen hinzu, um auch deren Repositories mit Webhooks zu verbinden.<br>
-              <i class="fas fa-key"></i> Dein Token benÃ¶tigt zusÃ¤tzlich die <code>admin:org_hook</code> Berechtigung fÃ¼r Organisations-Webhooks.
+              <i class="fas fa-info-circle"></i> Füge GitHub Organisationen hinzu, um auch deren Repositories mit Webhooks zu verbinden.<br>
+              <i class="fas fa-key"></i> Dein Token benötigt zusätzlich die <code>admin:org_hook</code> Berechtigung für Organisations-Webhooks.
             </div>
             <div class="form-group">
-              <label>Organisation hinzufÃ¼gen</label>
+              <label>Organisation hinzufügen</label>
               <div style="display:flex;gap:8px;">
                 <input type="text" id="discord-github-org-input" placeholder="z.B. LawNet-Team" style="flex:1;font-family:'JetBrains Mono',monospace;font-size:0.85rem;">
                 <button class="btn-secondary" onclick="addGithubOrg()"><i class="fas fa-plus"></i></button>
@@ -1341,16 +1341,16 @@
           </div>
 
           <div class="discord-config-card" style="margin-top:16px;">
-            <h3><i class="fas fa-list-check"></i> Repo-Auswahl fÃ¼r Discord-Posts</h3>
+            <h3><i class="fas fa-list-check"></i> Repo-Auswahl für Discord-Posts</h3>
             <div class="discord-info-box">
-              <i class="fas fa-info-circle"></i> WÃ¤hle aus, welche Repositories in den GitHub-Channel gepostet werden. AbgewÃ¤hlte Repos lÃ¶sen <strong>keine</strong> Discord-Nachricht aus (die Webhooks bei GitHub bleiben erhalten).<br>
-              <i class="fas fa-lightbulb"></i> Sind <strong>alle</strong> Repos ausgewÃ¤hlt, werden automatisch auch neue/zukÃ¼nftige Repos gepostet.
+              <i class="fas fa-info-circle"></i> Wähle aus, welche Repositories in den GitHub-Channel gepostet werden. Abgewählte Repos lösen <strong>keine</strong> Discord-Nachricht aus (die Webhooks bei GitHub bleiben erhalten).<br>
+              <i class="fas fa-lightbulb"></i> Sind <strong>alle</strong> Repos ausgewählt, werden automatisch auch neue/zukünftige Repos gepostet.
             </div>
             <div class="discord-actions" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
               <button class="btn-secondary" onclick="loadGithubRepoSelection()"><i class="fas fa-sync"></i> Repos laden</button>
               <button class="btn-secondary" onclick="toggleAllGithubRepos(true)"><i class="fas fa-check-double"></i> Alle</button>
               <button class="btn-secondary" onclick="toggleAllGithubRepos(false)"><i class="fas fa-xmark"></i> Keine</button>
-              <input type="text" id="github-repo-filter" placeholder="Filternâ€¦" oninput="filterGithubRepoList()" style="flex:1;min-width:160px;">
+              <input type="text" id="github-repo-filter" placeholder="Filtern…" oninput="filterGithubRepoList()" style="flex:1;min-width:160px;">
             </div>
             <div id="github-repo-select-list" style="margin-top:12px;display:flex;flex-direction:column;gap:6px;max-height:340px;overflow-y:auto;"></div>
             <div class="discord-actions" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
@@ -1360,7 +1360,7 @@
           </div>
         </div>
 
-        <!-- â•â•â• Tab: Tickets â•â•â• -->
+        <!-- ═══ Tab: Tickets ═══ -->
         <div id="discord-tab-tickets" class="discord-tab-content">
           <div class="discord-config-card">
             <h3><i class="fas fa-ticket-alt"></i> Ticket-System</h3>
@@ -1397,7 +1397,7 @@
           </div>
         </div>
 
-        <!-- â•â•â• Tab: Moderation â•â•â• -->
+        <!-- ═══ Tab: Moderation ═══ -->
         <div id="discord-tab-moderation" class="discord-tab-content">
           <div class="discord-config-card">
             <h3><i class="fas fa-shield-alt"></i> Moderation Logs</h3>
@@ -1415,7 +1415,7 @@
             <div class="discord-toggle-row"><label><i class="fas fa-folder-tree"></i> Channel erstellt/geloescht</label><label class="toggle-switch"><input type="checkbox" id="discord-modlog-channels" checked><span class="toggle-slider"></span></label></div>
             <div class="discord-toggle-row"><label><i class="fas fa-arrow-right-to-bracket"></i> Beitritte (Modlog)</label><label class="toggle-switch"><input type="checkbox" id="discord-modlog-join"><span class="toggle-slider"></span></label></div>
             <div class="discord-toggle-row"><label><i class="fas fa-arrow-right-from-bracket"></i> Verlassen (Modlog)</label><label class="toggle-switch"><input type="checkbox" id="discord-modlog-leave"><span class="toggle-slider"></span></label></div>
-            <div class="discord-info-box" style="margin-top:8px;"><i class="fas fa-circle-info"></i> FÃ¼r Moderator-Anzeige (Wer hat gebannt/gekickt?) benÃ¶tigt der Bot die Berechtigung <code>Audit-Log ansehen</code>.</div>
+            <div class="discord-info-box" style="margin-top:8px;"><i class="fas fa-circle-info"></i> Für Moderator-Anzeige (Wer hat gebannt/gekickt?) benötigt der Bot die Berechtigung <code>Audit-Log ansehen</code>.</div>
             <div class="discord-actions">
               <button class="btn-primary" onclick="saveDiscordModeration()"><i class="fas fa-save"></i> Speichern</button>
             </div>
@@ -1424,7 +1424,7 @@
           <div class="discord-config-card" style="margin-top:16px;">
             <h3><i class="fas fa-envelope-open-text"></i> Kundenanfragen</h3>
             <div class="discord-info-box">
-              <i class="fas fa-info-circle"></i> Bei jeder neuen Projektanfrage Ã¼ber das Portfolio postet der Bot sofort eine Nachricht in den festgelegten Channel.
+              <i class="fas fa-info-circle"></i> Bei jeder neuen Projektanfrage über das Portfolio postet der Bot sofort eine Nachricht in den festgelegten Channel.
             </div>
             <div class="discord-toggle-row"><label>Anfrage-Benachrichtigung aktiviert</label><label class="toggle-switch"><input type="checkbox" id="discord-requests-enabled" checked><span class="toggle-slider"></span></label></div>
             <div class="form-group">
@@ -1441,7 +1441,7 @@
           </div>
         </div>
 
-        <!-- â•â•â• Tab: Logs â•â•â• -->
+        <!-- ═══ Tab: Logs ═══ -->
         <div id="discord-tab-logs" class="discord-tab-content">
           <div class="discord-config-card">
             <h3><i class="fas fa-list"></i> Bot-Aktivitaeten</h3>
@@ -1477,7 +1477,7 @@
         </div>
         <div class="info-box">
           <i class="fas fa-info-circle"></i>
-          <span>Verwalte hier alle rechtlichen Texte fÃ¼r deine Website: Impressum, Datenschutz, AGB und Widerrufsbelehrung.</span>
+          <span>Verwalte hier alle rechtlichen Texte für deine Website: Impressum, Datenschutz, AGB und Widerrufsbelehrung.</span>
         </div>
 
         <!-- Legal Tabs -->
@@ -1499,15 +1499,15 @@
         <!-- Impressum Tab -->
         <div id="legal-impressum-tab" class="legal-tab-content active">
           <div class="settings-card">
-            <h3><i class="fas fa-user"></i> Angaben gemÃ¤ÃŸ Â§ 5 TMG</h3>
+            <h3><i class="fas fa-user"></i> Angaben gemäß § 5 TMG</h3>
             <form id="impressum-form">
               <div class="form-group">
-                <label>VollstÃ¤ndiger Name</label>
+                <label>Vollständiger Name</label>
                 <input type="text" id="imp-name" placeholder="Max Mustermann">
               </div>
               <div class="form-group">
-                <label>StraÃŸe und Hausnummer</label>
-                <input type="text" id="imp-street" placeholder="MusterstraÃŸe 1">
+                <label>Straße und Hausnummer</label>
+                <input type="text" id="imp-street" placeholder="Musterstraße 1">
               </div>
               <div class="form-row">
                 <div class="form-group">
@@ -1541,13 +1541,13 @@
           </div>
 
           <div class="settings-card">
-            <h3><i class="fas fa-briefcase"></i> GeschÃ¤ftliche Angaben (optional)</h3>
+            <h3><i class="fas fa-briefcase"></i> Geschäftliche Angaben (optional)</h3>
             <div class="form-group">
               <label>Umsatzsteuer-ID</label>
               <input type="text" id="imp-ustid" placeholder="DE123456789">
             </div>
             <div class="form-group">
-              <label>Berufsbezeichnung / TÃ¤tigkeit</label>
+              <label>Berufsbezeichnung / Tätigkeit</label>
               <input type="text" id="imp-job" placeholder="Softwareentwickler">
             </div>
           </div>
@@ -1555,8 +1555,8 @@
           <div class="settings-card">
             <h3><i class="fas fa-shield-alt"></i> Haftungsausschluss</h3>
             <div class="form-group">
-              <label>ZusÃ¤tzlicher Text (optional)</label>
-              <textarea id="imp-disclaimer" rows="4" placeholder="Haftung fÃ¼r Inhalte, Links, etc."></textarea>
+              <label>Zusätzlicher Text (optional)</label>
+              <textarea id="imp-disclaimer" rows="4" placeholder="Haftung für Inhalte, Links, etc."></textarea>
             </div>
           </div>
 
@@ -1572,13 +1572,13 @@
               <i class="fas fa-info-circle"></i>
               <div>
                 <strong>Automatische Generierung</strong>
-                <p>Die DatenschutzerklÃ¤rung wird automatisch basierend auf deinen Impressum-Daten generiert. Du kannst unten einen eigenen Text verwenden, falls du individuelle Anpassungen benÃ¶tigst.</p>
+                <p>Die Datenschutzerklärung wird automatisch basierend auf deinen Impressum-Daten generiert. Du kannst unten einen eigenen Text verwenden, falls du individuelle Anpassungen benötigst.</p>
               </div>
             </div>
           </div>
 
           <div class="settings-card">
-            <h3><i class="fas fa-edit"></i> Eigene DatenschutzerklÃ¤rung (optional)</h3>
+            <h3><i class="fas fa-edit"></i> Eigene Datenschutzerklärung (optional)</h3>
             <div class="form-group">
               <label>
                 <input type="checkbox" id="datenschutz-custom-toggle">
@@ -1587,7 +1587,7 @@
             </div>
             <div id="datenschutz-custom-container" class="hidden">
               <div class="form-group">
-                <label>Eigene DatenschutzerklÃ¤rung</label>
+                <label>Eigene Datenschutzerklärung</label>
                 <textarea id="datenschutz-custom" rows="20" placeholder="Geben Sie hier Ihren eigenen Datenschutztext ein..."></textarea>
               </div>
             </div>
@@ -1605,7 +1605,7 @@
               <i class="fas fa-info-circle"></i>
               <div>
                 <strong>Automatische Generierung</strong>
-                <p>Die AGB werden automatisch fÃ¼r Software-Entwicklungsdienstleistungen generiert. Du kannst unten einen eigenen Text verwenden, falls du individuelle Anpassungen benÃ¶tigst.</p>
+                <p>Die AGB werden automatisch für Software-Entwicklungsdienstleistungen generiert. Du kannst unten einen eigenen Text verwenden, falls du individuelle Anpassungen benötigst.</p>
               </div>
             </div>
           </div>
@@ -1638,7 +1638,7 @@
               <i class="fas fa-info-circle"></i>
               <div>
                 <strong>Automatische Generierung</strong>
-                <p>Die Widerrufsbelehrung wird automatisch fÃ¼r Dienstleistungen generiert. Du kannst unten einen eigenen Text verwenden, falls du individuelle Anpassungen benÃ¶tigst.</p>
+                <p>Die Widerrufsbelehrung wird automatisch für Dienstleistungen generiert. Du kannst unten einen eigenen Text verwenden, falls du individuelle Anpassungen benötigst.</p>
               </div>
             </div>
           </div>
@@ -1692,7 +1692,7 @@
             <div class="stat-icon"><i class="fas fa-clock"></i></div>
             <div class="stat-info">
               <span class="stat-value" id="analytics-response-time">0h</span>
-              <span class="stat-label">Ã˜ Reaktionszeit</span>
+              <span class="stat-label">Ø Reaktionszeit</span>
             </div>
           </div>
           <div class="stat-card warning">
@@ -1705,7 +1705,7 @@
           <div class="stat-card info">
             <div class="stat-icon"><i class="fas fa-euro-sign"></i></div>
             <div class="stat-info">
-              <span class="stat-value" id="analytics-total-revenue">0â‚¬</span>
+              <span class="stat-value" id="analytics-total-revenue">0€</span>
               <span class="stat-label">Umsatz</span>
             </div>
           </div>
@@ -1828,7 +1828,7 @@
             </div>
             <div class="form-group">
               <label for="faq-answer">Antwort</label>
-              <textarea id="faq-answer" rows="6" placeholder="AusfÃ¼hrliche Antwort..."></textarea>
+              <textarea id="faq-answer" rows="6" placeholder="Ausführliche Antwort..."></textarea>
             </div>
             <div class="form-group">
               <label>
@@ -1852,7 +1852,7 @@
         </div>
         <div class="info-box">
           <i class="fas fa-info-circle"></i>
-          <span>Verwalte hier alle Kundentermine. BestÃ¤tige oder lehne Terminanfragen ab.</span>
+          <span>Verwalte hier alle Kundentermine. Bestätige oder lehne Terminanfragen ab.</span>
         </div>
 
         <!-- Appointment Stats -->
@@ -1868,7 +1868,7 @@
             <div class="stat-icon"><i class="fas fa-check"></i></div>
             <div class="stat-info">
               <span class="stat-value" id="confirmed-appointments">0</span>
-              <span class="stat-label">BestÃ¤tigt</span>
+              <span class="stat-label">Bestätigt</span>
             </div>
           </div>
           <div class="stat-card primary">
@@ -1886,7 +1886,7 @@
             <i class="fas fa-clock"></i> Ausstehend
           </button>
           <button class="filter-btn" data-filter="confirmed">
-            <i class="fas fa-check"></i> BestÃ¤tigt
+            <i class="fas fa-check"></i> Bestätigt
           </button>
           <button class="filter-btn" data-filter="all">
             <i class="fas fa-list"></i> Alle
@@ -1920,7 +1920,7 @@
           <div id="maintenance-message-container" style="margin-top: 15px; display: none;">
             <div class="form-group">
               <label for="maintenance-message">Wartungsnachricht (optional)</label>
-              <textarea id="maintenance-message" rows="3" placeholder="z.B. Wir sind bald wieder fÃ¼r Sie da!"></textarea>
+              <textarea id="maintenance-message" rows="3" placeholder="z.B. Wir sind bald wieder für Sie da!"></textarea>
             </div>
             <button id="save-maintenance-btn" class="btn-primary">
               <i class="fas fa-save"></i> Speichern
@@ -1929,7 +1929,7 @@
         </div>
 
         <div class="settings-card">
-          <h3><i class="fas fa-key"></i> Passwort Ã¤ndern</h3>
+          <h3><i class="fas fa-key"></i> Passwort ändern</h3>
           <form id="change-password-form">
             <div class="form-group">
               <label for="current-password">Aktuelles Passwort</label>
@@ -1940,11 +1940,11 @@
               <input type="password" id="new-password" required>
             </div>
             <div class="form-group">
-              <label for="confirm-password">Passwort bestÃ¤tigen</label>
+              <label for="confirm-password">Passwort bestätigen</label>
               <input type="password" id="confirm-password" required>
             </div>
             <button type="submit" class="btn-primary">
-              <i class="fas fa-save"></i> Passwort Ã¤ndern
+              <i class="fas fa-save"></i> Passwort ändern
             </button>
           </form>
         </div>
@@ -1962,7 +1962,7 @@
           <h3><i class="fas fa-envelope"></i> E-Mail-Benachrichtigungen</h3>
           <div class="info-box" style="margin-bottom: 20px;">
             <i class="fas fa-info-circle"></i>
-            <span>Konfiguriere E-Mail-Benachrichtigungen fÃ¼r neue Nachrichten, StatusÃ¤nderungen und Deadline-Erinnerungen.</span>
+            <span>Konfiguriere E-Mail-Benachrichtigungen für neue Nachrichten, Statusänderungen und Deadline-Erinnerungen.</span>
           </div>
 
           <div class="form-group">
@@ -2016,7 +2016,7 @@
               <div class="form-group">
                 <label>
                   <input type="checkbox" id="notify-status-change" checked>
-                  Kunde bei StatusÃ¤nderung benachrichtigen
+                  Kunde bei Statusänderung benachrichtigen
                 </label>
               </div>
               <div class="form-group">
@@ -2069,7 +2069,7 @@
         <input type="hidden" id="template-id">
         <div class="form-group">
           <label for="template-name">Name</label>
-          <input type="text" id="template-name" placeholder="z.B. BegrÃ¼ÃŸung">
+          <input type="text" id="template-name" placeholder="z.B. Begrüßung">
         </div>
         <div class="form-group">
           <label for="template-subject">Betreff (optional)</label>
@@ -2079,7 +2079,7 @@
           <label for="template-category">Kategorie</label>
           <select id="template-category">
             <option value="general">Allgemein</option>
-            <option value="greeting">BegrÃ¼ÃŸung</option>
+            <option value="greeting">Begrüßung</option>
             <option value="anfrage">Anfrage</option>
             <option value="angebot">Angebot</option>
             <option value="projekt">Projekt</option>
@@ -2097,7 +2097,7 @@
           <div style="margin-top: 12px; padding: 12px; background: rgba(0, 255, 136, 0.05); border: 1px solid rgba(0, 255, 136, 0.2); border-radius: 8px;">
             <details>
               <summary style="cursor: pointer; font-weight: 600; color: #00ff88; margin-bottom: 8px;">
-                <i class="fas fa-info-circle"></i> VerfÃ¼gbare Platzhalter
+                <i class="fas fa-info-circle"></i> Verfügbare Platzhalter
               </summary>
               <div style="font-size: 0.85rem; color: #a0a0a0; line-height: 1.6;">
                 <strong>Kunde:</strong><br>
@@ -2147,7 +2147,7 @@
           </select>
         </div>
         <div class="form-group">
-          <label>VerfÃ¼gbare Platzhalter:</label>
+          <label>Verfügbare Platzhalter:</label>
           <div class="placeholder-tags">
             <span class="placeholder-tag" onclick="insertPlaceholder('{{VERTRAGSNUMMER}}')">{{VERTRAGSNUMMER}}</span>
             <span class="placeholder-tag" onclick="insertPlaceholder('{{DATUM}}')">{{DATUM}}</span>
@@ -2185,13 +2185,13 @@
       </div>
       <div class="modal-body">
         <div class="form-group">
-          <label for="generate-template-select">Vorlage auswÃ¤hlen</label>
+          <label for="generate-template-select">Vorlage auswählen</label>
           <select id="generate-template-select">
             <!-- Options loaded dynamically -->
           </select>
         </div>
         <div class="form-group">
-          <label for="generate-customer-select">Kunde auswÃ¤hlen</label>
+          <label for="generate-customer-select">Kunde auswählen</label>
           <select id="generate-customer-select">
             <!-- Options loaded dynamically -->
           </select>
@@ -2220,7 +2220,7 @@
     <div class="cmd-box">
       <div class="cmd-input-wrap">
         <i class="fas fa-search"></i>
-        <input type="text" id="cmd-input" placeholder="Suchen oder springen zu â€¦" autocomplete="off" spellcheck="false">
+        <input type="text" id="cmd-input" placeholder="Suchen oder springen zu …" autocomplete="off" spellcheck="false">
         <kbd>ESC</kbd>
       </div>
       <div id="cmd-results" class="cmd-results"></div>
