@@ -9,10 +9,16 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js"></script>
 <style>
   :root{--bg:#04060a;--panel:rgba(0,255,170,0.02);--line:rgba(0,255,170,0.16);--line2:rgba(0,255,170,0.34);--mint:#00ffaa;--cyan:#22d3ee;--amber:#ffb020;--text:#dffaf0;--text2:#6f8a82;--text3:#3d514c;--glow:rgba(0,255,170,0.5);--container:1240px;--mono:'JetBrains Mono',monospace}
   *{margin:0;padding:0;box-sizing:border-box}
   html{scroll-behavior:smooth}
+  /* Lenis smooth-scroll */
+  html.lenis,html.lenis body{height:auto}
+  .lenis.lenis-smooth{scroll-behavior:auto!important}
+  .lenis.lenis-smooth [data-lenis-prevent]{overscroll-behavior:contain}
+  .lenis.lenis-stopped{overflow:hidden}
   body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased}
   a{color:inherit;text-decoration:none} img{max-width:100%;display:block}
   ::selection{background:var(--mint);color:#000}
@@ -72,7 +78,11 @@
   .hstats{display:flex;gap:34px;margin-top:42px}
   .hstats .n{font-family:'Space Grotesk',sans-serif;font-size:1.8rem;font-weight:600;font-variant-numeric:tabular-nums}
   .hstats .l{font-family:var(--mono);font-size:.68rem;color:var(--text3);text-transform:uppercase;letter-spacing:.08em}
-  .reveal{opacity:0;transform:translateY(26px);transition:opacity .7s,transform .7s}.reveal.in{opacity:1;transform:none}
+  .reveal{opacity:0;transform:translateY(34px);transition:opacity .9s cubic-bezier(.16,1,.3,1),transform .9s cubic-bezier(.16,1,.3,1);transition-delay:var(--rd,0ms)}
+  .reveal.in{opacity:1;transform:none}
+  .sechead h2{clip-path:inset(0 0 115% 0);transition:clip-path 1.05s cubic-bezier(.16,1,.3,1) .06s}
+  .sechead.in h2,.reveal.in h2{clip-path:inset(0 0 -15% 0)}
+  .acard.reveal{transform:translateY(40px) scale(.97)}.acard.reveal.in{transform:none}
   /* build terminal */
   .jterm{position:relative;opacity:0;transform:translateY(20px);animation:rise 1s ease .5s forwards}
   @keyframes rise{to{opacity:1;transform:none}}
@@ -216,7 +226,7 @@
     <p>Mehr als Einzel-Tools — zusammenspielende Systeme, gebaut aus einer Hand.</p>
     <div class="jline">// keine Insellösungen — sondern Systeme, die zusammenarbeiten</div>
   </div>
-  <div class="caps">
+  <div class="caps" data-stagger>
     <div class="cap reveal"><span class="ci">// 01</span><div class="ic"><i class="fas fa-cubes"></i></div><h3>Plattformen &amp; Ökosysteme</h3><p>Modulare Systeme mit gemeinsamer Logik, Auth und Datenbasis — gebaut, um mit deiner Community zu wachsen.</p></div>
     <div class="cap reveal"><span class="ci">// 02</span><div class="ic"><i class="fas fa-gauge-high"></i></div><h3>Web-Apps &amp; Dashboards</h3><p>Schnelle, moderne Anwendungen mit Echtzeit-Daten, sauberer Architektur und durchdachter UX.</p></div>
     <div class="cap reveal"><span class="ci">// 03</span><div class="ic"><i class="fas fa-robot"></i></div><h3>KI-Systeme &amp; Bots</h3><p>Lokale Sprachassistenten, Discord-Bots mit Dashboard, Automatisierung und smarte Tools.</p></div>
@@ -261,20 +271,6 @@
   </div>
 </section>
 
-<section id="proc" class="wrap">
-  <div class="sechead ctr reveal">
-    <span class="eyebrow">Ablauf</span>
-    <h2>So arbeiten wir zusammen</h2>
-    <p>Klar, transparent und ohne Überraschungen — von der ersten Nachricht bis zum Launch.</p>
-  </div>
-  <div class="proc">
-    <div class="pstep reveal"><div class="pn">// 01</div><h3>Briefing</h3><p>Du erzählst mir in 2 Minuten, was du brauchst — Ziel, Rahmen, Wünsche.</p></div>
-    <div class="pstep reveal"><div class="pn">// 02</div><h3>Konzept</h3><p>Du bekommst eine ehrliche Einschätzung mit Umfang, Preis und Zeitrahmen.</p></div>
-    <div class="pstep reveal"><div class="pn">// 03</div><h3>Bau</h3><p>Ich entwickle dein System — mit Zwischenständen, die du live siehst und testest.</p></div>
-    <div class="pstep reveal"><div class="pn">// 04</div><h3>Launch</h3><p>Deployment, Übergabe und auf Wunsch laufender Betrieb inkl. Hosting &amp; Wartung.</p></div>
-  </div>
-</section>
-
 <section id="faq" class="wrap">
   <div class="sechead ctr reveal">
     <span class="eyebrow">FAQ</span>
@@ -287,6 +283,20 @@
     <div class="faq-item"><button class="faq-q" aria-expanded="false">Arbeitest du wirklich allein?<span class="x">+</span></button><div class="faq-a"><p>Ja. Du hast einen einzigen Ansprechpartner für Frontend, Backend, KI und Infrastruktur — kein Agentur-Pingpong, keine Reibungsverluste. Genau das macht die Systeme stimmig.</p></div></div>
     <div class="faq-item"><button class="faq-q" aria-expanded="false">Übernimmst du auch Hosting &amp; Wartung?<span class="x">+</span></button><div class="faq-a"><p>Auf Wunsch ja. Ich betreibe meine eigenen Systeme auf eigener Infrastruktur (Docker, eigenes Homelab) und kann deins genauso übernehmen — inklusive Updates, Monitoring und Support.</p></div></div>
     <div class="faq-item"><button class="faq-q" aria-expanded="false">Baust du nur RP-/FiveM-Tools?<span class="x">+</span></button><div class="faq-a"><p>Nein. Das ist mein Ursprung, aber ich baue jede Art von Web-App, Dashboard, KI-System oder Discord-Bot. Wenn es sich digital abbilden lässt, lässt es sich bauen.</p></div></div>
+  </div>
+</section>
+
+<section id="proc" class="wrap">
+  <div class="sechead ctr reveal">
+    <span class="eyebrow">Ablauf</span>
+    <h2>So arbeiten wir zusammen</h2>
+    <p>Klar, transparent und ohne Überraschungen — von der ersten Nachricht bis zum Launch.</p>
+  </div>
+  <div class="proc" data-stagger>
+    <div class="pstep reveal"><div class="pn">// 01</div><h3>Briefing</h3><p>Du erzählst mir in 2 Minuten, was du brauchst — Ziel, Rahmen, Wünsche.</p></div>
+    <div class="pstep reveal"><div class="pn">// 02</div><h3>Konzept</h3><p>Du bekommst eine ehrliche Einschätzung mit Umfang, Preis und Zeitrahmen.</p></div>
+    <div class="pstep reveal"><div class="pn">// 03</div><h3>Bau</h3><p>Ich entwickle dein System — mit Zwischenständen, die du live siehst und testest.</p></div>
+    <div class="pstep reveal"><div class="pn">// 04</div><h3>Launch</h3><p>Deployment, Übergabe und auf Wunsch laufender Betrieb inkl. Hosting &amp; Wartung.</p></div>
   </div>
 </section>
 
@@ -303,8 +313,8 @@
 
 <footer><div class="wrap foot"><span>© <span id="yr"></span> Mas0n1x — Max-Cedrik Blecker</span><span class="foot-links"><a href="#" data-legal="impressum">Impressum</a><a href="#" data-legal="datenschutz">Datenschutz</a><a href="#" data-legal="agb">AGB</a></span></div></footer>
 
-<div id="dm" class="modal"><div class="mov" onclick="cd()"></div><div class="mbox"><button class="mclose" onclick="cd()" aria-label="Schließen"><i class="fas fa-times"></i></button><div id="db"></div></div></div>
-<div id="lm" class="modal"><div class="mov" onclick="cl()"></div><div class="mbox"><button class="mclose" onclick="cl()" aria-label="Schließen"><i class="fas fa-times"></i></button><div id="lb"></div></div></div>
+<div id="dm" class="modal"><div class="mov" onclick="cd()"></div><div class="mbox" data-lenis-prevent><button class="mclose" onclick="cd()" aria-label="Schließen"><i class="fas fa-times"></i></button><div id="db"></div></div></div>
+<div id="lm" class="modal"><div class="mov" onclick="cl()"></div><div class="mbox" data-lenis-prevent><button class="mclose" onclick="cl()" aria-label="Schließen"><i class="fas fa-times"></i></button><div id="lb"></div></div></div>
 
 <div class="cookie" id="cookie"><p>Diese Seite nutzt nur technisch notwendige Daten. Mehr in der <a href="#" data-legal="datenschutz">Datenschutzerklärung</a>.</p><button onclick="okCookie()">Verstanden</button></div>
 
@@ -317,9 +327,13 @@
   // scroll progress
   const sprog=document.getElementById('sprog');
   addEventListener('scroll',()=>{const h=document.documentElement.scrollHeight-innerHeight;sprog.style.width=(h>0?scrollY/h*100:0)+'%';},{passive:true});
-  // reveal
-  const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}}),{threshold:.12});
-  document.querySelectorAll('.reveal').forEach(e=>io.observe(e));
+  // reveal v2 (mit Stagger)
+  const REDM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}}),{threshold:.14,rootMargin:'0px 0px -6% 0px'});
+  function staggerIn(c){[...c.children].forEach((ch,i)=>{if(ch.classList.contains('reveal'))ch.style.setProperty('--rd',(i*85)+'ms');});}
+  document.querySelectorAll('[data-stagger]').forEach(staggerIn);
+  function observeReveals(root){(root||document).querySelectorAll('.reveal:not(.in)').forEach(e=>io.observe(e));}
+  observeReveals();
   // scroll-spy
   const navlinks=[...navl.querySelectorAll('a[href^="#"]')];
   const spy=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){navlinks.forEach(a=>a.classList.toggle('act',a.getAttribute('href')==='#'+e.target.id));}}),{rootMargin:'-45% 0px -50% 0px'});
@@ -329,14 +343,14 @@
   const so=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){cu(e.target);so.unobserve(e.target);}}),{threshold:.5});document.querySelectorAll('[data-count]').forEach(e=>so.observe(e));
   function esc(t){if(!t)return'';const d=document.createElement('div');d.textContent=t;return d.innerHTML;}
   // work archive
-  async function load(){const g=document.getElementById('arch-grid');try{const r=await fetch('/api/projects');if(!r.ok)throw 0;const ps=await r.json();const cn=document.querySelector('[data-count="13"]');if(cn)cn.dataset.count=ps.length;g.innerHTML=ps.map((p,i)=>{const im=(p.images&&p.images.length)?p.images:(p.image?[{path:p.image}]:[]);const st={in_progress:'IN ARBEIT',completed:'AKTIV',planned:'GEPLANT'}[p.status]||'AKTIV';return `<div class="acard" data-i="${i}"><div class="athumb">${im.length?`<img src="${im[0].path}" alt="${esc(p.title)}" loading="lazy">`:(p.logo?`<img class="alogo" src="${p.logo}" alt="${esc(p.title)}">`:'<i class="fas fa-code ph"></i>')}<span class="aidx">// ${String(i+1).padStart(2,'0')}</span><span class="astat">${st}</span></div><div class="abody"><div class="atags">${(p.tags||[]).slice(0,4).map(t=>`<span class="atag">${esc(t)}</span>`).join('')}</div><h3>${esc(p.title)}</h3><p>${esc(p.description||'')}</p><span class="amore">Details ▸</span></div></div>`;}).join('');g.querySelectorAll('.acard').forEach(c=>c.onclick=()=>od(ps[+c.dataset.i]));}catch(e){g.innerHTML='<p style="color:var(--text3);grid-column:1/-1">Projekte aktuell nicht erreichbar.</p>';}}
-  function od(p){if(!p)return;const im=(p.images&&p.images.length)?p.images:(p.image?[{path:p.image}]:[]);const detail=esc(p.detail||p.description||'').replace(/\n/g,'<br>');const code=(p.repo_url&&!p.private)?`<a href="${esc(p.repo_url)}" target="_blank" rel="noopener" class="btn btn-g"><i class="fab fa-github"></i> Code</a>`:'';const meta=[p.language,p.stars?('★ '+p.stars):''].filter(Boolean).map(m=>`<span class="atag">${esc(m)}</span>`).join('');document.getElementById('db').innerHTML=`${im.length?`<div class="mgal">${im.map(x=>`<img src="${x.path}" alt="${esc(p.title)}" loading="lazy">`).join('')}</div>`:''}<h2>${esc(p.title)}</h2><div class="atags">${(p.tags||[]).map(t=>`<span class="atag">${esc(t)}</span>`).join('')}${meta}</div><p class="mdesc">${detail}</p><div class="acts" style="display:flex;gap:12px;flex-wrap:wrap">${p.link?`<a href="${esc(p.link)}" target="_blank" rel="noopener" class="btn btn-p">Ansehen <i class="fas fa-external-link-alt"></i></a>`:''}${code}</div>`;document.getElementById('dm').classList.add('open');document.body.style.overflow='hidden';}
-  function cd(){document.getElementById('dm').classList.remove('open');document.body.style.overflow='';}
+  async function load(){const g=document.getElementById('arch-grid');try{const r=await fetch('/api/projects');if(!r.ok)throw 0;const ps=await r.json();const cn=document.querySelector('[data-count="13"]');if(cn)cn.dataset.count=ps.length;g.innerHTML=ps.map((p,i)=>{const im=(p.images&&p.images.length)?p.images:(p.image?[{path:p.image}]:[]);const st={in_progress:'IN ARBEIT',completed:'AKTIV',planned:'GEPLANT'}[p.status]||'AKTIV';return `<div class="acard reveal" data-i="${i}"><div class="athumb">${im.length?`<img src="${im[0].path}" alt="${esc(p.title)}" loading="lazy">`:(p.logo?`<img class="alogo" src="${p.logo}" alt="${esc(p.title)}">`:'<i class="fas fa-code ph"></i>')}<span class="aidx">// ${String(i+1).padStart(2,'0')}</span><span class="astat">${st}</span></div><div class="abody"><div class="atags">${(p.tags||[]).slice(0,4).map(t=>`<span class="atag">${esc(t)}</span>`).join('')}</div><h3>${esc(p.title)}</h3><p>${esc(p.description||'')}</p><span class="amore">Details ▸</span></div></div>`;}).join('');g.querySelectorAll('.acard').forEach(c=>c.onclick=()=>od(ps[+c.dataset.i]));staggerIn(g);observeReveals(g);}catch(e){g.innerHTML='<p style="color:var(--text3);grid-column:1/-1">Projekte aktuell nicht erreichbar.</p>';}}
+  function od(p){if(!p)return;const im=(p.images&&p.images.length)?p.images:(p.image?[{path:p.image}]:[]);const detail=esc(p.detail||p.description||'').replace(/\n/g,'<br>');const code=(p.repo_url&&!p.private)?`<a href="${esc(p.repo_url)}" target="_blank" rel="noopener" class="btn btn-g"><i class="fab fa-github"></i> Code</a>`:'';const meta=[p.language,p.stars?('★ '+p.stars):''].filter(Boolean).map(m=>`<span class="atag">${esc(m)}</span>`).join('');document.getElementById('db').innerHTML=`${im.length?`<div class="mgal">${im.map(x=>`<img src="${x.path}" alt="${esc(p.title)}" loading="lazy">`).join('')}</div>`:''}<h2>${esc(p.title)}</h2><div class="atags">${(p.tags||[]).map(t=>`<span class="atag">${esc(t)}</span>`).join('')}${meta}</div><p class="mdesc">${detail}</p><div class="acts" style="display:flex;gap:12px;flex-wrap:wrap">${p.link?`<a href="${esc(p.link)}" target="_blank" rel="noopener" class="btn btn-p">Ansehen <i class="fas fa-external-link-alt"></i></a>`:''}${code}</div>`;document.getElementById('dm').classList.add('open');document.body.style.overflow='hidden';lenis&&lenis.stop();}
+  function cd(){document.getElementById('dm').classList.remove('open');document.body.style.overflow='';lenis&&lenis.start();}
   // legal
   let LS=null;async function loadLegal(){if(LS)return LS;try{const r=await fetch('/api/settings');if(r.ok)LS=await r.json();}catch(e){}return LS||{};}
   function f(s,k){return s&&s[k]?esc(s[k]):'';}
-  async function openLegal(type){const s=await loadLegal();let h='';if(type==='impressum'){h=`<h2>Impressum</h2>${s.impressum_custom?s.impressum_custom.replace(/\n/g,'<br>'):`<h3>Angaben gemäß § 5 DDG</h3><p>${f(s,'impressum_name')||'Max-Cedrik Blecker'}<br>${f(s,'impressum_street')||'Obere Warthe 8'}<br>${f(s,'impressum_zip')||'35080'} ${f(s,'impressum_city')||'Bad Endbach'}</p><h3>Kontakt</h3><p>E-Mail: ${f(s,'impressum_email')||'support@mas0n1x.online'}</p>`}`;}else if(type==='datenschutz'){h=`<h2>Datenschutzerklärung</h2>${s.datenschutz_custom?s.datenschutz_custom.replace(/\n/g,'<br>'):`<p>Der Schutz deiner Daten ist mir wichtig. Diese Website verarbeitet personenbezogene Daten nur im technisch notwendigen Rahmen (z.B. bei einer Projektanfrage).</p><h3>Verantwortlich</h3><p>${f(s,'impressum_name')||'Max-Cedrik Blecker'}, ${f(s,'impressum_email')||'support@mas0n1x.online'}</p><h3>Deine Rechte</h3><p>Du hast jederzeit das Recht auf Auskunft, Berichtigung und Löschung deiner Daten. Melde dich dazu per E-Mail.</p>`}`;}else{h=`<h2>AGB</h2>${s.agb_custom?s.agb_custom.replace(/\n/g,'<br>'):`<p>Es gelten die im jeweiligen Angebot vereinbarten Konditionen. Bei Projektanfragen erhältst du vor Beginn ein verbindliches Angebot mit Leistungsumfang, Preis und Zeitrahmen.</p>`}`;}document.getElementById('lb').innerHTML=h;document.getElementById('lm').classList.add('open');document.body.style.overflow='hidden';}
-  function cl(){document.getElementById('lm').classList.remove('open');document.body.style.overflow='';}
+  async function openLegal(type){const s=await loadLegal();let h='';if(type==='impressum'){h=`<h2>Impressum</h2>${s.impressum_custom?s.impressum_custom.replace(/\n/g,'<br>'):`<h3>Angaben gemäß § 5 DDG</h3><p>${f(s,'impressum_name')||'Max-Cedrik Blecker'}<br>${f(s,'impressum_street')||'Obere Warthe 8'}<br>${f(s,'impressum_zip')||'35080'} ${f(s,'impressum_city')||'Bad Endbach'}</p><h3>Kontakt</h3><p>E-Mail: ${f(s,'impressum_email')||'support@mas0n1x.online'}</p>`}`;}else if(type==='datenschutz'){h=`<h2>Datenschutzerklärung</h2>${s.datenschutz_custom?s.datenschutz_custom.replace(/\n/g,'<br>'):`<p>Der Schutz deiner Daten ist mir wichtig. Diese Website verarbeitet personenbezogene Daten nur im technisch notwendigen Rahmen (z.B. bei einer Projektanfrage).</p><h3>Verantwortlich</h3><p>${f(s,'impressum_name')||'Max-Cedrik Blecker'}, ${f(s,'impressum_email')||'support@mas0n1x.online'}</p><h3>Deine Rechte</h3><p>Du hast jederzeit das Recht auf Auskunft, Berichtigung und Löschung deiner Daten. Melde dich dazu per E-Mail.</p>`}`;}else{h=`<h2>AGB</h2>${s.agb_custom?s.agb_custom.replace(/\n/g,'<br>'):`<p>Es gelten die im jeweiligen Angebot vereinbarten Konditionen. Bei Projektanfragen erhältst du vor Beginn ein verbindliches Angebot mit Leistungsumfang, Preis und Zeitrahmen.</p>`}`;}document.getElementById('lb').innerHTML=h;document.getElementById('lm').classList.add('open');document.body.style.overflow='hidden';lenis&&lenis.stop();}
+  function cl(){document.getElementById('lm').classList.remove('open');document.body.style.overflow='';lenis&&lenis.start();}
   document.querySelectorAll('[data-legal]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();openLegal(a.dataset.legal);}));
   addEventListener('keydown',e=>{if(e.key==='Escape'){cd();cl();}});
   // faq
@@ -360,7 +374,17 @@
     lines.forEach(l=>{const add=()=>{const d=document.createElement('div');d.className='jt-line';d.innerHTML=l.h;t.appendChild(d);};rm?add():setTimeout(add,700+l.d);});
   })();
   // ===== Effekte =====
-  const REDM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // smooth-scroll (Lenis) — das „kenshin"-Scrollgefühl + Grid-Parallax
+  let lenis=null;
+  (function(){
+    if(REDM||typeof Lenis==='undefined')return;
+    lenis=new Lenis({duration:1.15,easing:t=>Math.min(1,1.001-Math.pow(2,-10*t)),smoothWheel:true,touchMultiplier:1.6});
+    function raf(time){lenis.raf(time);requestAnimationFrame(raf);}
+    requestAnimationFrame(raf);
+    document.querySelectorAll('a[href^="#"]').forEach(a=>{const id=a.getAttribute('href');if(id.length>1)a.addEventListener('click',e=>{const tg=document.querySelector(id);if(tg){e.preventDefault();lenis.scrollTo(tg,{offset:-64});}});});
+    const grid=document.querySelector('.fx-grid');
+    lenis.on('scroll',({scroll})=>{if(grid)grid.style.backgroundPosition='0 '+(scroll*0.18)+'px';});
+  })();
   // mouse-spotlight (folgt der Maus, rAF-gedrosselt)
   (function(){
     const spot=document.getElementById('fxSpot');if(!spot||REDM)return;
