@@ -23,6 +23,7 @@
   .fx-scan{position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0,transparent 2px,rgba(0,255,170,0.012) 3px,transparent 4px);animation:scanmove 8s linear infinite}
   @keyframes scanmove{to{background-position:0 100px}}
   .fx-glow{position:absolute;top:-15%;left:50%;transform:translateX(-50%);width:800px;height:500px;background:radial-gradient(circle,rgba(0,255,170,0.06),transparent 70%)}
+  .fx-spot{position:absolute;inset:0;background:radial-gradient(460px circle at var(--mx,50%) var(--my,-200px),rgba(0,255,170,0.08),transparent 65%)}
   @keyframes spin{to{transform:rotate(360deg)}}
   @keyframes blink{50%{opacity:0}}
   .wrap{max-width:var(--container);margin:0 auto;padding:0 28px}
@@ -61,9 +62,12 @@
   .hstatus{display:inline-flex;align-items:center;gap:9px;font-family:var(--mono);font-size:.74rem;letter-spacing:.14em;color:var(--mint);text-transform:uppercase}
   .hstatus .d{width:8px;height:8px;border-radius:50%;background:var(--mint);animation:pulse 2s infinite}
   @keyframes pulse{0%{box-shadow:0 0 0 0 var(--glow)}70%{box-shadow:0 0 0 8px transparent}100%{box-shadow:0 0 0 0 transparent}}
-  .hero h1{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(2.5rem,5.5vw,4.3rem);line-height:1;letter-spacing:-.03em;margin:18px 0 20px}
+  .hero h1.name{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(3.2rem,8vw,6rem);line-height:.95;letter-spacing:-.04em;margin:18px 0 8px}
   .hero h1 .g{background:linear-gradient(110deg,var(--mint),var(--cyan));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-  .hero .lede{color:var(--text2);font-size:1.12rem;max-width:480px;margin-bottom:30px}
+  .scramble{display:inline-block;min-width:1ch}
+  .hero .role{font-family:var(--mono);font-size:clamp(.92rem,1.6vw,1.12rem);color:var(--text2);letter-spacing:.02em;margin-bottom:22px}
+  .hero .role .rg{color:var(--mint)}
+  .hero .lede{color:var(--text2);font-size:1.06rem;max-width:480px;margin-bottom:30px}
   .hact{display:flex;gap:14px;flex-wrap:wrap}
   .hstats{display:flex;gap:34px;margin-top:42px}
   .hstats .n{font-family:'Space Grotesk',sans-serif;font-size:1.8rem;font-weight:600;font-variant-numeric:tabular-nums}
@@ -125,15 +129,6 @@
   .pstep::after{content:'';position:absolute;top:50%;right:-16px;width:16px;height:1px;background:var(--line2)}
   .pstep:last-child::after{display:none}
   /* testimonials */
-  .tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
-  .tcard{border:1px solid var(--line);background:var(--panel);padding:28px;display:flex;flex-direction:column;clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,12px 100%,0 calc(100% - 12px))}
-  .tcard .stars{color:var(--amber);letter-spacing:2px;font-size:.9rem;margin-bottom:14px}
-  .tcard .tt{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:1.02rem;margin-bottom:8px}
-  .tcard .quote{color:var(--text2);font-size:.92rem;line-height:1.7;flex:1;display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden}
-  .tcard .auth{display:flex;align-items:center;gap:12px;margin-top:20px;padding-top:18px;border-top:1px solid var(--line)}
-  .tcard .av{width:40px;height:40px;border:1px solid var(--line2);display:grid;place-items:center;font-family:var(--mono);font-size:.8rem;color:var(--mint)}
-  .tcard .nm{font-weight:600;font-size:.92rem}.tcard .rl{font-family:var(--mono);font-size:.72rem;color:var(--text3)}
-  .t-empty{grid-column:1/-1;font-family:var(--mono);color:var(--text3);text-align:center;padding:20px}
   /* faq */
   .faq{max-width:820px;margin:0 auto}
   .faq-item{border:1px solid var(--line);background:var(--panel);margin-bottom:12px}
@@ -178,7 +173,7 @@
 </style>
 </head>
 <body>
-<div class="fx"><div class="fx-grid"></div><div class="fx-scan"></div><div class="fx-glow"></div></div>
+<div class="fx"><div class="fx-grid"></div><div class="fx-scan"></div><div class="fx-glow"></div><div class="fx-spot" id="fxSpot"></div></div>
 <div class="sprog" id="sprog"></div>
 
 <nav id="nav">
@@ -194,8 +189,9 @@
   <div class="hgrid">
     <div>
       <span class="hstatus"><span class="d"></span>Verfügbar für neue Projekte</span>
-      <h1>Ich baue<br><span class="g">Ökosysteme</span>.</h1>
-      <p class="lede">Solo-Developer aus Leidenschaft. Von Web-Apps und KI-Assistenten bis zu kompletten, modularen Plattformen — mein größtes System läuft auf mehreren Servern und trägt täglich über 2.300 Nutzer.</p>
+      <h1 class="name"><span class="g scramble" data-text="Mas0n1x">Mas0n1x</span></h1>
+      <p class="role">Software-Developer — ich baue <span class="rg">Ökosysteme</span>.</p>
+      <p class="lede">Solo aus Leidenschaft. Von Web-Apps und KI-Assistenten bis zu kompletten, modularen Plattformen — mein größtes System läuft auf mehreren Servern und trägt täglich über 2.300 Nutzer.</p>
       <div class="hact">
         <a href="/projekt-starten.html" class="btn btn-p">Projekt starten <i class="fas fa-arrow-right"></i></a>
         <a href="#arch" class="btn btn-g">Projekte ansehen</a>
@@ -279,15 +275,6 @@
   </div>
 </section>
 
-<section id="voices" class="wrap">
-  <div class="sechead ctr reveal">
-    <span class="eyebrow">Referenzen</span>
-    <h2>Was Kunden sagen</h2>
-    <p>Echte Stimmen aus Projekten, die heute im Einsatz sind.</p>
-  </div>
-  <div class="tgrid" id="t-grid"><p class="t-empty">Lade Stimmen …</p></div>
-</section>
-
 <section id="faq" class="wrap">
   <div class="sechead ctr reveal">
     <span class="eyebrow">FAQ</span>
@@ -345,8 +332,6 @@
   async function load(){const g=document.getElementById('arch-grid');try{const r=await fetch('/api/projects');if(!r.ok)throw 0;const ps=await r.json();const cn=document.querySelector('[data-count="13"]');if(cn)cn.dataset.count=ps.length;g.innerHTML=ps.map((p,i)=>{const im=(p.images&&p.images.length)?p.images:(p.image?[{path:p.image}]:[]);const st={in_progress:'IN ARBEIT',completed:'AKTIV',planned:'GEPLANT'}[p.status]||'AKTIV';return `<div class="acard" data-i="${i}"><div class="athumb">${im.length?`<img src="${im[0].path}" alt="${esc(p.title)}" loading="lazy">`:(p.logo?`<img class="alogo" src="${p.logo}" alt="${esc(p.title)}">`:'<i class="fas fa-code ph"></i>')}<span class="aidx">// ${String(i+1).padStart(2,'0')}</span><span class="astat">${st}</span></div><div class="abody"><div class="atags">${(p.tags||[]).slice(0,4).map(t=>`<span class="atag">${esc(t)}</span>`).join('')}</div><h3>${esc(p.title)}</h3><p>${esc(p.description||'')}</p><span class="amore">Details ▸</span></div></div>`;}).join('');g.querySelectorAll('.acard').forEach(c=>c.onclick=()=>od(ps[+c.dataset.i]));}catch(e){g.innerHTML='<p style="color:var(--text3);grid-column:1/-1">Projekte aktuell nicht erreichbar.</p>';}}
   function od(p){if(!p)return;const im=(p.images&&p.images.length)?p.images:(p.image?[{path:p.image}]:[]);document.getElementById('db').innerHTML=`${im.length?`<div class="mgal">${im.map(x=>`<img src="${x.path}" alt="${esc(p.title)}" loading="lazy">`).join('')}</div>`:''}<h2>${esc(p.title)}</h2><div class="atags">${(p.tags||[]).map(t=>`<span class="atag">${esc(t)}</span>`).join('')}</div><p class="mdesc">${esc(p.description||'')}</p>${p.link?`<a href="${esc(p.link)}" target="_blank" rel="noopener" class="btn btn-p">Projekt ansehen <i class="fas fa-external-link-alt"></i></a>`:''}`;document.getElementById('dm').classList.add('open');document.body.style.overflow='hidden';}
   function cd(){document.getElementById('dm').classList.remove('open');document.body.style.overflow='';}
-  // testimonials
-  async function loadT(){const c=document.getElementById('t-grid');try{const r=await fetch('/api/testimonials');if(!r.ok)throw 0;const ts=await r.json();if(!ts.length){c.innerHTML='<p class="t-empty">Noch keine Bewertungen — sei der oder die Erste.</p>';return;}c.innerHTML=ts.map(t=>{const name=(t.customer_name||t.name||'Kunde').trim();const ini=name.split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();const rt=t.rating||5;const stars='★'.repeat(rt)+'☆'.repeat(Math.max(0,5-rt));const text=t.content||t.text||t.message||'';return `<div class="tcard"><div class="stars">${stars}</div>${t.title?`<div class="tt">${esc(t.title)}</div>`:''}<div class="quote">${esc(text)}</div><div class="auth"><div class="av">${esc(ini)}</div><div><div class="nm">${esc(name)}</div>${(t.customer_company||t.company)?`<div class="rl">${esc(t.customer_company||t.company)}</div>`:''}</div></div></div>`;}).join('');}catch(e){c.innerHTML='<p class="t-empty">Bewertungen aktuell nicht verfügbar.</p>';}}
   // legal
   let LS=null;async function loadLegal(){if(LS)return LS;try{const r=await fetch('/api/settings');if(r.ok)LS=await r.json();}catch(e){}return LS||{};}
   function f(s,k){return s&&s[k]?esc(s[k]):'';}
@@ -374,7 +359,38 @@
     const rm=matchMedia('(prefers-reduced-motion: reduce)').matches;
     lines.forEach(l=>{const add=()=>{const d=document.createElement('div');d.className='jt-line';d.innerHTML=l.h;t.appendChild(d);};rm?add():setTimeout(add,700+l.d);});
   })();
-  load();loadT();
+  // ===== Effekte =====
+  const REDM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // mouse-spotlight (folgt der Maus, rAF-gedrosselt)
+  (function(){
+    const spot=document.getElementById('fxSpot');if(!spot||REDM)return;
+    let mx=innerWidth/2,my=-200,raf=0;
+    addEventListener('pointermove',e=>{mx=e.clientX;my=e.clientY;if(!raf)raf=requestAnimationFrame(()=>{spot.style.setProperty('--mx',mx+'px');spot.style.setProperty('--my',my+'px');raf=0;});},{passive:true});
+  })();
+  // text-scramble auf dem Namen
+  (function(){
+    const el=document.querySelector('.scramble');if(!el)return;
+    const txt=el.dataset.text||el.textContent,chars='!<>-_\\/[]{}—=+*^?#01';
+    if(REDM){el.textContent=txt;return;}
+    let frame=0;const queue=[];
+    for(let i=0;i<txt.length;i++){const start=Math.floor(Math.random()*18),end=start+Math.floor(Math.random()*18)+8;queue.push({to:txt[i],start,end,ch:''});}
+    (function upd(){let out='',done=0;for(const q of queue){if(frame>=q.end){done++;out+=q.to;}else if(frame>=q.start){if(!q.ch||Math.random()<0.28)q.ch=chars[Math.floor(Math.random()*chars.length)];out+=`<span style="color:var(--cyan)">${q.ch}</span>`;}else{out+='';}}el.innerHTML=out;if(done<queue.length){frame++;requestAnimationFrame(upd);}else{el.textContent=txt;}})();
+  })();
+  // magnetic buttons
+  if(!REDM&&matchMedia('(pointer:fine)').matches){
+    document.querySelectorAll('.btn,.ncta').forEach(b=>{
+      b.addEventListener('pointermove',e=>{const r=b.getBoundingClientRect();const x=e.clientX-r.left-r.width/2,y=e.clientY-r.top-r.height/2;b.style.transform=`translate(${x*0.22}px,${y*0.30}px)`;});
+      b.addEventListener('pointerleave',()=>{b.style.transform='';});
+    });
+  }
+  // 3D-tilt auf Karten (delegiert, da Karten nachgeladen werden)
+  if(!REDM&&matchMedia('(pointer:fine)').matches){
+    const grid=document.getElementById('arch-grid');
+    grid&&grid.addEventListener('pointermove',e=>{const c=e.target.closest('.acard');if(!c)return;const r=c.getBoundingClientRect();const px=(e.clientX-r.left)/r.width-0.5,py=(e.clientY-r.top)/r.height-0.5;c.style.transform=`perspective(800px) rotateX(${-py*5}deg) rotateY(${px*6}deg) translateY(-4px)`;});
+    grid&&grid.addEventListener('pointerleave',e=>{const c=e.target.closest&&e.target.closest('.acard');if(c)c.style.transform='';},true);
+    grid&&grid.addEventListener('pointerout',e=>{const c=e.target.closest('.acard');if(c&&!c.contains(e.relatedTarget))c.style.transform='';});
+  }
+  load();
 </script>
 </body>
 </html>
