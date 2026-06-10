@@ -681,6 +681,16 @@ app.post('/api/projects', requireAuth, projectUpload, (req, res) => {
   res.json({ id: result.lastInsertRowid, success: true });
 });
 
+// Reihenfolge per Drag & Drop speichern (muss VOR /:id stehen)
+app.put('/api/projects/reorder', requireAuth, (req, res) => {
+  const order = req.body && req.body.order;
+  if (!Array.isArray(order)) return res.status(400).json({ error: 'order muss ein Array von IDs sein' });
+  order.forEach((id, index) => {
+    dbRun('UPDATE projects SET sort_order = ?, updated_at = datetime(\'now\') WHERE id = ?', [index, parseInt(id)]);
+  });
+  res.json({ success: true });
+});
+
 app.put('/api/projects/:id', requireAuth, projectUpload, (req, res) => {
   const { title, description, tags, link, status, sort_order, progress } = req.body;
   const project = dbGet('SELECT * FROM projects WHERE id = ?', [parseInt(req.params.id)]);
@@ -801,6 +811,16 @@ app.post('/api/services', requireAuth, (req, res) => {
     [icon, title, description, parseInt(sort_order) || 0]
   );
   res.json({ id: result.lastInsertRowid, success: true });
+});
+
+// Reihenfolge per Drag & Drop speichern (muss VOR /:id stehen)
+app.put('/api/services/reorder', requireAuth, (req, res) => {
+  const order = req.body && req.body.order;
+  if (!Array.isArray(order)) return res.status(400).json({ error: 'order muss ein Array von IDs sein' });
+  order.forEach((id, index) => {
+    dbRun('UPDATE services SET sort_order = ? WHERE id = ?', [index, parseInt(id)]);
+  });
+  res.json({ success: true });
 });
 
 app.put('/api/services/:id', requireAuth, (req, res) => {

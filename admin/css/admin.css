@@ -2566,6 +2566,46 @@ body {
   }
 }
 
+/* ==================== DRAG & DROP SORTIERUNG ==================== */
+.item-card,
+.service-card {
+  position: relative;
+}
+
+.drag-handle {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 5;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
+  background: rgba(0, 0, 0, 0.5);
+  color: var(--text-muted);
+  cursor: grab;
+  opacity: 0;
+  transition: opacity 0.2s ease, color 0.2s ease;
+  backdrop-filter: blur(4px);
+}
+
+.item-card:hover .drag-handle,
+.service-card:hover .drag-handle {
+  opacity: 1;
+}
+
+.drag-handle:hover { color: var(--accent); }
+.drag-handle:active { cursor: grabbing; }
+
+.item-card.dragging,
+.service-card.dragging {
+  opacity: 0.5;
+  border-color: var(--border-accent) !important;
+  box-shadow: 0 0 0 1px var(--accent), 0 16px 40px rgba(0, 0, 0, 0.5);
+}
+
 /* Activity List */
 .activity-list {
   max-height: 240px;

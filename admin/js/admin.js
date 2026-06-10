@@ -181,7 +181,8 @@ async function loadProjects() {
     }
 
     container.innerHTML = projects.map(project => `
-      <div class="item-card">
+      <div class="item-card" draggable="true" data-id="${project.id}">
+        <span class="drag-handle" title="Zum Sortieren ziehen"><i class="fas fa-grip-vertical"></i></span>
         <div class="item-card-image">
           ${project.logo
             ? `<img src="${project.logo}" alt="${project.title}" onerror="this.outerHTML='<div class=\\'placeholder\\'><i class=\\'fas fa-image\\'></i></div>'">`
@@ -224,9 +225,43 @@ async function loadProjects() {
         </div>
       </div>
     `).join('');
+    enableDragSort('projects-list', '/projects/reorder');
   } catch (e) {
     container.innerHTML = `<p class="error-message">Fehler beim Laden der Projekte</p>`;
   }
+}
+
+// Generische Drag-&-Drop-Sortierung; speichert die neue Reihenfolge ans Backend
+function enableDragSort(containerId, endpoint) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  let dragEl = null;
+  container.querySelectorAll('[draggable="true"]').forEach(card => {
+    card.addEventListener('dragstart', (e) => {
+      dragEl = card;
+      setTimeout(() => card.classList.add('dragging'), 0);
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    card.addEventListener('dragend', async () => {
+      card.classList.remove('dragging');
+      const order = [...container.querySelectorAll('[draggable="true"]')].map(c => c.dataset.id);
+      dragEl = null;
+      try {
+        await api(endpoint, { method: 'PUT', body: { order } });
+        showToast('Reihenfolge gespeichert', 'success');
+      } catch (err) {
+        showToast('Fehler beim Speichern der Reihenfolge', 'error');
+      }
+    });
+    card.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      if (!dragEl || dragEl === card) return;
+      const rect = card.getBoundingClientRect();
+      const after = (e.clientY - rect.top) / rect.height > 0.5;
+      if (after) card.after(dragEl);
+      else card.before(dragEl);
+    });
+  });
 }
 
 async function openProjectModal(id = null) {
@@ -539,7 +574,8 @@ async function loadServices() {
     }
 
     container.innerHTML = services.map(service => `
-      <div class="service-card">
+      <div class="service-card" draggable="true" data-id="${service.id}">
+        <span class="drag-handle" title="Zum Sortieren ziehen"><i class="fas fa-grip-vertical"></i></span>
         <div class="service-card-icon">
           <i class="${service.icon}"></i>
         </div>
@@ -555,6 +591,7 @@ async function loadServices() {
         </div>
       </div>
     `).join('');
+    enableDragSort('services-list', '/services/reorder');
   } catch (e) {
     container.innerHTML = `<p class="error-message">Fehler beim Laden der Services</p>`;
   }
