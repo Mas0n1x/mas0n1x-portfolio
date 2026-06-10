@@ -235,6 +235,7 @@
   .t-avatar { width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, var(--mint), var(--cyan)); display: grid; place-items: center; color: #000; font-weight: 700; font-family: 'Space Grotesk', sans-serif; }
   .t-meta .nm { font-weight: 600; font-size: 0.95rem; } .t-meta .rl { color: var(--text-3); font-size: 0.82rem; font-family: 'JetBrains Mono', monospace; }
   .t-stars { color: var(--mint); margin-bottom: 14px; font-size: 0.85rem; }
+  .t-title { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 1.1rem; margin-bottom: 10px; }
   .t-empty { grid-column: 1/-1; text-align: center; color: var(--text-3); padding: 50px; font-family: 'JetBrains Mono', monospace; }
 
   /* ============ CTA / Contact ============ */
@@ -391,7 +392,6 @@
   <div class="nav-links" id="navLinks">
     <a href="#leistungen">Leistungen</a>
     <a href="#work">Arbeiten</a>
-    <a href="#preise">Preise</a>
     <a href="#faq">FAQ</a>
     <a href="#kontakt">Kontakt</a>
     <a href="/projekt-starten.html" class="nav-cta">Projekt starten</a>
@@ -475,55 +475,6 @@
   </div>
 </section>
 
-<!-- PREISE -->
-<section id="preise" class="wrap">
-  <div class="section-head reveal">
-    <span class="eyebrow">Pakete</span>
-    <h2>Klare Pakete, faire Preise</h2>
-    <p>Transparente Richtwerte — den finalen Preis fixieren wir gemeinsam vor Projektstart, ohne versteckte Kosten.</p>
-  </div>
-  <div class="price-grid">
-    <div class="price-card reveal">
-      <span class="price-name">Starter</span>
-      <div class="price-amount">ab <strong>149€</strong></div>
-      <p class="price-for">Tools, Discord-Bots & Generatoren</p>
-      <ul class="price-feats">
-        <li><i class="fas fa-check"></i> Einzelnes Tool oder Bot</li>
-        <li><i class="fas fa-check"></i> Sauberer, wartbarer Code</li>
-        <li><i class="fas fa-check"></i> Deployment inklusive</li>
-        <li><i class="fas fa-check"></i> 14 Tage Support</li>
-      </ul>
-      <a href="/projekt-starten.html" class="btn btn-ghost price-cta">Anfragen</a>
-    </div>
-    <div class="price-card featured reveal">
-      <span class="price-badge">Beliebt</span>
-      <span class="price-name">Pro</span>
-      <div class="price-amount">ab <strong>590€</strong></div>
-      <p class="price-for">Web-Apps, Dashboards & Plattformen</p>
-      <ul class="price-feats">
-        <li><i class="fas fa-check"></i> Maßgeschneiderte Anwendung</li>
-        <li><i class="fas fa-check"></i> Individuelles UI/UX-Design</li>
-        <li><i class="fas fa-check"></i> Datenbank, API & Auth</li>
-        <li><i class="fas fa-check"></i> Admin-Bereich auf Wunsch</li>
-        <li><i class="fas fa-check"></i> 30 Tage Support</li>
-      </ul>
-      <a href="/projekt-starten.html" class="btn btn-primary price-cta">Projekt starten</a>
-    </div>
-    <div class="price-card reveal">
-      <span class="price-name">Custom</span>
-      <div class="price-amount"><strong>auf Anfrage</strong></div>
-      <p class="price-for">Komplexe Systeme & Ökosysteme</p>
-      <ul class="price-feats">
-        <li><i class="fas fa-check"></i> Mehrteilige Systeme</li>
-        <li><i class="fas fa-check"></i> KI-/Automatisierungs-Logik</li>
-        <li><i class="fas fa-check"></i> Skalierbare Architektur</li>
-        <li><i class="fas fa-check"></i> Laufende Betreuung möglich</li>
-      </ul>
-      <a href="/projekt-starten.html" class="btn btn-ghost price-cta">Gespräch vereinbaren</a>
-    </div>
-  </div>
-</section>
-
 <!-- FAQ -->
 <section id="faq" class="wrap">
   <div class="section-head reveal">
@@ -534,7 +485,7 @@
   <div class="faq-list reveal">
     <div class="faq-item">
       <button class="faq-q" aria-expanded="false"><span>Was kostet ein Projekt?</span><i class="fas fa-plus"></i></button>
-      <div class="faq-a"><p>Das hängt vom Umfang ab. Kleine Tools starten bei ~149€, Web-Apps bei ~590€. Du bekommst vor dem Start ein festes Angebot — keine Überraschungen.</p></div>
+      <div class="faq-a"><p>Das hängt vom Umfang ab — kleine Tools sind günstiger, komplexe Systeme aufwändiger. Starte einfach eine Anfrage: Du bekommst vorab ein festes, transparentes Angebot. Keine Überraschungen, keine versteckten Kosten.</p></div>
     </div>
     <div class="faq-item">
       <button class="faq-q" aria-expanded="false"><span>Wie lange dauert die Umsetzung?</span><i class="fas fa-plus"></i></button>
@@ -780,10 +731,15 @@
       const ts = await r.json();
       if (!ts.length) { c.innerHTML = '<div class="t-empty">Noch keine Bewertungen — sei der oder die Erste.</div>'; return; }
       c.innerHTML = ts.map(t => {
-        const initials = (t.name||'?').trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
-        const stars = '★'.repeat(t.rating||5) + '☆'.repeat(Math.max(0,5-(t.rating||5)));
-        return `<div class="t-card"><div class="t-stars">${stars}</div><div class="quote">${escapeHtml(t.text||t.message||'')}</div>
-          <div class="t-author"><div class="t-avatar">${initials}</div><div class="t-meta"><div class="nm">${escapeHtml(t.name||'Anonym')}</div>${t.role||t.company?`<div class="rl">${escapeHtml(t.role||t.company)}</div>`:''}</div></div></div>`;
+        const name = (t.customer_name || t.name || 'Kunde').trim();
+        const initials = name.split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
+        const r = t.rating || 5;
+        const stars = '★'.repeat(r) + '☆'.repeat(Math.max(0, 5 - r));
+        const text = t.content || t.text || t.message || '';
+        return `<div class="t-card"><div class="t-stars">${stars}</div>
+          ${t.title ? `<div class="t-title">${escapeHtml(t.title)}</div>` : ''}
+          <div class="quote">${escapeHtml(text)}</div>
+          <div class="t-author"><div class="t-avatar">${initials}</div><div class="t-meta"><div class="nm">${escapeHtml(name)}</div>${t.customer_company || t.company ? `<div class="rl">${escapeHtml(t.customer_company || t.company)}</div>` : ''}</div></div></div>`;
       }).join('');
     } catch (e) { c.innerHTML = '<div class="t-empty">Bewertungen aktuell nicht verfügbar.</div>'; }
   }
