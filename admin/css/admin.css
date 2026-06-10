@@ -2722,6 +2722,28 @@ body {
   font-size: 0.9rem;
 }
 
+/* Datei-Drop-Upload-Zone */
+.file-input-wrapper {
+  position: relative;
+  border-radius: 12px;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.file-input-wrapper.drag-active {
+  box-shadow: 0 0 0 2px var(--accent), 0 0 24px rgba(0, 255, 136, 0.15);
+}
+
+.file-input-wrapper.drag-active .file-input-label {
+  border-color: var(--accent) !important;
+  background: rgba(0, 255, 136, 0.08) !important;
+  color: var(--accent);
+}
+
+.file-input-wrapper.drag-active .file-input-label i {
+  transform: scale(1.15);
+  transition: transform 0.2s ease;
+}
+
 /* Activity List */
 .activity-list {
   max-height: 240px;

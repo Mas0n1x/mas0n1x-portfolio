@@ -264,6 +264,31 @@ function enableDragSort(containerId, endpoint) {
   });
 }
 
+// Datei-Drop-Upload: Dateien in die Wrapper-Zone ziehen -> werden dem File-Input zugewiesen
+function enableDropUpload(wrapper, input) {
+  if (!wrapper || !input) return;
+  ['dragenter', 'dragover'].forEach(ev => wrapper.addEventListener(ev, (e) => {
+    e.preventDefault(); e.stopPropagation();
+    wrapper.classList.add('drag-active');
+  }));
+  ['dragleave', 'dragend'].forEach(ev => wrapper.addEventListener(ev, (e) => {
+    e.preventDefault(); e.stopPropagation();
+    if (ev === 'dragleave' && wrapper.contains(e.relatedTarget)) return;
+    wrapper.classList.remove('drag-active');
+  }));
+  wrapper.addEventListener('drop', (e) => {
+    e.preventDefault(); e.stopPropagation();
+    wrapper.classList.remove('drag-active');
+    const dropped = [...(e.dataTransfer?.files || [])].filter(f => f.type.startsWith('image/'));
+    if (dropped.length === 0) return;
+    const dt = new DataTransfer();
+    if (input.multiple) [...input.files].forEach(f => dt.items.add(f));
+    dropped.forEach(f => { if (!input.multiple && dt.items.length) dt.items.clear(); dt.items.add(f); });
+    input.files = dt.files;
+    input.dispatchEvent(new Event('change'));
+  });
+}
+
 async function openProjectModal(id = null) {
   let project = { title: '', description: '', tags: [], images: [], logo: null, link: '', status: 'completed', sort_order: 0, progress: 0 };
 
@@ -432,6 +457,10 @@ async function openProjectModal(id = null) {
       reader.readAsDataURL(file);
     }
   });
+
+  // Drag-&-Drop-Upload aktivieren (Dateien direkt in die Zone ziehen)
+  enableDropUpload(imagesInput.closest('.file-input-wrapper'), imagesInput);
+  enableDropUpload(logoInput.closest('.file-input-wrapper'), logoInput);
 
   // Existing image/logo remove buttons
   imagesPreview.addEventListener('click', (e) => {
