@@ -14,7 +14,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="css/admin.css?v=4">
+  <link rel="stylesheet" href="css/admin.css?v=5">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
   <!-- Login Screen -->
@@ -156,42 +157,57 @@
           </div>
         </div>
 
-        <!-- Umsatz-Übersicht -->
+        <!-- Umsatz + Projekt-Status (zwei Donuts) -->
         <div class="dashboard-row">
-          <div class="dashboard-card revenue-card">
+          <div class="dashboard-card">
             <div class="card-header">
               <h3><i class="fas fa-euro-sign"></i> Umsatz-Übersicht</h3>
             </div>
             <div class="card-body">
-              <div class="revenue-stats">
-                <div class="revenue-item">
-                  <span class="revenue-label">Gesamt</span>
-                  <span class="revenue-value" id="dash-revenue-total">0,00 €</span>
+              <div class="chart-split">
+                <div class="donut-wrap">
+                  <canvas id="revenue-donut"></canvas>
+                  <div class="donut-center">
+                    <span class="donut-value" id="dash-revenue-total">0,00 €</span>
+                    <span class="donut-sub">Gesamt</span>
+                  </div>
                 </div>
-                <div class="revenue-item">
-                  <span class="revenue-label">Bezahlt</span>
-                  <span class="revenue-value success" id="dash-revenue-paid">0,00 €</span>
-                </div>
-                <div class="revenue-item">
-                  <span class="revenue-label">Offen</span>
-                  <span class="revenue-value warning" id="dash-revenue-open">0,00 €</span>
-                </div>
-                <div class="revenue-item">
-                  <span class="revenue-label">Überfällig</span>
-                  <span class="revenue-value danger" id="dash-revenue-overdue">0,00 €</span>
+                <div class="chart-legend">
+                  <div class="legend-row"><span class="legend-dot paid"></span><span class="legend-label">Bezahlt</span><span class="legend-value success" id="dash-revenue-paid">0,00 €</span></div>
+                  <div class="legend-row"><span class="legend-dot open"></span><span class="legend-label">Offen</span><span class="legend-value warning" id="dash-revenue-open">0,00 €</span></div>
+                  <div class="legend-row"><span class="legend-dot overdue"></span><span class="legend-label">Überfällig</span><span class="legend-value danger" id="dash-revenue-overdue">0,00 €</span></div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="dashboard-card activity-card">
+          <div class="dashboard-card">
             <div class="card-header">
-              <h3><i class="fas fa-clock"></i> Letzte Aktivitäten</h3>
+              <h3><i class="fas fa-folder-open"></i> Projekt-Status</h3>
             </div>
             <div class="card-body">
-              <div id="dash-activities" class="activity-list">
-                <p class="empty-text">Keine Aktivitäten vorhanden</p>
+              <div class="chart-split">
+                <div class="donut-wrap">
+                  <canvas id="projects-donut"></canvas>
+                  <div class="donut-center">
+                    <span class="donut-value" id="dash-pd-total">0</span>
+                    <span class="donut-sub">Projekte</span>
+                  </div>
+                </div>
+                <div class="chart-legend" id="projects-legend"></div>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Letzte Aktivitäten -->
+        <div class="dashboard-card">
+          <div class="card-header">
+            <h3><i class="fas fa-clock"></i> Letzte Aktivitäten</h3>
+          </div>
+          <div class="card-body">
+            <div id="dash-activities" class="activity-list">
+              <p class="empty-text">Keine Aktivitäten vorhanden</p>
             </div>
           </div>
         </div>
@@ -2194,6 +2210,6 @@
   <!-- Toast Notifications -->
   <div id="toast-container" class="toast-container"></div>
 
-  <script src="js/admin.js?v=4"></script>
+  <script src="js/admin.js?v=5"></script>
 </body>
 </html>

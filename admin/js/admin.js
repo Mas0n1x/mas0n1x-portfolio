@@ -2130,21 +2130,106 @@ document.getElementById('customer-detail-modal')?.addEventListener('click', (e) 
 });
 
 // ==================== DASHBOARD ====================
+let revenueDonut = null;
+let projectsDonut = null;
+
+// Count-up-Animation fuer Kennzahlen
+function animateCount(el, target, opts = {}) {
+  if (!el) return;
+  target = target || 0;
+  const duration = 750;
+  const start = performance.now();
+  function tick(now) {
+    const p = Math.min(1, (now - start) / duration);
+    const eased = 1 - Math.pow(1 - p, 3);
+    const val = target * eased;
+    el.textContent = opts.currency ? formatCurrency(val) : Math.round(val).toLocaleString('de-DE');
+    if (p < 1) requestAnimationFrame(tick);
+    else el.textContent = opts.currency ? formatCurrency(target) : Math.round(target).toLocaleString('de-DE');
+  }
+  requestAnimationFrame(tick);
+}
+
+const DONUT_OPTS = {
+  cutout: '72%',
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: { legend: { display: false } },
+  animation: { animateRotate: true, duration: 850 },
+};
+
+function renderRevenueDonut(rev) {
+  const canvas = document.getElementById('revenue-donut');
+  if (!canvas || typeof Chart === 'undefined') return;
+  const paid = rev.paid || 0, open = rev.open || 0, overdue = rev.overdue || 0;
+  const empty = (paid + open + overdue) === 0;
+  if (revenueDonut) revenueDonut.destroy();
+  revenueDonut = new Chart(canvas, {
+    type: 'doughnut',
+    data: {
+      labels: ['Bezahlt', 'Offen', 'Überfällig'],
+      datasets: [{
+        data: empty ? [1] : [paid, open, overdue],
+        backgroundColor: empty ? ['rgba(255,255,255,0.05)'] : ['#00ff88', '#ffaa00', '#ff4444'],
+        borderWidth: 0, hoverOffset: 6,
+      }],
+    },
+    options: { ...DONUT_OPTS, plugins: { legend: { display: false }, tooltip: { enabled: !empty } } },
+  });
+}
+
+async function renderProjectsDonut() {
+  const canvas = document.getElementById('projects-donut');
+  if (!canvas || typeof Chart === 'undefined') return;
+  let projects = [];
+  try { projects = await api('/projects'); } catch { projects = []; }
+  const done = projects.filter(p => p.status === 'completed').length;
+  const prog = projects.filter(p => p.status === 'in_progress').length;
+  const other = projects.length - done - prog;
+  const totalEl = document.getElementById('dash-pd-total');
+  if (totalEl) animateCount(totalEl, projects.length);
+  const legend = document.getElementById('projects-legend');
+  if (legend) {
+    legend.innerHTML = `
+      <div class="legend-row"><span class="legend-dot paid"></span><span class="legend-label">Abgeschlossen</span><span class="legend-value success">${done}</span></div>
+      <div class="legend-row"><span class="legend-dot open"></span><span class="legend-label">In Arbeit</span><span class="legend-value warning">${prog}</span></div>
+      ${other > 0 ? `<div class="legend-row"><span class="legend-dot muted"></span><span class="legend-label">Sonstige</span><span class="legend-value">${other}</span></div>` : ''}`;
+  }
+  const empty = projects.length === 0;
+  if (projectsDonut) projectsDonut.destroy();
+  projectsDonut = new Chart(canvas, {
+    type: 'doughnut',
+    data: {
+      labels: ['Abgeschlossen', 'In Arbeit', 'Sonstige'],
+      datasets: [{
+        data: empty ? [1] : [done, prog, other],
+        backgroundColor: empty ? ['rgba(255,255,255,0.05)'] : ['#00ff88', '#ffaa00', 'rgba(255,255,255,0.14)'],
+        borderWidth: 0, hoverOffset: 6,
+      }],
+    },
+    options: { ...DONUT_OPTS, plugins: { legend: { display: false }, tooltip: { enabled: !empty } } },
+  });
+}
+
 async function loadDashboard() {
   try {
     const data = await api('/dashboard');
 
-    // Update stats
-    document.getElementById('dash-projects').textContent = data.stats.projects;
-    document.getElementById('dash-customers').textContent = data.stats.customers;
-    document.getElementById('dash-requests').textContent = data.stats.openRequests;
-    document.getElementById('dash-invoices').textContent = data.stats.invoices;
+    // Stats mit Count-up
+    animateCount(document.getElementById('dash-projects'), data.stats.projects);
+    animateCount(document.getElementById('dash-customers'), data.stats.customers);
+    animateCount(document.getElementById('dash-requests'), data.stats.openRequests);
+    animateCount(document.getElementById('dash-invoices'), data.stats.invoices);
 
-    // Update revenue
-    document.getElementById('dash-revenue-total').textContent = formatCurrency(data.revenue.total);
-    document.getElementById('dash-revenue-paid').textContent = formatCurrency(data.revenue.paid);
-    document.getElementById('dash-revenue-open').textContent = formatCurrency(data.revenue.open);
-    document.getElementById('dash-revenue-overdue').textContent = formatCurrency(data.revenue.overdue);
+    // Revenue-Werte mit Count-up
+    animateCount(document.getElementById('dash-revenue-total'), data.revenue.total, { currency: true });
+    animateCount(document.getElementById('dash-revenue-paid'), data.revenue.paid, { currency: true });
+    animateCount(document.getElementById('dash-revenue-open'), data.revenue.open, { currency: true });
+    animateCount(document.getElementById('dash-revenue-overdue'), data.revenue.overdue, { currency: true });
+
+    // Donut-Charts
+    renderRevenueDonut(data.revenue);
+    renderProjectsDonut();
 
     // Update activities
     const activitiesContainer = document.getElementById('dash-activities');

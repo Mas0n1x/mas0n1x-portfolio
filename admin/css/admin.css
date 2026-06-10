@@ -2473,6 +2473,99 @@ body {
   color: var(--danger);
 }
 
+/* Chart-Layout (Donut + Legende) */
+.chart-split {
+  display: grid;
+  grid-template-columns: 152px 1fr;
+  gap: 26px;
+  align-items: center;
+  min-height: 152px;
+}
+
+.donut-wrap {
+  position: relative;
+  width: 152px;
+  height: 152px;
+}
+
+.donut-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.donut-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.1;
+}
+
+.donut-sub {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+  margin-top: 3px;
+}
+
+.chart-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.legend-row {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  font-size: 0.88rem;
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  box-shadow: 0 0 8px currentColor;
+}
+
+.legend-dot.paid { background: var(--accent); color: rgba(0, 255, 136, 0.5); }
+.legend-dot.open { background: var(--warning); color: rgba(255, 170, 0, 0.4); }
+.legend-dot.overdue { background: var(--danger); color: rgba(255, 68, 68, 0.4); }
+.legend-dot.muted { background: rgba(255, 255, 255, 0.15); color: transparent; box-shadow: none; }
+
+.legend-label {
+  color: var(--text-secondary);
+  flex: 1;
+}
+
+.legend-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.legend-value.success { color: var(--accent); }
+.legend-value.warning { color: var(--warning); }
+.legend-value.danger { color: var(--danger); }
+
+@media (max-width: 600px) {
+  .chart-split {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+  }
+  .chart-legend {
+    width: 100%;
+  }
+}
+
 /* Activity List */
 .activity-list {
   max-height: 240px;
