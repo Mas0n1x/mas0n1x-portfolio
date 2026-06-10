@@ -63,7 +63,9 @@
 
   /* ============ Layout ============ */
   .wrap { max-width: var(--container); margin: 0 auto; padding: 0 28px; }
-  section { padding: 120px 0; position: relative; }
+  section { padding: 130px 0; position: relative; }
+  section::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: min(86%, var(--container)); height: 1px; background: linear-gradient(90deg, transparent, var(--line-strong), transparent); }
+  #leistungen::before { display: none; }
   .eyebrow {
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.78rem; letter-spacing: 0.12em; text-transform: uppercase;
@@ -230,7 +232,7 @@
   /* ============ Testimonials ============ */
   .t-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px; }
   .t-card { padding: 28px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
-  .t-card .quote { font-size: 1.05rem; line-height: 1.7; margin-bottom: 20px; }
+  .t-card .quote { font-size: 0.98rem; line-height: 1.65; margin-bottom: 20px; color: var(--text-2); display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
   .t-card .quote::before { content: '“'; color: var(--mint); font-family: 'Space Grotesk', sans-serif; font-size: 2rem; line-height: 0; vertical-align: -0.35em; margin-right: 4px; }
   .t-author { display: flex; align-items: center; gap: 12px; }
   .t-avatar { width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, var(--mint), var(--cyan)); display: grid; place-items: center; color: #000; font-weight: 700; font-family: 'Space Grotesk', sans-serif; }
@@ -474,7 +476,6 @@
     <h2>Ausgewählte Projekte</h2>
     <p>Ein Blick auf Systeme, die ich gebaut habe — viele davon laufen täglich im Einsatz.</p>
   </div>
-  <div class="filters reveal" id="work-filters"></div>
   <div class="work-grid" id="work-grid">
     <p class="t-empty">Projekte werden geladen …</p>
   </div>
@@ -698,7 +699,7 @@
       const projects = await r.json();
       document.getElementById('stat-projects').textContent = projects.length + '+';
       allWork = projects;
-      renderFilters(); renderWork();
+      renderWork();
     } catch (e) {
       document.getElementById('work-grid').innerHTML = '<p class="t-empty">Projekte konnten nicht geladen werden.</p>';
     }
