@@ -1046,6 +1046,288 @@
             background: transparent;
         }
 
+        .portfolio-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            max-width: var(--container-max);
+            margin: 0 auto 36px;
+        }
+
+        .portfolio-filter {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            padding: 8px 16px;
+            border-radius: 100px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.02);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .portfolio-filter:hover {
+            color: var(--text-primary);
+            border-color: rgba(0, 255, 136, 0.3);
+        }
+
+        .portfolio-filter.active {
+            background: var(--accent);
+            color: #000;
+            border-color: var(--accent);
+            box-shadow: 0 0 18px rgba(0, 255, 136, 0.25);
+        }
+
+        .portfolio-detail-btn {
+            margin-top: 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82rem;
+            color: var(--accent);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            transition: gap 0.25s ease;
+        }
+
+        .portfolio-detail-btn:hover { gap: 12px; }
+
+        /* Projekt-Detail-Modal */
+        @keyframes detailIn {
+            from { opacity: 0; transform: translateY(16px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .project-detail-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .project-detail-modal.open { display: flex; }
+
+        .detail-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(8px);
+        }
+
+        .detail-content {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 760px;
+            max-height: 88vh;
+            overflow-y: auto;
+            background: linear-gradient(160deg, #131313, #0b0b0b);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 20px;
+            padding: 32px;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7);
+            animation: detailIn 0.2s ease;
+        }
+
+        .detail-close {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .detail-close:hover { color: var(--accent); border-color: rgba(0, 255, 136, 0.3); }
+
+        .detail-gallery {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            margin-bottom: 24px;
+            padding-bottom: 8px;
+        }
+
+        .detail-gallery img {
+            height: 220px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            object-fit: cover;
+        }
+
+        .detail-head {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .detail-logo {
+            width: 52px;
+            height: 52px;
+            object-fit: contain;
+            border-radius: 12px;
+        }
+
+        .detail-head h2 { font-size: 1.8rem; }
+
+        .detail-desc {
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin: 16px 0 24px;
+        }
+
+        .detail-progress {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+
+        .detail-progress-bar {
+            flex: 1;
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.06);
+            overflow: hidden;
+        }
+
+        .detail-progress-bar div {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--accent-secondary));
+            border-radius: 4px;
+        }
+
+        .detail-progress span {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--accent);
+        }
+
+        .detail-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 22px;
+            border-radius: 12px;
+            background: var(--accent);
+            color: #000;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.25s ease;
+        }
+
+        .detail-link:hover {
+            box-shadow: 0 0 24px rgba(0, 255, 136, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* GitHub-Aktivität */
+        .github-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            max-width: var(--container-max);
+            margin: 0 auto;
+        }
+
+        .github-loading {
+            grid-column: 1 / -1;
+            text-align: center;
+            color: var(--text-muted);
+            padding: 40px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .github-card {
+            display: block;
+            background: rgba(12, 12, 12, 0.6);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 22px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(20px);
+        }
+
+        .github-card:hover {
+            border-color: rgba(0, 255, 136, 0.3);
+            transform: translateY(-4px);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .github-card-head {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .github-card-head i { color: var(--accent); font-size: 1.1rem; }
+
+        .github-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .github-desc {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 16px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .github-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .github-meta i { margin-right: 4px; }
+        .github-lang { display: inline-flex; align-items: center; gap: 6px; }
+
+        .lang-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: var(--accent);
+            box-shadow: 0 0 8px var(--accent-glow);
+        }
+
+        .github-fallback {
+            grid-column: 1 / -1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 18px;
+            color: var(--accent);
+            text-decoration: none;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
         .portfolio-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
@@ -2513,6 +2795,7 @@
                 Ein Blick auf einige meiner bisherigen Arbeiten und Projekte.
             </p>
         </div>
+        <div class="portfolio-filters reveal" id="portfolio-filters"></div>
         <div class="portfolio-grid" id="portfolio-grid">
             <!-- Projekte werden dynamisch geladen -->
             <div class="portfolio-card reveal">
@@ -2602,6 +2885,15 @@
     </section>
 
     <!-- About Section -->
+    <!-- Projekt-Detail-Modal -->
+    <div id="project-detail-modal" class="project-detail-modal">
+      <div class="detail-overlay" onclick="closeProjectDetail()"></div>
+      <div class="detail-content">
+        <button class="detail-close" onclick="closeProjectDetail()" aria-label="Schließen"><i class="fas fa-times"></i></button>
+        <div id="project-detail-body"></div>
+      </div>
+    </div>
+
     <section id="about">
         <div class="section-header reveal">
             <p class="section-label">// About</p>
@@ -2636,6 +2928,17 @@
     </section>
 
     <!-- Testimonials Section -->
+    <section id="github-activity">
+        <div class="section-header reveal">
+            <p class="section-label">// Open Source</p>
+            <h2 class="section-title">GitHub-Aktivität</h2>
+            <p class="section-subtitle">Woran ich gerade arbeite — live von GitHub.</p>
+        </div>
+        <div class="github-grid reveal" id="github-grid">
+            <div class="github-loading"><i class="fas fa-circle-notch fa-spin"></i> Lade Aktivität …</div>
+        </div>
+    </section>
+
     <section id="testimonials">
         <div class="section-header reveal">
             <p class="section-label">// Testimonials</p>
@@ -3046,15 +3349,44 @@
             `}).join('');
         }
 
+        let allPortfolioProjects = [];
+        let activePortfolioFilter = 'all';
+
         function renderProjects(projects) {
+            allPortfolioProjects = projects || [];
+            renderPortfolioFilters(allPortfolioProjects);
+            renderFilteredProjects();
+        }
+
+        function renderPortfolioFilters(projects) {
+            const fc = document.getElementById('portfolio-filters');
+            if (!fc) return;
+            const tags = new Set();
+            projects.forEach(p => (p.tags || []).forEach(t => tags.add(t)));
+            const tagList = [...tags].sort((a, b) => a.localeCompare(b));
+            fc.innerHTML = `<button class="portfolio-filter active" data-filter="all">Alle</button>` +
+                tagList.map(t => `<button class="portfolio-filter" data-filter="${escapeHtml(t)}">${escapeHtml(t)}</button>`).join('');
+            fc.querySelectorAll('.portfolio-filter').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    activePortfolioFilter = btn.dataset.filter;
+                    fc.querySelectorAll('.portfolio-filter').forEach(b => b.classList.toggle('active', b === btn));
+                    renderFilteredProjects();
+                });
+            });
+        }
+
+        function renderFilteredProjects() {
             const container = document.getElementById('portfolio-grid');
+            const projects = activePortfolioFilter === 'all'
+                ? allPortfolioProjects
+                : allPortfolioProjects.filter(p => (p.tags || []).includes(activePortfolioFilter));
 
             if (projects.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: var(--text-muted); grid-column: 1 / -1;">Noch keine abgeschlossenen Projekte.</p>';
+                container.innerHTML = '<p style="text-align: center; color: var(--text-muted); grid-column: 1 / -1;">Keine Projekte in dieser Kategorie.</p>';
                 return;
             }
 
-            container.innerHTML = projects.map(project => {
+            container.innerHTML = projects.map((project, idx) => {
                 const images = project.images && project.images.length > 0
                     ? project.images
                     : (project.image ? [{ path: project.image, order: 0 }] : []);
@@ -3069,10 +3401,90 @@
                         </div>
                         <h3>${escapeHtml(project.title)}</h3>
                         <p>${escapeHtml(project.description || '')}</p>
+                        <button class="portfolio-detail-btn" data-detail="${idx}">Details ansehen <i class="fas fa-arrow-right"></i></button>
                     </div>
                 </div>
             `}).join('');
+
+            container.querySelectorAll('.portfolio-detail-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openProjectDetail(projects[parseInt(btn.dataset.detail)]);
+                });
+            });
         }
+
+        function openProjectDetail(project) {
+            if (!project) return;
+            const modal = document.getElementById('project-detail-modal');
+            const body = document.getElementById('project-detail-body');
+            const images = project.images && project.images.length > 0
+                ? project.images
+                : (project.image ? [{ path: project.image, order: 0 }] : []);
+            const inProgress = project.status === 'in_progress' && project.progress != null;
+            body.innerHTML = `
+                ${images.length > 0 ? `<div class="detail-gallery">${images.map(img => `<img src="${img.path}" alt="${escapeHtml(project.title)}" loading="lazy" onerror="this.style.display='none'">`).join('')}</div>` : ''}
+                <div class="detail-head">
+                    ${project.logo ? `<img class="detail-logo" src="${project.logo}" alt="Logo" onerror="this.style.display='none'">` : ''}
+                    <h2>${escapeHtml(project.title)}</h2>
+                </div>
+                <div class="portfolio-tags">${(project.tags || []).map(t => `<span class="portfolio-tag">${escapeHtml(t)}</span>`).join('')}</div>
+                <p class="detail-desc">${escapeHtml(project.description || '')}</p>
+                ${inProgress ? `<div class="detail-progress"><div class="detail-progress-bar"><div style="width:${project.progress}%"></div></div><span>${project.progress}% fertig</span></div>` : ''}
+                ${project.link ? `<a href="${escapeHtml(project.link)}" target="_blank" rel="noopener" class="detail-link">Projekt ansehen <i class="fas fa-external-link-alt"></i></a>` : ''}
+            `;
+            modal.classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeProjectDetail() {
+            const modal = document.getElementById('project-detail-modal');
+            if (modal) modal.classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeProjectDetail();
+        });
+
+        // ==================== GITHUB-AKTIVITAET ====================
+        function githubRelative(dateStr) {
+            const d = new Date(dateStr);
+            const diff = (Date.now() - d.getTime()) / 1000;
+            if (diff < 3600) return Math.max(1, Math.floor(diff / 60)) + ' Min.';
+            if (diff < 86400) return Math.floor(diff / 3600) + ' Std.';
+            if (diff < 2592000) return Math.floor(diff / 86400) + ' Tg.';
+            return d.toLocaleDateString('de-DE');
+        }
+
+        async function loadGithubActivity() {
+            const grid = document.getElementById('github-grid');
+            if (!grid) return;
+            try {
+                const res = await fetch('https://api.github.com/users/Mas0n1x/repos?sort=pushed&per_page=8&type=owner');
+                if (!res.ok) throw new Error('github');
+                const repos = await res.json();
+                const active = repos.filter(r => !r.fork && !r.private).slice(0, 6);
+                if (active.length === 0) throw new Error('empty');
+                grid.innerHTML = active.map(r => `
+                    <a href="${r.html_url}" target="_blank" rel="noopener" class="github-card">
+                        <div class="github-card-head">
+                            <i class="fab fa-github"></i>
+                            <span class="github-name">${escapeHtml(r.name)}</span>
+                        </div>
+                        <p class="github-desc">${escapeHtml(r.description || 'Open-Source-Projekt von Mas0n1x.')}</p>
+                        <div class="github-meta">
+                            ${r.language ? `<span class="github-lang"><span class="lang-dot"></span>${escapeHtml(r.language)}</span>` : ''}
+                            <span><i class="fas fa-clock"></i> ${githubRelative(r.pushed_at)}</span>
+                            ${r.stargazers_count > 0 ? `<span><i class="fas fa-star"></i> ${r.stargazers_count}</span>` : ''}
+                        </div>
+                    </a>
+                `).join('');
+            } catch (e) {
+                grid.innerHTML = '<a href="https://github.com/Mas0n1x" target="_blank" rel="noopener" class="github-fallback"><i class="fab fa-github"></i> Projekte auf GitHub ansehen</a>';
+            }
+        }
+        loadGithubActivity();
 
         function renderServices(services) {
             const container = document.getElementById('services-grid');
