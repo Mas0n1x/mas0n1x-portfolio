@@ -573,6 +573,21 @@
         </div></div>`;
     }).join('');
     g.querySelectorAll('.work-card').forEach(c => c.addEventListener('click', () => openDetail(list[parseInt(c.dataset.i)])));
+    enableTilt();
+  }
+  // ===== 3D-Tilt (nur Desktop, respektiert reduced-motion) =====
+  function enableTilt() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !window.matchMedia('(pointer: fine)').matches) return;
+    document.querySelectorAll('.b-card, .work-card').forEach(card => {
+      if (card.dataset.tilt) return; card.dataset.tilt = '1';
+      card.style.transformStyle = 'preserve-3d';
+      card.addEventListener('mousemove', e => {
+        const r = card.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
+        card.style.transform = `perspective(900px) rotateY(${x * 4.5}deg) rotateX(${(-y) * 4.5}deg) translateY(-5px)`;
+      });
+      card.addEventListener('mouseleave', () => { card.style.transform = ''; });
+    });
   }
   function statusLabel(s) { return ({in_progress:'In Arbeit', completed:'Abgeschlossen', planned:'Geplant', paused:'Pausiert'})[s] || 'Abgeschlossen'; }
 
@@ -600,6 +615,7 @@
         const span = i < 2 ? 'b-span-3' : 'b-span-2';
         return `<div class="b-card ${span} reveal in"><div class="ic"><i class="${s.icon||'fas fa-code'}"></i></div><h3>${escapeHtml(s.title)}</h3><p>${escapeHtml(s.description||'')}</p></div>`;
       }).join('');
+      enableTilt();
     } catch (e) {}
   }
 
@@ -656,6 +672,7 @@
 
   // ===== Init =====
   loadWork(); loadServices(); loadTestimonials();
+  enableTilt();
 </script>
 </body>
 </html>

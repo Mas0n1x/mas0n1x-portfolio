@@ -49,6 +49,15 @@ body {
   display: none !important;
 }
 
+/* Display-Typo (konsistent mit der neuen Landing Page) */
+.section-header h1,
+.dashboard-welcome h2,
+.login-container h1,
+.modal-header h2 {
+  font-family: 'Space Grotesk', sans-serif;
+  letter-spacing: -0.01em;
+}
+
 /* ==================== LOGIN SCREEN ==================== */
 .login-screen {
   min-height: 100vh;
