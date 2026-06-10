@@ -387,6 +387,35 @@ async function initDatabase() {
     console.error('Image migration error:', e);
   }
 
+  // GitHub-Projekte: gecachte Repo-Daten + Kuratierung (Auswahl, eigene Inhalte, Bilder)
+  db.run(`
+    CREATE TABLE IF NOT EXISTS github_projects (
+      repo_id INTEGER PRIMARY KEY,
+      full_name TEXT,
+      name TEXT,
+      owner TEXT,
+      gh_description TEXT,
+      gh_language TEXT,
+      gh_url TEXT,
+      gh_topics TEXT,
+      gh_stars INTEGER DEFAULT 0,
+      gh_private INTEGER DEFAULT 0,
+      gh_pushed_at TEXT,
+      gh_homepage TEXT,
+      selected INTEGER DEFAULT 0,
+      custom_title TEXT,
+      custom_desc TEXT,
+      detail_desc TEXT,
+      custom_tags TEXT,
+      custom_link TEXT,
+      images TEXT,
+      logo TEXT,
+      status TEXT DEFAULT 'completed',
+      sort_order INTEGER DEFAULT 0,
+      updated_at TEXT DEFAULT (datetime('now'))
+    )
+  `);
+
   // Check if admin exists
   const adminCheck = db.exec("SELECT * FROM admin WHERE id = 1");
   if (adminCheck.length === 0 || adminCheck[0].values.length === 0) {
@@ -632,7 +661,71 @@ app.post('/api/maintenance', requireAuth, (req, res) => {
 
 // ==================== PROJECTS ROUTES ====================
 
+function safeJson(s, fb) { try { return JSON.parse(s); } catch (e) { return fb; } }
+
+// GitHub-Helper: Repos vom eigenen Account + Org-Mitgliedschaften (privat + öffentlich)
+async function fetchGithubRepos() {
+  const token = process.env.GITHUB_TOKEN;
+  if (!token) { const e = new Error('GITHUB_TOKEN fehlt'); e.code = 'NO_TOKEN'; throw e; }
+  const headers = {
+    Authorization: `Bearer ${token}`,
+    Accept: 'application/vnd.github+json',
+    'User-Agent': 'mas0n1x-portfolio',
+    'X-GitHub-Api-Version': '2022-11-28'
+  };
+  let repos = [];
+  for (let page = 1; page <= 5; page++) {
+    const r = await fetch(`https://api.github.com/user/repos?per_page=100&page=${page}&affiliation=owner,organization_member&sort=pushed`, { headers });
+    if (!r.ok) { const e = new Error('GitHub API ' + r.status); e.code = 'API_' + r.status; throw e; }
+    const data = await r.json();
+    repos = repos.concat(data);
+    if (data.length < 100) break;
+  }
+  return repos;
+}
+
+// Repo-Basisdaten in DB cachen, ohne Kuratierung (selected/custom/images) zu überschreiben
+function upsertGithubRepo(repo) {
+  const vals = [
+    repo.full_name, repo.name, repo.owner ? repo.owner.login : '',
+    repo.description || '', repo.language || '', repo.html_url,
+    JSON.stringify(repo.topics || []), repo.stargazers_count || 0,
+    repo.private ? 1 : 0, repo.pushed_at || '', repo.homepage || ''
+  ];
+  const existing = dbGet('SELECT repo_id FROM github_projects WHERE repo_id = ?', [repo.id]);
+  if (existing) {
+    dbRun('UPDATE github_projects SET full_name=?,name=?,owner=?,gh_description=?,gh_language=?,gh_url=?,gh_topics=?,gh_stars=?,gh_private=?,gh_pushed_at=?,gh_homepage=? WHERE repo_id=?', [...vals, repo.id]);
+  } else {
+    dbRun('INSERT INTO github_projects (repo_id,full_name,name,owner,gh_description,gh_language,gh_url,gh_topics,gh_stars,gh_private,gh_pushed_at,gh_homepage) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)', [repo.id, ...vals]);
+  }
+}
+
+// Kuratiertes GitHub-Projekt → öffentliches Projekt-Format (custom überschreibt GitHub-Default)
+function mapGithubProject(p) {
+  const topics = p.gh_topics ? safeJson(p.gh_topics, []) : [];
+  const customTags = p.custom_tags ? safeJson(p.custom_tags, []) : [];
+  const tags = customTags.length ? customTags : [p.gh_language, ...topics].filter(Boolean).slice(0, 5);
+  return {
+    id: p.repo_id,
+    title: p.custom_title || p.name,
+    description: p.custom_desc || p.gh_description || '',
+    detail: p.detail_desc || '',
+    images: p.images ? safeJson(p.images, []) : [],
+    logo: p.logo || null,
+    tags,
+    link: p.custom_link || p.gh_homepage || p.gh_url,
+    status: p.status || 'completed',
+    stars: p.gh_stars || 0,
+    language: p.gh_language || null,
+    private: !!p.gh_private,
+    repo_url: p.gh_url
+  };
+}
+
 app.get('/api/projects', (req, res) => {
+  // Bevorzugt kuratierte GitHub-Projekte; Fallback auf manuelle Projekte (Übergang)
+  const gh = dbAll('SELECT * FROM github_projects WHERE selected = 1 ORDER BY sort_order ASC, gh_pushed_at DESC');
+  if (gh.length) return res.json(gh.map(mapGithubProject));
   const projects = dbAll('SELECT * FROM projects ORDER BY sort_order ASC, id DESC');
   res.json(projects.map(p => ({
     ...p,
@@ -795,6 +888,70 @@ app.delete('/api/projects/:id', requireAuth, (req, res) => {
 
   dbRun('DELETE FROM projects WHERE id = ?', [parseInt(req.params.id)]);
   res.json({ success: true });
+});
+
+// ==================== GITHUB PROJECTS (Admin) ====================
+
+// Alle erreichbaren Repos live von GitHub holen, Basisdaten cachen, kuratierten Stand zurückgeben
+app.get('/api/admin/github/repos', requireAuth, async (req, res) => {
+  try {
+    const repos = await fetchGithubRepos();
+    repos.forEach(upsertGithubRepo);
+    const rows = dbAll('SELECT * FROM github_projects ORDER BY selected DESC, sort_order ASC, gh_pushed_at DESC');
+    res.json({
+      ok: true,
+      count: rows.length,
+      repos: rows.map(r => ({
+        repo_id: r.repo_id, full_name: r.full_name, name: r.name, owner: r.owner,
+        gh_description: r.gh_description, gh_language: r.gh_language, gh_url: r.gh_url,
+        gh_topics: safeJson(r.gh_topics, []), gh_stars: r.gh_stars, gh_private: !!r.gh_private,
+        gh_pushed_at: r.gh_pushed_at, gh_homepage: r.gh_homepage,
+        selected: !!r.selected, custom_title: r.custom_title || '', custom_desc: r.custom_desc || '',
+        detail_desc: r.detail_desc || '', custom_tags: safeJson(r.custom_tags, []), custom_link: r.custom_link || '',
+        images: safeJson(r.images, []), logo: r.logo || null, status: r.status || 'completed', sort_order: r.sort_order || 0
+      }))
+    });
+  } catch (e) {
+    res.status(e.code === 'NO_TOKEN' ? 400 : 502).json({ ok: false, error: e.message, code: e.code || 'ERR' });
+  }
+});
+
+// Reihenfolge der ausgewählten Projekte (muss VOR /:repoId stehen)
+app.put('/api/admin/github/reorder', requireAuth, (req, res) => {
+  const order = req.body && req.body.order;
+  if (!Array.isArray(order)) return res.status(400).json({ error: 'order muss ein Array von repo_ids sein' });
+  order.forEach((id, i) => dbRun('UPDATE github_projects SET sort_order = ? WHERE repo_id = ?', [i, parseInt(id)]));
+  res.json({ success: true });
+});
+
+// Auswahl + eigene Inhalte + Bilder eines Repos speichern
+app.put('/api/admin/github/projects/:repoId', requireAuth, projectUpload, (req, res) => {
+  const repoId = parseInt(req.params.repoId);
+  const row = dbGet('SELECT * FROM github_projects WHERE repo_id = ?', [repoId]);
+  if (!row) return res.status(404).json({ error: 'Repo nicht gefunden — erst Repos synchronisieren' });
+  const b = req.body || {};
+
+  // Bilder: behaltene (existing_images JSON) + neu hochgeladene
+  let images = b.existing_images ? safeJson(b.existing_images, []) : [];
+  if (req.files && req.files['images']) {
+    const start = images.length;
+    req.files['images'].forEach((file, i) => images.push({ path: `/uploads/${file.filename}`, order: start + i }));
+  }
+  const logo = (req.files && req.files['logo'] && req.files['logo'][0])
+    ? `/uploads/${req.files['logo'][0].filename}`
+    : (b.logo || row.logo || null);
+  const tagsJson = (b.custom_tags !== undefined)
+    ? JSON.stringify(String(b.custom_tags).split(',').map(t => t.trim()).filter(Boolean))
+    : (row.custom_tags || '[]');
+  const sel = (b.selected === '1' || b.selected === 'true' || b.selected === true) ? 1 : 0;
+
+  dbRun(
+    `UPDATE github_projects SET selected=?,custom_title=?,custom_desc=?,detail_desc=?,custom_tags=?,custom_link=?,images=?,logo=?,status=?,sort_order=?,updated_at=datetime('now') WHERE repo_id=?`,
+    [sel, b.custom_title || null, b.custom_desc || null, b.detail_desc || null, tagsJson,
+     b.custom_link || null, JSON.stringify(images), logo, b.status || 'completed',
+     parseInt(b.sort_order) || row.sort_order || 0, repoId]
+  );
+  res.json({ success: true, images });
 });
 
 // ==================== SERVICES ROUTES ====================

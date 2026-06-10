@@ -69,7 +69,7 @@ function showDashboard() {
   loginScreen.classList.add('hidden');
   adminDashboard.classList.remove('hidden');
   loadDashboard();
-  loadProjects();
+  loadGithubProjects();
   loadServices();
   loadRequests();
   loadMaintenanceStatus();
@@ -122,6 +122,8 @@ document.querySelectorAll('.nav-item[data-section]').forEach(item => {
       loadAdminFAQs();
     } else if (section === 'discord') {
       loadDiscordSection();
+    } else if (section === 'projects') {
+      loadGithubProjects();
     }
   });
 });
@@ -579,7 +581,181 @@ async function deleteProject(id) {
   }
 }
 
-document.getElementById('add-project-btn').addEventListener('click', () => openProjectModal());
+// ==================== GITHUB PROJECTS ====================
+let GH_REPOS = [];
+let GH_DIRTY_IMAGES = null;
+function escAttr(s){ return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+
+document.getElementById('add-project-btn').addEventListener('click', () => loadGithubProjects(true));
+['gh-search','gh-only-selected'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('input', renderGhRepos);
+  if (el && el.type === 'checkbox') el.addEventListener('change', renderGhRepos);
+});
+
+async function loadGithubProjects(showSync) {
+  const list = document.getElementById('gh-list');
+  if (!list) return;
+  list.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><i class="fas fa-spinner fa-spin"></i><p>Lade GitHub-Repos …</p></div>';
+  try {
+    const data = await api('/admin/github/repos');
+    GH_REPOS = data.repos || [];
+    renderGhRepos();
+    if (showSync) showToast(`${GH_REPOS.length} Repos synchronisiert`, 'success');
+  } catch (e) {
+    const tokenIssue = /token/i.test(e.message || '');
+    const hint = tokenIssue
+      ? 'GITHUB_TOKEN fehlt in der .env des Backends. Lege einen Personal Access Token an (Scope: repo + read:org) und trage GITHUB_TOKEN=… in /srv/mas0n1x-portfolio/.env ein, dann Backend neu starten.'
+      : ('GitHub nicht erreichbar: ' + (e.message || 'Fehler'));
+    list.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><i class="fab fa-github"></i><h3>Keine Repos geladen</h3><p style="max-width:520px;margin:8px auto 0">${escapeHtml(hint)}</p></div>`;
+  }
+}
+
+function ghRepo(id){ return GH_REPOS.find(r => r.repo_id === id); }
+
+function ghFiltered() {
+  const q = (document.getElementById('gh-search')?.value || '').toLowerCase();
+  const onlySel = document.getElementById('gh-only-selected')?.checked;
+  return GH_REPOS.filter(r => {
+    if (onlySel && !r.selected) return false;
+    if (!q) return true;
+    return (r.name + ' ' + (r.gh_description||'') + ' ' + (r.gh_language||'')).toLowerCase().includes(q);
+  });
+}
+
+function renderGhRepos() {
+  const list = document.getElementById('gh-list');
+  if (!list) return;
+  const repos = ghFiltered().slice().sort((a,b) =>
+    (b.selected - a.selected) || (a.sort_order - b.sort_order) || (new Date(b.gh_pushed_at) - new Date(a.gh_pushed_at)));
+  const selCount = GH_REPOS.filter(r => r.selected).length;
+  const countEl = document.getElementById('gh-count');
+  if (countEl) countEl.textContent = `${selCount} aktiv · ${GH_REPOS.length} gesamt`;
+  if (!repos.length) { list.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><p>Keine Repos gefunden.</p></div>'; return; }
+  const activeIds = GH_REPOS.filter(r=>r.selected).slice().sort((a,b)=>a.sort_order-b.sort_order).map(r=>r.repo_id);
+  list.innerHTML = repos.map(r => {
+    const isActive = r.selected;
+    const idx = activeIds.indexOf(r.repo_id);
+    const desc = escapeHtml(r.custom_desc || r.gh_description || 'Keine Beschreibung.');
+    return `<div class="gh-card ${isActive?'active':''}" data-id="${r.repo_id}">
+      <div class="gh-card-top">
+        <div class="gh-name">${escapeHtml(r.custom_title || r.name)}
+          <span class="gh-badge ${r.gh_private?'priv':'pub'}">${r.gh_private?'privat':'public'}</span>
+          ${r.gh_language?`<span class="gh-badge lang">${escapeHtml(r.gh_language)}</span>`:''}
+        </div>
+        ${isActive?`<div class="gh-ord"><button onclick="ghMove(${r.repo_id},-1)" title="Hoch">↑</button><button onclick="ghMove(${r.repo_id},1)" title="Runter">↓</button></div>`:''}
+      </div>
+      <div class="gh-desc">${desc}</div>
+      <div class="gh-meta"><span>★ ${r.gh_stars}</span><span>${(r.images||[]).length} Bild(er)</span><span>${escapeHtml(r.owner||'')}</span></div>
+      <div class="gh-card-actions">
+        <label class="gh-toggle"><input type="checkbox" ${isActive?'checked':''} onchange="ghToggle(${r.repo_id},this.checked)"><span class="gh-switch"></span>${isActive?(idx>=0?`Aktiv #${idx+1}`:'Aktiv'):'Anzeigen'}</label>
+        <button class="gh-edit" onclick="openGhModal(${r.repo_id})"><i class="fas fa-pen"></i> Bearbeiten</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function ghToggle(id, on) {
+  const r = ghRepo(id); if (!r) return;
+  r.selected = on;
+  if (on && !r.sort_order) r.sort_order = GH_REPOS.filter(x=>x.selected).length;
+  try { await saveGhRepo(r, null); renderGhRepos(); }
+  catch(e){ r.selected = !on; showToast(e.message,'error'); renderGhRepos(); }
+}
+
+async function ghMove(id, dir) {
+  const active = GH_REPOS.filter(r=>r.selected).slice().sort((a,b)=>a.sort_order-b.sort_order);
+  const i = active.findIndex(r=>r.repo_id===id), j = i + dir;
+  if (i<0 || j<0 || j>=active.length) return;
+  [active[i], active[j]] = [active[j], active[i]];
+  active.forEach((r,k)=>r.sort_order=k);
+  try { await api('/admin/github/reorder', { method:'PUT', body:{ order: active.map(r=>r.repo_id) } }); renderGhRepos(); }
+  catch(e){ showToast(e.message,'error'); }
+}
+
+async function saveGhRepo(r, newFiles) {
+  const fd = new FormData();
+  fd.append('selected', r.selected ? '1' : '0');
+  fd.append('custom_title', r.custom_title || '');
+  fd.append('custom_desc', r.custom_desc || '');
+  fd.append('detail_desc', r.detail_desc || '');
+  fd.append('custom_tags', (r.custom_tags||[]).join(', '));
+  fd.append('custom_link', r.custom_link || '');
+  fd.append('status', r.status || 'completed');
+  fd.append('sort_order', r.sort_order || 0);
+  fd.append('existing_images', JSON.stringify(r.images || []));
+  if (newFiles) for (const f of newFiles) fd.append('images', f);
+  const res = await api(`/admin/github/projects/${r.repo_id}`, { method:'PUT', body: fd });
+  r.images = res.images || r.images;
+  return res;
+}
+
+function openGhModal(id) {
+  const r = ghRepo(id); if (!r) return;
+  GH_DIRTY_IMAGES = (r.images||[]).slice();
+  const newFiles = [];
+  const content = `
+    <div class="gh-form">
+      <label>Titel <span class="hint">(überschreibt Repo-Name)</span>
+        <input type="text" id="ghf-title" value="${escAttr(r.custom_title||'')}" placeholder="${escAttr(r.name)}">
+      </label>
+      <label>Kurzbeschreibung <span class="hint">(auf der Karte)</span>
+        <input type="text" id="ghf-desc" value="${escAttr(r.custom_desc||'')}" placeholder="${escAttr(r.gh_description||'')}">
+      </label>
+      <label>Ausführliche Beschreibung <span class="hint">(erscheint beim Klick im Detail)</span>
+        <textarea id="ghf-detail" placeholder="Was ist das Projekt? Welches Problem löst es? Was steckt technisch dahinter?">${escapeHtml(r.detail_desc||'')}</textarea>
+      </label>
+      <label>Tags <span class="hint">(Komma-getrennt, leer = Sprache + GitHub-Topics)</span>
+        <input type="text" id="ghf-tags" value="${escAttr((r.custom_tags||[]).join(', '))}" placeholder="${escAttr(r.gh_language||'')}">
+      </label>
+      <label>Link <span class="hint">(überschreibt GitHub-URL)</span>
+        <input type="text" id="ghf-link" value="${escAttr(r.custom_link||'')}" placeholder="${escAttr(r.gh_homepage||r.gh_url)}">
+      </label>
+      <label>Status
+        <select id="ghf-status">
+          ${['completed','in_progress','planned'].map(s=>`<option value="${s}" ${(r.status||'completed')===s?'selected':''}>${({completed:'Aktiv',in_progress:'In Arbeit',planned:'Geplant'})[s]}</option>`).join('')}
+        </select>
+      </label>
+      <label>Bilder <span class="hint">(mehrere möglich, erstes ist das Titelbild)</span>
+        <div class="gh-imgs" id="ghf-imgs"></div>
+        <div class="gh-drop" id="ghf-drop"><i class="fas fa-cloud-upload-alt"></i> Bilder hierher ziehen oder klicken</div>
+        <input type="file" id="ghf-file" accept="image/*" multiple style="display:none">
+      </label>
+      <div class="gh-form-actions">
+        <button class="btn-secondary" onclick="closeModal()">Abbrechen</button>
+        <button class="btn-primary" id="ghf-save"><i class="fas fa-check"></i> Speichern &amp; anzeigen</button>
+      </div>
+    </div>`;
+  openModal(`Projekt: ${r.name}`, content);
+  function renderImgs() {
+    const c = document.getElementById('ghf-imgs');
+    c.innerHTML = GH_DIRTY_IMAGES.map((im,i)=>`<div class="gh-thumb"><img src="${im.path}"><button onclick="ghDelImg(${i})">✕</button></div>`).join('')
+      + newFiles.map((f,i)=>`<div class="gh-thumb"><img src="${URL.createObjectURL(f)}"><button onclick="ghDelNew(${i})">✕</button></div>`).join('');
+  }
+  window.ghDelImg = (i)=>{ GH_DIRTY_IMAGES.splice(i,1); renderImgs(); };
+  window.ghDelNew = (i)=>{ newFiles.splice(i,1); renderImgs(); };
+  renderImgs();
+  const fileInput = document.getElementById('ghf-file');
+  const drop = document.getElementById('ghf-drop');
+  drop.onclick = ()=>fileInput.click();
+  fileInput.onchange = ()=>{ [...fileInput.files].forEach(f=>newFiles.push(f)); renderImgs(); fileInput.value=''; };
+  drop.ondragover = e=>{ e.preventDefault(); drop.style.borderColor='var(--accent)'; };
+  drop.ondragleave = ()=>{ drop.style.borderColor=''; };
+  drop.ondrop = e=>{ e.preventDefault(); drop.style.borderColor=''; [...e.dataTransfer.files].filter(f=>f.type.startsWith('image/')).forEach(f=>newFiles.push(f)); renderImgs(); };
+  document.getElementById('ghf-save').onclick = async ()=>{
+    r.custom_title = document.getElementById('ghf-title').value.trim();
+    r.custom_desc = document.getElementById('ghf-desc').value.trim();
+    r.detail_desc = document.getElementById('ghf-detail').value;
+    r.custom_tags = document.getElementById('ghf-tags').value.split(',').map(t=>t.trim()).filter(Boolean);
+    r.custom_link = document.getElementById('ghf-link').value.trim();
+    r.status = document.getElementById('ghf-status').value;
+    r.images = GH_DIRTY_IMAGES.slice();
+    r.selected = true;
+    if (!r.sort_order) r.sort_order = GH_REPOS.filter(x=>x.selected).length;
+    try { await saveGhRepo(r, newFiles); showToast('Projekt gespeichert', 'success'); closeModal(); loadGithubProjects(); }
+    catch(e){ showToast(e.message,'error'); }
+  };
+}
 
 // ==================== SERVICES ====================
 async function loadServices() {

@@ -5287,3 +5287,48 @@ body {
     grid-template-columns: 1fr !important;
   }
 }
+
+/* ===== GitHub Projects ===== */
+.gh-toolbar{display:flex;gap:12px;align-items:center;margin-bottom:18px;flex-wrap:wrap}
+.gh-toolbar #gh-search{flex:1;min-width:220px;background:var(--bg-card);border:1px solid var(--border);color:var(--text-primary);padding:11px 14px;border-radius:10px;font-size:.9rem}
+.gh-toolbar #gh-search:focus{outline:none;border-color:var(--border-accent)}
+.gh-check{display:flex;align-items:center;gap:8px;color:var(--text-secondary);font-size:.88rem;cursor:pointer;white-space:nowrap}
+.gh-count{color:var(--text-muted);font-size:.82rem;font-family:monospace}
+.gh-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px}
+.gh-card{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:11px;transition:.2s}
+.gh-card:hover{border-color:rgba(255,255,255,.12)}
+.gh-card.active{border-color:var(--border-accent);box-shadow:var(--shadow-accent)}
+.gh-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.gh-name{font-weight:600;font-size:1rem;color:var(--text-primary);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.gh-badge{font-size:.64rem;font-family:monospace;padding:2px 7px;border-radius:5px;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+.gh-badge.priv{background:rgba(255,170,0,.12);color:var(--warning);border:1px solid rgba(255,170,0,.3)}
+.gh-badge.pub{background:rgba(0,212,255,.1);color:var(--accent-secondary);border:1px solid rgba(0,212,255,.25)}
+.gh-badge.lang{background:var(--bg-hover);color:var(--text-secondary);border:1px solid var(--border)}
+.gh-desc{color:var(--text-secondary);font-size:.85rem;line-height:1.5;min-height:2.4em}
+.gh-meta{display:flex;gap:14px;color:var(--text-muted);font-size:.76rem;font-family:monospace}
+.gh-card-actions{display:flex;gap:10px;align-items:center;margin-top:auto;padding-top:8px;border-top:1px solid var(--border)}
+.gh-toggle{position:relative;display:inline-flex;align-items:center;gap:9px;cursor:pointer;color:var(--text-secondary);font-size:.84rem}
+.gh-switch{width:38px;height:21px;background:var(--bg-hover);border:1px solid var(--border);border-radius:999px;position:relative;transition:.2s;flex-shrink:0}
+.gh-switch::after{content:'';position:absolute;top:2px;left:2px;width:15px;height:15px;border-radius:50%;background:var(--text-muted);transition:.2s}
+.gh-toggle input{display:none}
+.gh-toggle input:checked + .gh-switch{background:var(--accent);border-color:var(--accent)}
+.gh-toggle input:checked + .gh-switch::after{transform:translateX(17px);background:#000}
+.gh-edit{margin-left:auto;background:var(--bg-hover);border:1px solid var(--border);color:var(--text-primary);padding:7px 13px;border-radius:8px;font-size:.82rem;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.gh-edit:hover{border-color:var(--border-accent);color:var(--accent)}
+.gh-ord{display:inline-flex;gap:2px}
+.gh-ord button{background:var(--bg-hover);border:1px solid var(--border);color:var(--text-muted);cursor:pointer;width:26px;height:26px;border-radius:6px;font-size:.72rem}
+.gh-ord button:hover{color:var(--accent);border-color:var(--border-accent)}
+.gh-form{display:flex;flex-direction:column;gap:14px}
+.gh-form label{display:flex;flex-direction:column;gap:6px;font-size:.84rem;color:var(--text-secondary)}
+.gh-form input[type=text],.gh-form textarea,.gh-form select{background:var(--bg-secondary);border:1px solid var(--border);color:var(--text-primary);padding:10px 12px;border-radius:8px;font-size:.9rem;font-family:inherit}
+.gh-form textarea{min-height:130px;resize:vertical;line-height:1.6}
+.gh-form input:focus,.gh-form textarea:focus,.gh-form select:focus{outline:none;border-color:var(--border-accent)}
+.gh-form .hint{color:var(--text-muted);font-size:.76rem;font-weight:400}
+.gh-imgs{display:flex;flex-wrap:wrap;gap:10px}
+.gh-thumb{position:relative;width:96px;height:66px;border-radius:8px;overflow:hidden;border:1px solid var(--border)}
+.gh-thumb img{width:100%;height:100%;object-fit:cover}
+.gh-thumb button{position:absolute;top:3px;right:3px;width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,.72);border:none;color:#fff;cursor:pointer;font-size:.7rem;display:grid;place-items:center}
+.gh-thumb button:hover{background:var(--danger)}
+.gh-drop{border:1.5px dashed var(--border);border-radius:10px;padding:16px;text-align:center;color:var(--text-muted);cursor:pointer;font-size:.85rem;transition:.2s}
+.gh-drop:hover{border-color:var(--border-accent);color:var(--accent)}
+.gh-form-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:6px}
