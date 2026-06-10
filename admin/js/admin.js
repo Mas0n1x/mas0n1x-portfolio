@@ -4761,6 +4761,9 @@ async function loadDiscordConfig() {
 
     // Products
     if (config.channel_products) document.getElementById('discord-channel-products').value = config.channel_products;
+
+    // Aktive Projekte
+    if (config.channel_projects) document.getElementById('discord-channel-projects').value = config.channel_projects;
     const products = parseJSON(config.msg_products, null);
     const productList = (products && products.length > 0) ? products : DISCORD_DEFAULTS.products;
     const productsList = document.getElementById('discord-products-list');
@@ -5280,6 +5283,18 @@ async function sendDiscordProducts() {
     if (!channelId) return showToast('Bitte Channel-ID eintragen', 'error');
     await api('/admin/discord/send-products', { method: 'POST', body: { channelId } });
     showToast('Produkte gepostet', 'success');
+  } catch (e) {
+    showToast(e.message, 'error');
+  }
+}
+
+async function sendDiscordProjects() {
+  const channelId = document.getElementById('discord-channel-projects').value;
+  if (!channelId) return showToast('Bitte Channel-ID eintragen', 'error');
+  try {
+    await api('/admin/discord/config', { method: 'POST', body: { channel_projects: channelId } });
+    await api('/admin/discord/send-active-projects', { method: 'POST', body: { channelId } });
+    showToast('Aktive Projekte gepostet', 'success');
   } catch (e) {
     showToast(e.message, 'error');
   }

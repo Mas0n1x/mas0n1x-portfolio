@@ -1199,6 +1199,115 @@ class DiscordBot {
     return sentMessages;
   }
 
+  // ── Aktive Projekte (Components V2) ───────────────────────────
+
+  async sendActiveProjectsEmbed(channelId) {
+    if (!this.client || !this.isConnected) throw new Error('Bot nicht verbunden');
+
+    const channel = await this.client.channels.fetch(channelId);
+    if (!channel) throw new Error('Channel nicht gefunden');
+
+    const projects = this.dbAll(
+      "SELECT * FROM projects WHERE status = 'active' ORDER BY sort_order ASC, id DESC"
+    );
+
+    const sentMessages = [];
+
+    // Header
+    const headerContainer = new ContainerBuilder()
+      .setAccentColor(0x00ff88);
+    headerContainer.addTextDisplayComponents(
+      new TextDisplayBuilder().setContent(
+        '# 🚀 Aktive Projekte\n' +
+        'Ein Blick auf die Projekte, an denen aktuell gearbeitet wird.'
+      )
+    );
+    const headerMsg = await channel.send({
+      components: [headerContainer],
+      flags: CV2_FLAGS,
+    });
+    sentMessages.push(headerMsg.id);
+
+    if (!projects || projects.length === 0) {
+      const emptyContainer = new ContainerBuilder()
+        .setAccentColor(0xffaa00);
+      emptyContainer.addTextDisplayComponents(
+        new TextDisplayBuilder().setContent('_Aktuell sind keine Projekte als aktiv markiert._')
+      );
+      const emptyMsg = await channel.send({
+        components: [emptyContainer],
+        flags: CV2_FLAGS,
+      });
+      sentMessages.push(emptyMsg.id);
+      this.log('projects', channelId, null, null, { count: 0 });
+      return sentMessages;
+    }
+
+    // Jedes aktive Projekt als eigener Container
+    for (const project of projects) {
+      const container = new ContainerBuilder()
+        .setAccentColor(0x00ff88);
+
+      container.addTextDisplayComponents(
+        new TextDisplayBuilder().setContent(`## ${project.title}`)
+      );
+
+      if (project.description) {
+        container.addTextDisplayComponents(
+          new TextDisplayBuilder().setContent(project.description)
+        );
+      }
+
+      container.addSeparatorComponents(new SeparatorBuilder().setDivider(true));
+
+      // Fortschrittsbalken
+      const progress = Math.max(0, Math.min(100, parseInt(project.progress, 10) || 0));
+      const filled = Math.round(progress / 10);
+      const bar = '█'.repeat(filled) + '░'.repeat(10 - filled);
+      let detailsText = `**Fortschritt:** \`${bar}\` ${progress}%`;
+
+      // Tech-Tags
+      const tags = this._parseJSON(project.tags, []);
+      if (tags && tags.length > 0) {
+        detailsText += `\n**Tech:** ${tags.join(' · ')}`;
+      }
+
+      container.addTextDisplayComponents(
+        new TextDisplayBuilder().setContent(detailsText)
+      );
+
+      if (project.link) {
+        container.addTextDisplayComponents(
+          new TextDisplayBuilder().setContent(`🔗 [Projekt ansehen](${project.link})`)
+        );
+      }
+
+      const sent = await channel.send({
+        components: [container],
+        flags: CV2_FLAGS,
+      });
+      sentMessages.push(sent.id);
+    }
+
+    // Abschluss-CTA
+    const ctaContainer = new ContainerBuilder()
+      .setAccentColor(0x00d4ff);
+    ctaContainer.addTextDisplayComponents(
+      new TextDisplayBuilder().setContent(
+        '### 💡 Interesse an einer Zusammenarbeit?\n' +
+        'Erstelle ein **Ticket** oder besuche das **[Portfolio](https://mas0n1x.dev)**.'
+      )
+    );
+    const ctaMsg = await channel.send({
+      components: [ctaContainer],
+      flags: CV2_FLAGS,
+    });
+    sentMessages.push(ctaMsg.id);
+
+    this.log('projects', channelId, null, null, { count: projects.length });
+    return sentMessages;
+  }
+
   // ── Social Links (Components V2) ──────────────────────────────
 
   async sendSocialEmbed(channelId) {

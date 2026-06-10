@@ -2787,6 +2787,18 @@ app.post('/api/admin/discord/send-products', requireAuth, async (req, res) => {
   }
 });
 
+// Send active projects embeds
+app.post('/api/admin/discord/send-active-projects', requireAuth, async (req, res) => {
+  try {
+    const channelId = req.body.channelId || discordBot.getConfig('channel_projects');
+    if (!channelId) return res.status(400).json({ error: 'Kein Channel konfiguriert' });
+    const messageIds = await discordBot.sendActiveProjectsEmbed(channelId);
+    res.json({ success: true, messageIds });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // Send social links embed
 app.post('/api/admin/discord/send-social', requireAuth, async (req, res) => {
   try {
