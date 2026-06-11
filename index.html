@@ -469,7 +469,23 @@
     grid&&grid.addEventListener('pointerout',e=>{const c=e.target.closest('.acard');if(c&&!c.contains(e.relatedTarget))c.style.transform='';});
   }
   // Hero-Stats live aus GitHub (Repo-Anzahl + Commits dieses Jahr) — synchron, keine Hardcodes
-  async function loadStats(){try{const r=await fetch('/api/github/stats');if(!r.ok)throw 0;const d=await r.json();const rp=document.getElementById('stat-repos');if(rp&&d.repos!=null){rp.dataset.count=d.repos;rp.dataset.suffix='';cu(rp);}const lb=document.getElementById('stat-commits-label');if(lb)lb.textContent='Commits '+(d.year||new Date().getFullYear());const cm=document.getElementById('stat-commits');if(cm&&d.commits!=null){cm.dataset.count=d.commits;cm.dataset.suffix='';cu(cm);}else if(cm)cm.textContent='—';}catch(e){const rp=document.getElementById('stat-repos');if(rp)rp.textContent='—';const cm=document.getElementById('stat-commits');if(cm)cm.textContent='—';}}
+  async function loadStats(attempt){
+    attempt=attempt||0;
+    const again=()=>{ if(attempt<5) setTimeout(()=>loadStats(attempt+1),2000); };
+    try{
+      const r=await fetch('/api/github/stats',{cache:'no-store'});
+      if(!r.ok)throw 0;
+      const d=await r.json();
+      const rp=document.getElementById('stat-repos');
+      if(rp&&d.repos!=null){rp.dataset.count=d.repos;rp.dataset.suffix='';cu(rp);}
+      const lb=document.getElementById('stat-commits-label');
+      if(lb)lb.textContent='Commits '+(d.year||new Date().getFullYear());
+      const cm=document.getElementById('stat-commits');
+      if(cm&&d.commits!=null){cm.dataset.count=d.commits;cm.dataset.suffix='';cu(cm);}
+      // Backend-Cache noch nicht warm (stale / unvollstaendig) → erneut versuchen
+      if(d.repos==null||d.commits==null||d.stale) again();
+    }catch(e){ again(); }
+  }
   load();loadStats();
 </script>
 </body>
