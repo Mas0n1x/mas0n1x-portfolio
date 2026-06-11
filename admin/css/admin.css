@@ -751,6 +751,33 @@ body {
   margin-bottom: 24px;
 }
 
+/* ===== Settings FUI-Redesign ===== */
+.set-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;align-items:start}
+.set-card{position:relative;background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:26px 26px 24px;transition:border-color .25s}
+.set-card:hover{border-color:rgba(0,255,170,.28)}
+.set-card.wide{grid-column:1/-1}
+.set-card::before,.set-card::after{content:'';position:absolute;width:13px;height:13px;border:1px solid var(--border-accent);pointer-events:none}
+.set-card::before{top:-1px;left:-1px;border-right:0;border-bottom:0}
+.set-card::after{bottom:-1px;right:-1px;border-left:0;border-top:0}
+.set-eyebrow{font-family:'JetBrains Mono',monospace;font-size:.64rem;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.set-eyebrow::before{content:'▸'}
+.set-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px}
+.set-head h3{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:1.16rem;color:var(--text-primary);display:flex;align-items:center;gap:10px}
+.set-head h3 i{color:var(--accent);font-size:1rem}
+.set-desc{color:var(--text-secondary);font-size:.85rem;line-height:1.55;margin-bottom:20px}
+.set-badge{font-family:'JetBrains Mono',monospace;font-size:.6rem;font-weight:600;padding:4px 10px;border-radius:6px;text-transform:uppercase;letter-spacing:.06em;border:1px solid;white-space:nowrap}
+.set-badge.on{color:var(--warning);border-color:rgba(255,176,32,.4);background:rgba(255,176,32,.12)}
+.set-badge.off{color:var(--text-muted);border-color:var(--border);background:var(--bg-hover)}
+.set-divider{height:1px;background:var(--border);margin:22px 0 18px}
+.set-sub{font-family:'JetBrains Mono',monospace;font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-secondary);margin-bottom:14px}
+.set-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px}
+.set-actions .btn-primary,.set-actions .btn-secondary{width:auto}
+.notification-options{display:grid;gap:2px}
+.notification-options .form-group{margin-bottom:0}
+.notification-options label{display:flex;align-items:center;gap:10px;padding:11px 13px;border:1px solid transparent;border-radius:9px;cursor:pointer;font-size:.88rem;color:var(--text-secondary);transition:.2s}
+.notification-options label:hover{background:var(--bg-hover);border-color:var(--border);color:var(--text-primary)}
+@media(max-width:860px){.set-grid{grid-template-columns:1fr}}
+
 .settings-card h3 {
   display: flex;
   align-items: center;

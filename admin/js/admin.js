@@ -907,13 +907,22 @@ async function loadMaintenanceStatus() {
     maintenanceToggle.checked = data.enabled;
     maintenanceMessage.value = data.message || '';
     maintenanceMessageContainer.style.display = data.enabled ? 'block' : 'none';
+    setMaintenanceBadge(data.enabled);
   } catch (e) {
     console.error('Failed to load maintenance status:', e);
   }
 }
 
+function setMaintenanceBadge(on){
+  const b = document.getElementById('maintenance-badge');
+  if (!b) return;
+  b.textContent = on ? 'An' : 'Aus';
+  b.className = 'set-badge ' + (on ? 'on' : 'off');
+}
+
 maintenanceToggle.addEventListener('change', async () => {
   maintenanceMessageContainer.style.display = maintenanceToggle.checked ? 'block' : 'none';
+  setMaintenanceBadge(maintenanceToggle.checked);
 
   try {
     await api('/maintenance', {

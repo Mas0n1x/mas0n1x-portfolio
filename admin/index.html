@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="css/admin.css?v=11">
+  <link rel="stylesheet" href="css/admin.css?v=12">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
@@ -1904,76 +1904,75 @@
           <h1><i class="fas fa-sliders-h"></i> Einstellungen</h1>
         </div>
 
-        <div class="settings-card">
-          <h3><i class="fas fa-tools"></i> Wartungsmodus</h3>
-          <div class="info-box" style="margin-bottom: 20px;">
-            <i class="fas fa-info-circle"></i>
-            <span>Aktiviere den Wartungsmodus, um Besuchern eine Wartungsseite anzuzeigen. Das Admin-Panel bleibt weiterhin erreichbar.</span>
-          </div>
-          <div class="form-group">
-            <label class="toggle-switch">
-              <input type="checkbox" id="maintenance-mode">
-              <span class="toggle-slider"></span>
-              <span class="toggle-label">Wartungsmodus aktivieren</span>
-            </label>
-          </div>
-          <div id="maintenance-message-container" style="margin-top: 15px; display: none;">
-            <div class="form-group">
-              <label for="maintenance-message">Wartungsnachricht (optional)</label>
-              <textarea id="maintenance-message" rows="3" placeholder="z.B. Wir sind bald wieder für Sie da!"></textarea>
+        <div class="set-grid">
+          <div class="set-card">
+            <div class="set-eyebrow">System</div>
+            <div class="set-head">
+              <h3><i class="fas fa-tools"></i> Wartungsmodus</h3>
+              <span class="set-badge off" id="maintenance-badge">Aus</span>
             </div>
-            <button id="save-maintenance-btn" class="btn-primary">
-              <i class="fas fa-save"></i> Speichern
-            </button>
-          </div>
-        </div>
-
-        <div class="settings-card">
-          <h3><i class="fas fa-key"></i> Passwort ändern</h3>
-          <form id="change-password-form">
+            <p class="set-desc">Zeigt Besuchern eine Wartungsseite. Das Admin-Panel bleibt erreichbar.</p>
             <div class="form-group">
-              <label for="current-password">Aktuelles Passwort</label>
-              <input type="password" id="current-password" required>
+              <label class="toggle-switch">
+                <input type="checkbox" id="maintenance-mode">
+                <span class="toggle-slider"></span>
+                <span class="toggle-label">Wartungsmodus aktivieren</span>
+              </label>
             </div>
-            <div class="form-group">
-              <label for="new-password">Neues Passwort</label>
-              <input type="password" id="new-password" required>
+            <div id="maintenance-message-container" style="display:none">
+              <div class="set-divider"></div>
+              <div class="form-group">
+                <label for="maintenance-message">Wartungsnachricht (optional)</label>
+                <textarea id="maintenance-message" rows="3" placeholder="z.B. Wir sind bald wieder für dich da!"></textarea>
+              </div>
+              <div class="set-actions"><button id="save-maintenance-btn" class="btn-primary"><i class="fas fa-save"></i> Speichern</button></div>
             </div>
-            <div class="form-group">
-              <label for="confirm-password">Passwort bestätigen</label>
-              <input type="password" id="confirm-password" required>
-            </div>
-            <button type="submit" class="btn-primary">
-              <i class="fas fa-save"></i> Passwort ändern
-            </button>
-          </form>
-        </div>
-
-        <div class="settings-card">
-          <h3><i class="fas fa-database"></i> Daten importieren</h3>
-          <p>Importiere die bestehenden Projekte und Services aus der index.html in die Datenbank.</p>
-          <button id="import-data-btn" class="btn-secondary">
-            <i class="fas fa-file-import"></i> Bestehende Daten importieren
-          </button>
-        </div>
-
-        <!-- E-Mail Settings -->
-        <div class="settings-card">
-          <h3><i class="fas fa-envelope"></i> E-Mail-Benachrichtigungen</h3>
-          <div class="info-box" style="margin-bottom: 20px;">
-            <i class="fas fa-info-circle"></i>
-            <span>Konfiguriere E-Mail-Benachrichtigungen für neue Nachrichten, Statusänderungen und Deadline-Erinnerungen.</span>
           </div>
 
-          <div class="form-group">
-            <label>
-              <input type="checkbox" id="email-enabled">
-              E-Mail-Benachrichtigungen aktivieren
-            </label>
+          <div class="set-card">
+            <div class="set-eyebrow">Sicherheit</div>
+            <div class="set-head"><h3><i class="fas fa-key"></i> Passwort ändern</h3></div>
+            <p class="set-desc">Aktualisiere dein Admin-Passwort. Mindestens 8 Zeichen empfohlen.</p>
+            <form id="change-password-form">
+              <div class="form-group">
+                <label for="current-password">Aktuelles Passwort</label>
+                <input type="password" id="current-password" required>
+              </div>
+              <div class="form-group">
+                <label for="new-password">Neues Passwort</label>
+                <input type="password" id="new-password" required>
+              </div>
+              <div class="form-group">
+                <label for="confirm-password">Passwort bestätigen</label>
+                <input type="password" id="confirm-password" required>
+              </div>
+              <div class="set-actions"><button type="submit" class="btn-primary"><i class="fas fa-save"></i> Passwort ändern</button></div>
+            </form>
           </div>
 
-          <div id="email-settings-container">
-            <h4 style="margin-top: 20px; margin-bottom: 15px;">SMTP-Konfiguration</h4>
+          <div class="set-card">
+            <div class="set-eyebrow">Daten</div>
+            <div class="set-head"><h3><i class="fas fa-database"></i> Daten importieren</h3></div>
+            <p class="set-desc">Importiert bestehende Projekte und Leistungen aus der index.html in die Datenbank.</p>
+            <div class="set-actions"><button id="import-data-btn" class="btn-secondary"><i class="fas fa-file-import"></i> Bestehende Daten importieren</button></div>
+          </div>
+
+          <!-- E-Mail Settings -->
+          <div class="set-card wide">
+            <div class="set-eyebrow">Kommunikation</div>
+            <div class="set-head"><h3><i class="fas fa-envelope"></i> E-Mail-Benachrichtigungen</h3></div>
+            <p class="set-desc">Benachrichtigungen für neue Nachrichten, Statusänderungen und Deadline-Erinnerungen via SMTP.</p>
+
+            <div class="form-group">
+              <label>
+                <input type="checkbox" id="email-enabled">
+                E-Mail-Benachrichtigungen aktivieren
+              </label>
+            </div>
+
+            <div id="email-settings-container">
+              <div class="set-divider"></div>
+              <div class="set-sub">SMTP-Konfiguration</div>
             <div class="form-row">
               <div class="form-group">
                 <label>SMTP-Server</label>
@@ -1999,7 +1998,8 @@
               <input type="text" id="smtp-from-name" placeholder="Mas0n1x Portfolio">
             </div>
 
-            <h4 style="margin-top: 25px; margin-bottom: 15px;">Benachrichtigungsoptionen</h4>
+            <div class="set-divider"></div>
+            <div class="set-sub">Benachrichtigungsoptionen</div>
             <div class="notification-options">
               <div class="form-group">
                 <label>
@@ -2027,7 +2027,7 @@
               </div>
             </div>
 
-            <div class="form-row" style="margin-top: 20px;">
+            <div class="set-actions">
               <button id="save-email-settings-btn" class="btn-primary">
                 <i class="fas fa-save"></i> E-Mail-Einstellungen speichern
               </button>
@@ -2036,6 +2036,7 @@
               </button>
             </div>
           </div>
+        </div>
         </div>
       </section>
     </main>
@@ -2227,6 +2228,6 @@
     </div>
   </div>
 
-  <script src="js/admin.js?v=10"></script>
+  <script src="js/admin.js?v=11"></script>
 </body>
 </html>
