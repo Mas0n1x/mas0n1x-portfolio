@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="css/admin.css?v=12">
+  <link rel="stylesheet" href="css/admin.css?v=13">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
@@ -1957,6 +1957,46 @@
             <div class="set-actions"><button id="import-data-btn" class="btn-secondary"><i class="fas fa-file-import"></i> Bestehende Daten importieren</button></div>
           </div>
 
+          <!-- Integrationen-Health-Check -->
+          <div class="set-card">
+            <div class="set-eyebrow">Integrationen</div>
+            <div class="set-head">
+              <h3><i class="fas fa-plug"></i> Verbindungen</h3>
+              <button class="set-refresh" id="integrations-refresh" title="Neu prüfen" aria-label="Neu prüfen"><i class="fas fa-rotate"></i></button>
+            </div>
+            <p class="set-desc">Status von GitHub, E-Mail und Discord-Bot auf einen Blick.</p>
+            <div id="integrations-list" class="intg-list"><div class="intg-loading">Prüfe …</div></div>
+          </div>
+
+          <!-- Geschäftsdaten -->
+          <div class="set-card wide">
+            <div class="set-eyebrow">Stammdaten</div>
+            <div class="set-head"><h3><i class="fas fa-building"></i> Geschäftsdaten</h3></div>
+            <p class="set-desc">Zentral für Impressum, Rechnungen und Verträge — einmal pflegen, überall genutzt.</p>
+            <form id="business-form">
+              <div class="form-row">
+                <div class="form-group"><label for="biz_company">Firma / Name</label><input type="text" id="biz_company" placeholder="Max-Cedrik Blecker"></div>
+                <div class="form-group"><label for="biz_vatid">USt-IdNr. (optional)</label><input type="text" id="biz_vatid" placeholder="DE…"></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label for="biz_street">Straße &amp; Nr.</label><input type="text" id="biz_street" placeholder="Obere Warthe 8"></div>
+                <div class="form-group"><label for="biz_email">Kontakt-E-Mail</label><input type="email" id="biz_email" placeholder="support@mas0n1x.online"></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label for="biz_zip">PLZ</label><input type="text" id="biz_zip" placeholder="35080"></div>
+                <div class="form-group"><label for="biz_city">Ort</label><input type="text" id="biz_city" placeholder="Bad Endbach"></div>
+              </div>
+              <div class="set-divider"></div>
+              <div class="set-sub">Bankverbindung (für Rechnungen)</div>
+              <div class="form-row">
+                <div class="form-group"><label for="biz_bank">Bank</label><input type="text" id="biz_bank" placeholder="z.B. Sparkasse"></div>
+                <div class="form-group"><label for="biz_iban">IBAN</label><input type="text" id="biz_iban" placeholder="DE…"></div>
+              </div>
+              <div class="form-group"><label for="biz_bic">BIC</label><input type="text" id="biz_bic" placeholder="…"></div>
+              <div class="set-actions"><button type="submit" class="btn-primary"><i class="fas fa-save"></i> Geschäftsdaten speichern</button></div>
+            </form>
+          </div>
+
           <!-- E-Mail Settings -->
           <div class="set-card wide">
             <div class="set-eyebrow">Kommunikation</div>
@@ -2228,6 +2268,6 @@
     </div>
   </div>
 
-  <script src="js/admin.js?v=11"></script>
+  <script src="js/admin.js?v=12"></script>
 </body>
 </html>

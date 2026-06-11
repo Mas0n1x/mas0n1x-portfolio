@@ -3187,9 +3187,55 @@ document.querySelectorAll('.nav-item[data-section]').forEach(item => {
     }
     if (item.dataset.section === 'settings') {
       loadEmailSettings();
+      loadBusinessData();
+      loadIntegrations();
     }
   });
 });
+
+// ==================== GESCHÄFTSDATEN ====================
+const BIZ_FIELDS = ['biz_company','biz_vatid','biz_street','biz_email','biz_zip','biz_city','biz_bank','biz_iban','biz_bic'];
+async function loadBusinessData() {
+  try {
+    const s = await api('/settings');
+    BIZ_FIELDS.forEach(k => { const el = document.getElementById(k); if (el) el.value = s[k] || ''; });
+  } catch (e) { console.error('Geschäftsdaten laden fehlgeschlagen:', e); }
+}
+document.getElementById('business-form')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const body = {};
+  BIZ_FIELDS.forEach(k => { const el = document.getElementById(k); if (el) body[k] = el.value.trim(); });
+  try { await api('/settings', { method: 'POST', body }); showToast('Geschäftsdaten gespeichert', 'success'); }
+  catch (err) { showToast(err.message || 'Speichern fehlgeschlagen', 'error'); }
+});
+
+// ==================== INTEGRATIONEN-HEALTH-CHECK ====================
+async function loadIntegrations() {
+  const list = document.getElementById('integrations-list');
+  const btn = document.getElementById('integrations-refresh');
+  if (!list) return;
+  btn?.classList.add('spin');
+  const NAMES = { github: 'GitHub', email: 'E-Mail / SMTP', discord: 'Discord-Bot' };
+  try {
+    const d = await api('/admin/integrations');
+    list.innerHTML = Object.keys(NAMES).map(key => {
+      const it = d[key] || { ok: false, status: 'Unbekannt' };
+      const cls = it.ok ? 'ok' : 'bad';
+      return `<div class="intg-item">
+        <span class="intg-dot ${cls}"></span>
+        <div class="intg-body">
+          <div class="intg-name">${NAMES[key]}</div>
+          <div class="intg-status ${cls}">${escapeHtml(it.status || '')}</div>
+          ${it.detail ? `<div class="intg-detail">${escapeHtml(it.detail)}</div>` : ''}
+          ${it.meta ? `<div class="intg-detail">${escapeHtml(it.meta)}</div>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+  } catch (e) {
+    list.innerHTML = `<div class="intg-loading">Status nicht abrufbar: ${escapeHtml(e.message || 'Fehler')}</div>`;
+  } finally { btn?.classList.remove('spin'); }
+}
+document.getElementById('integrations-refresh')?.addEventListener('click', loadIntegrations);
 
 // ==================== EMAIL SETTINGS ====================
 async function loadEmailSettings() {

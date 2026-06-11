@@ -1057,6 +1057,41 @@ app.post('/api/settings', requireAuth, (req, res) => {
   res.json({ success: true });
 });
 
+// Integrations-Health-Check: Status von GitHub, E-Mail/SMTP und Discord-Bot
+app.get('/api/admin/integrations', requireAuth, async (req, res) => {
+  const out = {};
+  // GitHub-Token
+  try {
+    if (!process.env.GITHUB_TOKEN) {
+      out.github = { ok: false, status: 'Kein Token gesetzt' };
+    } else {
+      const r = await fetch('https://api.github.com/user', { headers: { Authorization: `Bearer ${process.env.GITHUB_TOKEN}`, 'User-Agent': 'mas0n1x-portfolio' } });
+      if (r.ok) {
+        const u = await r.json();
+        const scopes = r.headers.get('x-oauth-scopes') || '–';
+        const rl = r.headers.get('x-ratelimit-remaining');
+        out.github = { ok: true, status: 'Verbunden', detail: `@${u.login} · Scopes: ${scopes}`, meta: rl ? `${rl} API-Calls übrig` : '' };
+      } else {
+        out.github = { ok: false, status: `Token ungültig (HTTP ${r.status})` };
+      }
+    }
+  } catch (e) { out.github = { ok: false, status: 'Fehler: ' + e.message }; }
+  // E-Mail / SMTP (aus settings)
+  const smtpHost = dbGet('SELECT value FROM settings WHERE key = ?', ['smtp_host'])?.value;
+  const smtpUser = dbGet('SELECT value FROM settings WHERE key = ?', ['smtp_user'])?.value;
+  out.email = (smtpHost && smtpUser)
+    ? { ok: true, status: 'Konfiguriert', detail: `${smtpUser} via ${smtpHost}` }
+    : { ok: false, status: 'Nicht konfiguriert' };
+  // Discord-Bot
+  try {
+    const ds = discordBot.getStatus();
+    out.discord = (ds && ds.connected)
+      ? { ok: true, status: 'Verbunden', detail: ds.tag || ds.username || '' }
+      : { ok: false, status: process.env.DISCORD_BOT_TOKEN ? 'Getrennt' : 'Kein Token gesetzt' };
+  } catch (e) { out.discord = { ok: false, status: 'Nicht verfügbar' }; }
+  res.json(out);
+});
+
 // ==================== EMAIL SERVICE ====================
 // Email test endpoint - requires nodemailer to be installed for actual sending
 app.post('/api/email/test', requireAuth, async (req, res) => {
