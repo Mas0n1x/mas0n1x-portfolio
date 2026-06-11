@@ -5,26 +5,35 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mas0n1x — Ich baue Software-Ökosysteme</title>
 <meta name="description" content="Mas0n1x baut modulare Software-Ökosysteme: Web-Apps, KI-Assistenten, Discord-Bots und CAD/MDT-Plattformen. Solo-Developer, alles aus einer Hand.">
+<link rel="canonical" href="https://mas0n1x.online/">
+<!-- Open Graph / Social Sharing -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://mas0n1x.online/">
+<meta property="og:site_name" content="Mas0n1x">
+<meta property="og:title" content="Mas0n1x — Ich baue Software-Ökosysteme">
+<meta property="og:description" content="Solo-Developer für modulare Software-Ökosysteme: Web-Apps, KI-Assistenten, Discord-Bots und CAD/MDT-Plattformen. Alles aus einer Hand.">
+<meta property="og:image" content="https://mas0n1x.online/logo.png">
+<meta property="og:image:alt" content="Mas0n1x">
+<meta property="og:locale" content="de_DE">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Mas0n1x — Ich baue Software-Ökosysteme">
+<meta name="twitter:description" content="Solo-Developer für modulare Software-Ökosysteme: Web-Apps, KI-Assistenten, Discord-Bots und CAD/MDT-Plattformen. Alles aus einer Hand.">
+<meta name="twitter:image" content="https://mas0n1x.online/logo.png">
+<meta name="theme-color" content="#04060a">
 <link rel="icon" href="/logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js"></script>
-<style>
-  :root{--bg:#04060a;--panel:rgba(0,255,170,0.02);--line:rgba(0,255,170,0.16);--line2:rgba(0,255,170,0.34);--mint:#00ffaa;--cyan:#22d3ee;--amber:#ffb020;--text:#dffaf0;--text2:#6f8a82;--text3:#3d514c;--glow:rgba(0,255,170,0.5);--container:1240px;--mono:'JetBrains Mono',monospace}
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet"><style>
+  :root{--bg:#04060a;--panel:rgba(0,255,170,0.02);--line:rgba(0,255,170,0.16);--line2:rgba(0,255,170,0.34);--mint:#00ffaa;--cyan:#22d3ee;--amber:#ffb020;--text:#dffaf0;--text2:#8aa39b;--text3:#62807a;--glow:rgba(0,255,170,0.5);--container:1240px;--mono:'JetBrains Mono',monospace}
   *{margin:0;padding:0;box-sizing:border-box}
   html{scroll-behavior:smooth;scroll-snap-type:y mandatory}
   /* Deck/Snap: jeder Bereich rastet als eigenes Vollbild-Modul ein (ein Scroll = ein Modul) */
   body>header,body>section{scroll-snap-align:start;scroll-snap-stop:always}
-  /* Lenis smooth-scroll */
-  html.lenis,html.lenis body{height:auto}
-  .lenis.lenis-smooth{scroll-behavior:auto!important}
-  .lenis.lenis-smooth [data-lenis-prevent]{overscroll-behavior:contain}
-  .lenis.lenis-stopped{overflow:hidden}
   body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased}
   a{color:inherit;text-decoration:none} img{max-width:100%;display:block}
   ::selection{background:var(--mint);color:#000}
   :focus-visible{outline:2px solid var(--mint);outline-offset:3px}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  .icon{width:1em;height:1em;display:inline-block;vertical-align:-.125em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
   /* scanlines + grid bg */
   .fx{position:fixed;inset:0;z-index:-1;pointer-events:none}
   .fx-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(0,255,170,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,170,0.04) 1px,transparent 1px);background-size:50px 50px;-webkit-mask-image:radial-gradient(ellipse 90% 60% at 50% 0%,#000 30%,transparent 80%);mask-image:radial-gradient(ellipse 90% 60% at 50% 0%,#000 30%,transparent 80%)}
@@ -158,7 +167,8 @@
   footer{border-top:1px solid var(--line);padding:36px 0}
   .foot{display:flex;justify-content:space-between;flex-wrap:wrap;gap:14px;font-family:var(--mono);font-size:.78rem;color:var(--text3)}
   .foot-links{display:flex;gap:20px}
-  .foot a{color:var(--text3)}.foot a:hover{color:var(--mint)}
+  .foot a,.foot-links button{color:var(--text3)}.foot a:hover,.foot-links button:hover{color:var(--mint)}
+  .foot-links button{background:none;border:none;font-family:var(--mono);font-size:inherit;cursor:pointer;padding:0}
   /* modal */
   .modal{position:fixed;inset:0;z-index:1000;display:none;align-items:center;justify-content:center;padding:24px}
   .modal.open{display:flex}
@@ -181,11 +191,23 @@
   .sprog{position:fixed;top:0;left:0;height:2px;background:linear-gradient(90deg,var(--mint),var(--cyan));z-index:200;width:0}
   @media(max-width:980px){.hgrid{grid-template-columns:1fr;gap:40px}.caps{grid-template-columns:repeat(2,1fr)}.proc{grid-template-columns:repeat(2,1fr)}.pstep:nth-child(2)::after{display:none}.abt{grid-template-columns:1fr}}
   @media(max-width:720px){.navl{display:none}.burg{display:block}section{padding:80px 0}.caps{grid-template-columns:1fr}.proc{grid-template-columns:1fr}.pstep::after{display:none}.hstats{gap:24px}}
-  @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition-duration:.01ms!important}.reveal{opacity:1;transform:none}.sect{opacity:1;transform:none}.jterm{opacity:1;transform:none}}
+  @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition-duration:.01ms!important}html{scroll-snap-type:none}body>header,body>section{scroll-snap-align:none}.reveal{opacity:1;transform:none}.sect{opacity:1;transform:none}.jterm{opacity:1;transform:none}}
 </style>
 <noscript><style>.sect{opacity:1!important;transform:none!important}</style></noscript>
 </head>
 <body>
+<svg width="0" height="0" class="sr-only" aria-hidden="true" focusable="false"><defs>
+<symbol id="i-menu" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></symbol>
+<symbol id="i-arrow" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></symbol>
+<symbol id="i-box" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></symbol>
+<symbol id="i-gauge" viewBox="0 0 24 24"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></symbol>
+<symbol id="i-bot" viewBox="0 0 24 24"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></symbol>
+<symbol id="i-server" viewBox="0 0 24 24"><rect width="20" height="8" x="2" y="2" rx="2"/><rect width="20" height="8" x="2" y="14" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></symbol>
+<symbol id="i-code" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></symbol>
+<symbol id="i-github" viewBox="0 0 24 24"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></symbol>
+<symbol id="i-ext" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+</defs></svg>
 <div class="fx"><div class="fx-grid"></div><div class="fx-scan"></div><div class="fx-glow"></div><div class="fx-spot" id="fxSpot"></div></div>
 <div class="sprog" id="sprog"></div>
 
@@ -195,18 +217,18 @@
     <a href="#cap">Leistungen</a><a href="#arch">Projekte</a><a href="#op">Über mich</a><a href="#faq">FAQ</a><a href="#conn">Kontakt</a>
     <a href="/projekt-starten.html" class="ncta">Projekt starten</a>
   </div>
-  <button class="burg" id="burg" aria-label="Menü"><i class="fas fa-bars"></i></button>
+  <button class="burg" id="burg" aria-label="Menü"><svg class="icon" aria-hidden="true"><use href="#i-menu"/></svg></button>
 </nav>
 
 <header class="hero wrap" id="home">
   <div class="hgrid">
     <div>
       <span class="hstatus"><span class="d"></span>Verfügbar für neue Projekte</span>
-      <h1 class="name"><span class="g scramble" data-text="Mas0n1x">Mas0n1x</span></h1>
+      <h1 class="name"><span class="g scramble" data-text="Mas0n1x">Mas0n1x</span><span class="sr-only"> — Software-Developer für modulare Software-Ökosysteme</span></h1>
       <p class="role">Software-Developer — ich baue <span class="rg">Ökosysteme</span>.</p>
       <p class="lede">Solo aus Leidenschaft. Von Web-Apps und KI-Assistenten bis zu kompletten, modularen Plattformen — mein größtes System läuft auf mehreren Servern und trägt täglich über 2.300 Nutzer.</p>
       <div class="hact">
-        <a href="/projekt-starten.html" class="btn btn-p">Projekt starten <i class="fas fa-arrow-right"></i></a>
+        <a href="/projekt-starten.html" class="btn btn-p">Projekt starten <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
         <a href="#arch" class="btn btn-g">Projekte ansehen</a>
       </div>
       <div class="hstats">
@@ -231,10 +253,10 @@
     <div class="jline">// keine Insellösungen — sondern Systeme, die zusammenarbeiten</div>
   </div>
   <div class="caps" data-stagger>
-    <div class="cap reveal"><span class="ci">// 01</span><div class="ic"><i class="fas fa-cubes"></i></div><h3>Plattformen &amp; Ökosysteme</h3><p>Modulare Systeme mit gemeinsamer Logik, Auth und Datenbasis — gebaut, um mit deiner Community zu wachsen.</p></div>
-    <div class="cap reveal"><span class="ci">// 02</span><div class="ic"><i class="fas fa-gauge-high"></i></div><h3>Web-Apps &amp; Dashboards</h3><p>Schnelle, moderne Anwendungen mit Echtzeit-Daten, sauberer Architektur und durchdachter UX.</p></div>
-    <div class="cap reveal"><span class="ci">// 03</span><div class="ic"><i class="fas fa-robot"></i></div><h3>KI-Systeme &amp; Bots</h3><p>Lokale Sprachassistenten, Discord-Bots mit Dashboard, Automatisierung und smarte Tools.</p></div>
-    <div class="cap reveal"><span class="ci">// 04</span><div class="ic"><i class="fas fa-server"></i></div><h3>Server &amp; Selfhosting</h3><p>Linux-Server aufsetzen, absichern und warten — Docker, Reverse-Proxy, Backups. Dein Selfhosting-Stack aus einer Hand.</p></div>
+    <div class="cap reveal"><span class="ci">// 01</span><div class="ic"><svg class="icon" aria-hidden="true"><use href="#i-box"/></svg></div><h3>Plattformen &amp; Ökosysteme</h3><p>Modulare Systeme mit gemeinsamer Logik, Auth und Datenbasis — gebaut, um mit deiner Community zu wachsen.</p></div>
+    <div class="cap reveal"><span class="ci">// 02</span><div class="ic"><svg class="icon" aria-hidden="true"><use href="#i-gauge"/></svg></div><h3>Web-Apps &amp; Dashboards</h3><p>Schnelle, moderne Anwendungen mit Echtzeit-Daten, sauberer Architektur und durchdachter UX.</p></div>
+    <div class="cap reveal"><span class="ci">// 03</span><div class="ic"><svg class="icon" aria-hidden="true"><use href="#i-bot"/></svg></div><h3>KI-Systeme &amp; Bots</h3><p>Lokale Sprachassistenten, Discord-Bots mit Dashboard, Automatisierung und smarte Tools.</p></div>
+    <div class="cap reveal"><span class="ci">// 04</span><div class="ic"><svg class="icon" aria-hidden="true"><use href="#i-server"/></svg></div><h3>Server &amp; Selfhosting</h3><p>Linux-Server aufsetzen, absichern und warten — Docker, Reverse-Proxy, Backups. Dein Selfhosting-Stack aus einer Hand.</p></div>
   </div>
 </section>
 
@@ -320,16 +342,16 @@
     <h2>Lass uns dein System bauen.</h2>
     <p>Erzähl mir in 2 Minuten, was du brauchst — ich melde mich mit einer ehrlichen Einschätzung.</p>
     <div class="acts">
-      <a href="/projekt-starten.html" class="btn btn-p">Projekt starten <i class="fas fa-arrow-right"></i></a>
+      <a href="/projekt-starten.html" class="btn btn-p">Projekt starten <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
       <a href="mailto:support@mas0n1x.online" class="btn btn-g">Direktkanal</a>
     </div>
   </div>
 </section>
 
-<footer><div class="wrap foot"><span>© <span id="yr"></span> Mas0n1x</span><span class="foot-links"><a href="#" data-legal="impressum">Impressum</a><a href="#" data-legal="datenschutz">Datenschutz</a><a href="#" data-legal="agb">AGB</a></span></div></footer>
+<footer><div class="wrap foot"><span>© <span id="yr"></span> Mas0n1x</span><span class="foot-links"><button type="button" data-legal="impressum">Impressum</button><button type="button" data-legal="datenschutz">Datenschutz</button><button type="button" data-legal="agb">AGB</button></span></div></footer>
 
-<div id="dm" class="modal"><div class="mov" onclick="cd()"></div><div class="mbox" data-lenis-prevent><button class="mclose" onclick="cd()" aria-label="Schließen"><i class="fas fa-times"></i></button><div id="db"></div></div></div>
-<div id="lm" class="modal"><div class="mov" onclick="cl()"></div><div class="mbox" data-lenis-prevent><button class="mclose" onclick="cl()" aria-label="Schließen"><i class="fas fa-times"></i></button><div id="lb"></div></div></div>
+<div id="dm" class="modal"><div class="mov" onclick="cd()"></div><div class="mbox" data-lenis-prevent><button class="mclose" onclick="cd()" aria-label="Schließen"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button><div id="db"></div></div></div>
+<div id="lm" class="modal"><div class="mov" onclick="cl()"></div><div class="mbox" data-lenis-prevent><button class="mclose" onclick="cl()" aria-label="Schließen"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button><div id="lb"></div></div></div>
 
 <div class="cookie" id="cookie"><p>Diese Seite nutzt nur technisch notwendige Daten. Mehr in der <a href="#" data-legal="datenschutz">Datenschutzerklärung</a>.</p><button onclick="okCookie()">Verstanden</button></div>
 
@@ -378,8 +400,8 @@
   const so=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){cu(e.target);so.unobserve(e.target);}}),{threshold:.5});document.querySelectorAll('[data-count]').forEach(e=>so.observe(e));
   function esc(t){if(!t)return'';const d=document.createElement('div');d.textContent=t;return d.innerHTML;}
   // work archive
-  async function load(){const g=document.getElementById('arch-grid');try{const r=await fetch('/api/projects');if(!r.ok)throw 0;const ps=await r.json();g.innerHTML=ps.map((p,i)=>{const im=(p.images&&p.images.length)?p.images:(p.image?[{path:p.image}]:[]);const st={in_progress:'IN ARBEIT',completed:'AKTIV',planned:'GEPLANT'}[p.status]||'AKTIV';return `<div class="acard reveal" data-i="${i}"><div class="athumb">${im.length?`<img src="${im[0].path}" alt="${esc(p.title)}" loading="lazy">`:(p.logo?`<img class="alogo" src="${p.logo}" alt="${esc(p.title)}">`:'<i class="fas fa-code ph"></i>')}<span class="aidx">// ${String(i+1).padStart(2,'0')}</span><span class="astat">${st}</span></div><div class="abody"><div class="atags">${(p.tags||[]).slice(0,4).map(t=>`<span class="atag">${esc(t)}</span>`).join('')}</div><h3>${esc(p.title)}</h3><p>${esc(p.description||'')}</p><span class="amore">Details ▸</span></div></div>`;}).join('');g.querySelectorAll('.acard').forEach(c=>c.onclick=()=>od(ps[+c.dataset.i]));updateReveal();}catch(e){g.innerHTML='<p style="color:var(--text3);grid-column:1/-1">Projekte aktuell nicht erreichbar.</p>';}}
-  function od(p){if(!p)return;const im=(p.images&&p.images.length)?p.images:(p.image?[{path:p.image}]:[]);const detail=esc(p.detail||p.description||'').replace(/\n/g,'<br>');const code=(p.repo_url&&!p.private)?`<a href="${esc(p.repo_url)}" target="_blank" rel="noopener" class="btn btn-g"><i class="fab fa-github"></i> Code</a>`:'';const meta=[p.language,p.stars?('★ '+p.stars):''].filter(Boolean).map(m=>`<span class="atag">${esc(m)}</span>`).join('');document.getElementById('db').innerHTML=`${im.length?`<div class="mgal">${im.map(x=>`<img src="${x.path}" alt="${esc(p.title)}" loading="lazy">`).join('')}</div>`:''}<h2>${esc(p.title)}</h2><div class="atags">${(p.tags||[]).map(t=>`<span class="atag">${esc(t)}</span>`).join('')}${meta}</div><p class="mdesc">${detail}</p><div class="acts" style="display:flex;gap:12px;flex-wrap:wrap">${p.link?`<a href="${esc(p.link)}" target="_blank" rel="noopener" class="btn btn-p">Ansehen <i class="fas fa-external-link-alt"></i></a>`:''}${code}</div>`;document.getElementById('dm').classList.add('open');document.body.style.overflow='hidden';lenis&&lenis.stop();}
+  async function load(){const g=document.getElementById('arch-grid');try{const r=await fetch('/api/projects');if(!r.ok)throw 0;const ps=await r.json();g.innerHTML=ps.map((p,i)=>{const im=(p.images&&p.images.length)?p.images:(p.image?[{path:p.image}]:[]);const st={in_progress:'IN ARBEIT',completed:'AKTIV',planned:'GEPLANT'}[p.status]||'AKTIV';return `<div class="acard reveal" data-i="${i}"><div class="athumb">${im.length?`<img src="${im[0].path}" alt="${esc(p.title)}" loading="lazy">`:(p.logo?`<img class="alogo" src="${p.logo}" alt="${esc(p.title)}">`:'<svg class="icon ph" aria-hidden="true"><use href="#i-code"/></svg>')}<span class="aidx">// ${String(i+1).padStart(2,'0')}</span><span class="astat">${st}</span></div><div class="abody"><div class="atags">${(p.tags||[]).slice(0,4).map(t=>`<span class="atag">${esc(t)}</span>`).join('')}</div><h3>${esc(p.title)}</h3><p>${esc(p.description||'')}</p><span class="amore">Details ▸</span></div></div>`;}).join('');g.querySelectorAll('.acard').forEach(c=>c.onclick=()=>od(ps[+c.dataset.i]));updateReveal();}catch(e){g.innerHTML='<p style="color:var(--text3);grid-column:1/-1">Projekte aktuell nicht erreichbar.</p>';}}
+  function od(p){if(!p)return;const im=(p.images&&p.images.length)?p.images:(p.image?[{path:p.image}]:[]);const detail=esc(p.detail||p.description||'').replace(/\n/g,'<br>');const code=(p.repo_url&&!p.private)?`<a href="${esc(p.repo_url)}" target="_blank" rel="noopener" class="btn btn-g"><svg class="icon" aria-hidden="true"><use href="#i-github"/></svg> Code</a>`:'';const meta=[p.language,p.stars?('★ '+p.stars):''].filter(Boolean).map(m=>`<span class="atag">${esc(m)}</span>`).join('');document.getElementById('db').innerHTML=`${im.length?`<div class="mgal">${im.map(x=>`<img src="${x.path}" alt="${esc(p.title)}" loading="lazy">`).join('')}</div>`:''}<h2>${esc(p.title)}</h2><div class="atags">${(p.tags||[]).map(t=>`<span class="atag">${esc(t)}</span>`).join('')}${meta}</div><p class="mdesc">${detail}</p><div class="acts" style="display:flex;gap:12px;flex-wrap:wrap">${p.link?`<a href="${esc(p.link)}" target="_blank" rel="noopener" class="btn btn-p">Ansehen <svg class="icon" aria-hidden="true"><use href="#i-ext"/></svg></a>`:''}${code}</div>`;document.getElementById('dm').classList.add('open');document.body.style.overflow='hidden';lenis&&lenis.stop();}
   function cd(){document.getElementById('dm').classList.remove('open');document.body.style.overflow='';lenis&&lenis.start();}
   // legal
   let LS=null;async function loadLegal(){if(LS)return LS;try{const r=await fetch('/api/settings');if(r.ok)LS=await r.json();}catch(e){}return LS||{};}
