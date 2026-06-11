@@ -790,6 +790,10 @@ body {
 .intg-status{font-size:.8rem;margin-top:1px}
 .intg-status.ok{color:var(--accent)}.intg-status.bad{color:var(--danger)}
 .intg-detail{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--text-muted);margin-top:4px;word-break:break-word}
+.set-hint{font-size:.76rem;color:var(--text-muted);margin-top:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.set-hint code{font-family:'JetBrains Mono',monospace;color:var(--accent);background:var(--bg-hover);padding:2px 7px;border-radius:5px}
+.set-ip-add{background:none;border:1px solid var(--border);color:var(--text-secondary);font-size:.72rem;padding:3px 9px;border-radius:6px;cursor:pointer;transition:.2s}
+.set-ip-add:hover{color:var(--accent);border-color:var(--border-accent)}
 @media(max-width:860px){.set-grid{grid-template-columns:1fr}}
 
 .settings-card h3 {

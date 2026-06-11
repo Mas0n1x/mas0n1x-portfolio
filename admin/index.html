@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="css/admin.css?v=13">
+  <link rel="stylesheet" href="css/admin.css?v=14">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
@@ -1905,7 +1905,7 @@
         </div>
 
         <div class="set-grid">
-          <div class="set-card">
+          <div class="set-card wide">
             <div class="set-eyebrow">System</div>
             <div class="set-head">
               <h3><i class="fas fa-tools"></i> Wartungsmodus</h3>
@@ -1916,17 +1916,30 @@
               <label class="toggle-switch">
                 <input type="checkbox" id="maintenance-mode">
                 <span class="toggle-slider"></span>
-                <span class="toggle-label">Wartungsmodus aktivieren</span>
+                <span class="toggle-label">Wartungsmodus jetzt aktivieren</span>
               </label>
             </div>
             <div id="maintenance-message-container" style="display:none">
-              <div class="set-divider"></div>
               <div class="form-group">
                 <label for="maintenance-message">Wartungsnachricht (optional)</label>
-                <textarea id="maintenance-message" rows="3" placeholder="z.B. Wir sind bald wieder für dich da!"></textarea>
+                <textarea id="maintenance-message" rows="2" placeholder="z.B. Wir sind bald wieder für dich da!"></textarea>
               </div>
-              <div class="set-actions"><button id="save-maintenance-btn" class="btn-primary"><i class="fas fa-save"></i> Speichern</button></div>
             </div>
+            <div class="set-divider"></div>
+            <div class="set-sub">Geplante Wartung (optional)</div>
+            <p class="set-desc" style="margin-bottom:14px">Im Zeitfenster wird die Wartung automatisch aktiv — auch ohne den Schalter oben.</p>
+            <div class="form-row">
+              <div class="form-group"><label for="maintenance-from">Von</label><input type="datetime-local" id="maintenance-from"></div>
+              <div class="form-group"><label for="maintenance-until">Bis</label><input type="datetime-local" id="maintenance-until"></div>
+            </div>
+            <div class="set-divider"></div>
+            <div class="set-sub">IP-Whitelist</div>
+            <div class="form-group">
+              <label for="maintenance-whitelist">Diese IPs sehen die Seite trotz Wartung (Komma-getrennt)</label>
+              <input type="text" id="maintenance-whitelist" placeholder="z.B. 1.2.3.4, 5.6.7.8">
+              <div class="set-hint">Deine aktuelle IP: <code id="maintenance-your-ip">…</code> <button type="button" class="set-ip-add" id="maintenance-add-ip">+ hinzufügen</button></div>
+            </div>
+            <div class="set-actions"><button id="save-maintenance-btn" class="btn-primary"><i class="fas fa-save"></i> Wartungseinstellungen speichern</button></div>
           </div>
 
           <div class="set-card">
@@ -2268,6 +2281,6 @@
     </div>
   </div>
 
-  <script src="js/admin.js?v=13"></script>
+  <script src="js/admin.js?v=14"></script>
 </body>
 </html>

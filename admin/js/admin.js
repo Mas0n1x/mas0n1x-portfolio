@@ -908,6 +908,12 @@ async function loadMaintenanceStatus() {
     maintenanceMessage.value = data.message || '';
     maintenanceMessageContainer.style.display = data.enabled ? 'block' : 'none';
     setMaintenanceBadge(data.enabled);
+    const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ''; };
+    setVal('maintenance-from', data.from);
+    setVal('maintenance-until', data.until);
+    setVal('maintenance-whitelist', data.whitelist);
+    const ipEl = document.getElementById('maintenance-your-ip');
+    if (ipEl) ipEl.textContent = data.your_ip || 'unbekannt';
   } catch (e) {
     console.error('Failed to load maintenance status:', e);
   }
@@ -940,18 +946,30 @@ maintenanceToggle.addEventListener('change', async () => {
 });
 
 saveMaintenanceBtn.addEventListener('click', async () => {
+  const gv = id => document.getElementById(id)?.value || '';
   try {
     await api('/maintenance', {
       method: 'POST',
       body: {
         enabled: maintenanceToggle.checked,
-        message: maintenanceMessage.value
+        message: maintenanceMessage.value,
+        from: gv('maintenance-from'),
+        until: gv('maintenance-until'),
+        whitelist: gv('maintenance-whitelist')
       }
     });
-    showToast('Wartungsnachricht gespeichert!', 'success');
+    showToast('Wartungseinstellungen gespeichert!', 'success');
   } catch (e) {
     showToast('Fehler beim Speichern', 'error');
   }
+});
+
+document.getElementById('maintenance-add-ip')?.addEventListener('click', () => {
+  const ip = document.getElementById('maintenance-your-ip')?.textContent?.trim();
+  const wl = document.getElementById('maintenance-whitelist');
+  if (!ip || !wl || ip === 'unbekannt' || ip === '…') return;
+  const cur = wl.value.split(',').map(s => s.trim()).filter(Boolean);
+  if (!cur.includes(ip)) { cur.push(ip); wl.value = cur.join(', '); }
 });
 
 // ==================== SETTINGS ====================

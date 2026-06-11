@@ -618,44 +618,52 @@ app.post('/api/change-password', requireAuth, (req, res) => {
 
 // ==================== MAINTENANCE MODE ====================
 
+// Ermittelt die Client-IP hinter nginx/Cloudflare (best effort)
+function clientIp(req) {
+  return (req.headers['cf-connecting-ip'] || req.headers['x-real-ip'] || (req.headers['x-forwarded-for'] || '').split(',')[0] || req.ip || '').trim();
+}
+// Wartung aktiv? Manueller Schalter ODER geplantes Fenster — ausser die IP steht auf der Whitelist
+function isMaintenanceActive(req) {
+  const manual = dbGet("SELECT value FROM settings WHERE key = 'maintenance_mode'")?.value === 'true';
+  const from = dbGet("SELECT value FROM settings WHERE key = 'maintenance_from'")?.value;
+  const until = dbGet("SELECT value FROM settings WHERE key = 'maintenance_until'")?.value;
+  let scheduled = false;
+  if (from && until) {
+    const now = Date.now(), f = Date.parse(from), u = Date.parse(until);
+    if (!isNaN(f) && !isNaN(u) && now >= f && now <= u) scheduled = true;
+  }
+  if (!manual && !scheduled) return false;
+  const wl = (dbGet("SELECT value FROM settings WHERE key = 'maintenance_whitelist'")?.value || '').split(',').map(s => s.trim()).filter(Boolean);
+  if (wl.length && wl.includes(clientIp(req))) return false;
+  return true;
+}
+
 // Check endpoint for nginx auth_request (returns 200 = OK, 403 = maintenance)
 app.get('/api/maintenance-check', (req, res) => {
-  const setting = dbGet("SELECT value FROM settings WHERE key = 'maintenance_mode'");
-  if (setting?.value === 'true') {
-    res.status(403).send('Maintenance');
-  } else {
-    res.status(200).send('OK');
-  }
+  if (isMaintenanceActive(req)) res.status(403).send('Maintenance');
+  else res.status(200).send('OK');
 });
 
 app.get('/api/maintenance', (req, res) => {
-  const setting = dbGet("SELECT value FROM settings WHERE key = 'maintenance_mode'");
-  const message = dbGet("SELECT value FROM settings WHERE key = 'maintenance_message'");
+  const get = k => dbGet("SELECT value FROM settings WHERE key = ?", [k])?.value || '';
   res.json({
-    enabled: setting?.value === 'true',
-    message: message?.value || ''
+    enabled: get('maintenance_mode') === 'true',
+    message: get('maintenance_message'),
+    from: get('maintenance_from'),
+    until: get('maintenance_until'),
+    whitelist: get('maintenance_whitelist'),
+    your_ip: clientIp(req)
   });
 });
 
 app.post('/api/maintenance', requireAuth, (req, res) => {
-  const { enabled, message } = req.body;
-
-  // Upsert maintenance_mode
-  const existing = dbGet("SELECT key FROM settings WHERE key = 'maintenance_mode'");
-  if (existing) {
-    dbRun("UPDATE settings SET value = ? WHERE key = 'maintenance_mode'", [enabled ? 'true' : 'false']);
-  } else {
-    dbRun("INSERT INTO settings (key, value) VALUES ('maintenance_mode', ?)", [enabled ? 'true' : 'false']);
-  }
-
-  // Upsert maintenance_message
-  const existingMsg = dbGet("SELECT key FROM settings WHERE key = 'maintenance_message'");
-  if (existingMsg) {
-    dbRun("UPDATE settings SET value = ? WHERE key = 'maintenance_message'", [message || '']);
-  } else {
-    dbRun("INSERT INTO settings (key, value) VALUES ('maintenance_message', ?)", [message || '']);
-  }
-
+  const { enabled, message, from, until, whitelist } = req.body;
+  const set = (k, v) => dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)", [k, v]);
+  set('maintenance_mode', enabled ? 'true' : 'false');
+  if (message !== undefined) set('maintenance_message', message || '');
+  if (from !== undefined) set('maintenance_from', from || '');
+  if (until !== undefined) set('maintenance_until', until || '');
+  if (whitelist !== undefined) set('maintenance_whitelist', whitelist || '');
   res.json({ success: true });
 });
 
