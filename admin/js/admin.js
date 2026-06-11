@@ -3207,6 +3207,7 @@ document.querySelectorAll('.nav-item[data-section]').forEach(item => {
       loadEmailSettings();
       loadBusinessData();
       loadIntegrations();
+      loadNotifyRouting();
     }
   });
 });
@@ -3260,6 +3261,25 @@ async function loadIntegrations() {
   } finally { btn?.classList.remove('spin'); }
 }
 document.getElementById('integrations-refresh')?.addEventListener('click', loadIntegrations);
+
+// ==================== BENACHRICHTIGUNGS-ROUTING ====================
+const NOTIFY_KEYS = { notify_request_email: false, notify_request_discord: true, notify_review_email: false, notify_message_email: false };
+async function loadNotifyRouting() {
+  try {
+    const s = await api('/settings');
+    Object.entries(NOTIFY_KEYS).forEach(([k, def]) => {
+      const el = document.getElementById(k); if (!el) return;
+      const v = s[k];
+      el.checked = (v === undefined || v === null || v === '') ? def : v === 'true';
+    });
+  } catch (e) { console.error('Routing laden fehlgeschlagen:', e); }
+}
+document.getElementById('save-notify-btn')?.addEventListener('click', async () => {
+  const body = {};
+  Object.keys(NOTIFY_KEYS).forEach(k => { const el = document.getElementById(k); if (el) body[k] = el.checked ? 'true' : 'false'; });
+  try { await api('/settings', { method: 'POST', body }); showToast('Benachrichtigungs-Routing gespeichert', 'success'); }
+  catch (e) { showToast(e.message || 'Speichern fehlgeschlagen', 'error'); }
+});
 
 // ==================== EMAIL SETTINGS ====================
 async function loadEmailSettings() {

@@ -1330,10 +1330,28 @@ app.post('/api/customer/review', requireCustomerAuth, (req, res) => {
     [request_id, req.session.customerId, rating, title, content, is_public ? 1 : 0]
   );
 
+  adminNotify('review', {
+    subject: 'Neue Bewertung erhalten',
+    html: `<h2>Neue Bewertung (${esc(rating)}★)</h2><p><b>${esc(title)}</b></p><p>${esc(content)}</p>`
+  });
+
   res.json({ success: true });
 });
 
 // ==================== PROJECT REQUEST ROUTES ====================
+
+// ===== Benachrichtigungs-Routing (Einstellungen → Benachrichtigungen) =====
+function notifyAllowed(event, channel, def) {
+  const v = dbGet("SELECT value FROM settings WHERE key = ?", [`notify_${event}_${channel}`])?.value;
+  if (v === undefined || v === null || v === '') return def;
+  return v === 'true';
+}
+function adminNotify(event, { subject, html }) {
+  if (!notifyAllowed(event, 'email', false)) return;
+  const to = dbGet("SELECT value FROM settings WHERE key = 'impressum_email'")?.value;
+  if (to && subject && html) sendNotificationEmail(to, subject, html).catch(e => console.error('Admin-Alert-Mail:', e.message));
+}
+const esc = s => String(s || '').replace(/[<>&]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]));
 
 app.post('/api/requests', requireCustomerAuth, (req, res) => {
   const { projectType, budget, timeline, description } = req.body;
@@ -1343,14 +1361,19 @@ app.post('/api/requests', requireCustomerAuth, (req, res) => {
     [req.session.customerId, projectType, budget, timeline, description]
   );
 
-  // Discord-Benachrichtigung in festgelegten Channel (async, nicht blockierend)
-  if (discordBot) {
+  // Discord-Benachrichtigung (Routing: default an), async, nicht blockierend
+  if (discordBot && notifyAllowed('request', 'discord', true)) {
     const customer = dbGet('SELECT name, company, email, phone FROM customers WHERE id = ?', [req.session.customerId]);
     discordBot.sendRequestNotification(
       { id: result.lastInsertRowid, project_type: projectType, budget, timeline, description },
       customer
     ).catch(e => console.error('Discord request notification error:', e.message));
   }
+  // Admin-E-Mail (Routing: default aus)
+  adminNotify('request', {
+    subject: 'Neue Projektanfrage',
+    html: `<h2>Neue Projektanfrage</h2><p><b>Typ:</b> ${esc(projectType)}<br><b>Budget:</b> ${esc(budget)}<br><b>Zeitrahmen:</b> ${esc(timeline)}</p><p>${esc(description)}</p>`
+  });
 
   res.json({ success: true, requestId: result.lastInsertRowid });
 });
@@ -1543,6 +1566,14 @@ app.post('/api/requests/:id/messages', requestUpload.single('file'), (req, res) 
   );
 
   const messageId = result.lastInsertRowid;
+
+  // Admin-E-Mail nur bei Kundennachrichten (nicht bei eigenen Antworten)
+  if (senderType === 'customer') {
+    adminNotify('message', {
+      subject: `Neue Kundennachricht (Anfrage #${requestId})`,
+      html: `<h2>Neue Nachricht zu Anfrage #${requestId}</h2><p>${esc(content)}</p>`
+    });
+  }
 
   // Handle file upload
   if (req.file) {

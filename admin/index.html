@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="css/admin.css?v=14">
+  <link rel="stylesheet" href="css/admin.css?v=15">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
@@ -2010,6 +2010,32 @@
             </form>
           </div>
 
+          <!-- Benachrichtigungs-Routing -->
+          <div class="set-card wide">
+            <div class="set-eyebrow">Benachrichtigungen</div>
+            <div class="set-head"><h3><i class="fas fa-bell"></i> Routing</h3></div>
+            <p class="set-desc">Pro Ereignis wählen, wie du benachrichtigt wirst. E-Mail-Alerts gehen an deine Geschäfts-E-Mail (Stammdaten), der Discord-Channel wird im Discord-Tab gesetzt.</p>
+            <div class="ntf-matrix">
+              <div class="ntf-row ntf-head"><span>Ereignis</span><span>E-Mail</span><span>Discord</span></div>
+              <div class="ntf-row">
+                <span class="ntf-evt">Neue Projektanfrage</span>
+                <label class="ntf-chk"><input type="checkbox" id="notify_request_email"></label>
+                <label class="ntf-chk"><input type="checkbox" id="notify_request_discord"></label>
+              </div>
+              <div class="ntf-row">
+                <span class="ntf-evt">Neue Bewertung</span>
+                <label class="ntf-chk"><input type="checkbox" id="notify_review_email"></label>
+                <span class="ntf-na" title="Kein Discord-Sender für dieses Ereignis">—</span>
+              </div>
+              <div class="ntf-row">
+                <span class="ntf-evt">Neue Kundennachricht</span>
+                <label class="ntf-chk"><input type="checkbox" id="notify_message_email"></label>
+                <span class="ntf-na" title="Kein Discord-Sender für dieses Ereignis">—</span>
+              </div>
+            </div>
+            <div class="set-actions"><button id="save-notify-btn" class="btn-primary"><i class="fas fa-save"></i> Routing speichern</button></div>
+          </div>
+
           <!-- E-Mail Settings -->
           <div class="set-card wide">
             <div class="set-eyebrow">Kommunikation</div>
@@ -2281,6 +2307,6 @@
     </div>
   </div>
 
-  <script src="js/admin.js?v=14"></script>
+  <script src="js/admin.js?v=15"></script>
 </body>
 </html>

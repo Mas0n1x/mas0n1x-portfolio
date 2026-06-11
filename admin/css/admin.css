@@ -794,6 +794,15 @@ body {
 .set-hint code{font-family:'JetBrains Mono',monospace;color:var(--accent);background:var(--bg-hover);padding:2px 7px;border-radius:5px}
 .set-ip-add{background:none;border:1px solid var(--border);color:var(--text-secondary);font-size:.72rem;padding:3px 9px;border-radius:6px;cursor:pointer;transition:.2s}
 .set-ip-add:hover{color:var(--accent);border-color:var(--border-accent)}
+.ntf-matrix{display:flex;flex-direction:column;gap:2px;margin-bottom:6px}
+.ntf-row{display:grid;grid-template-columns:1fr 80px 80px;align-items:center;gap:10px;padding:12px 14px;border-radius:9px}
+.ntf-row:not(.ntf-head):hover{background:var(--bg-hover)}
+.ntf-head{font-family:'JetBrains Mono',monospace;font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);padding-bottom:4px}
+.ntf-head span:not(:first-child){text-align:center}
+.ntf-evt{font-size:.9rem;color:var(--text-primary)}
+.ntf-chk{display:inline-flex;justify-self:center;cursor:pointer}
+.ntf-chk input{width:18px;height:18px;accent-color:var(--accent);cursor:pointer}
+.ntf-na{color:var(--text-muted);justify-self:center}
 @media(max-width:860px){.set-grid{grid-template-columns:1fr}}
 
 .settings-card h3 {
