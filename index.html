@@ -22,12 +22,16 @@
 <meta name="theme-color" content="#04060a">
 <link rel="icon" href="/logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet"><style>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js" defer></script><style>
   :root{--bg:#04060a;--panel:rgba(0,255,170,0.02);--line:rgba(0,255,170,0.16);--line2:rgba(0,255,170,0.34);--mint:#00ffaa;--cyan:#22d3ee;--amber:#ffb020;--text:#dffaf0;--text2:#8aa39b;--text3:#62807a;--glow:rgba(0,255,170,0.5);--container:1240px;--mono:'JetBrains Mono',monospace}
   *{margin:0;padding:0;box-sizing:border-box}
-  html{scroll-behavior:smooth;scroll-snap-type:y mandatory}
-  /* Deck/Snap: jeder Bereich rastet als eigenes Vollbild-Modul ein (ein Scroll = ein Modul) */
-  body>header,body>section{scroll-snap-align:start;scroll-snap-stop:always}
+  html{scroll-behavior:smooth}
+  /* Lenis smooth-scroll */
+  html.lenis,html.lenis body{height:auto}
+  .lenis.lenis-smooth{scroll-behavior:auto!important}
+  .lenis.lenis-smooth [data-lenis-prevent]{overscroll-behavior:contain}
+  .lenis.lenis-stopped{overflow:hidden}
   body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased}
   a{color:inherit;text-decoration:none} img{max-width:100%;display:block}
   ::selection{background:var(--mint);color:#000}
@@ -44,7 +48,7 @@
   @keyframes spin{to{transform:rotate(360deg)}}
   @keyframes blink{50%{opacity:0}}
   .wrap{max-width:var(--container);margin:0 auto;padding:0 28px}
-  section{padding:90px 0;position:relative}
+  section{position:relative}
   /* eigenständige Trennlinie zwischen Sektionen (fadet nicht mit) */
   /* Trennlinien deaktiviert: bei bildschirmhohen Bereichen wuerden sie im Leerraum schweben */
   .divider{display:none}
@@ -93,7 +97,10 @@
   .hstats .l{font-family:var(--mono);font-size:.68rem;color:var(--text3);text-transform:uppercase;letter-spacing:.08em}
   /* Bereiche: jeder Bereich fuellt den Bildschirm, Inhalt vertikal zentriert — so ist beim Scrollen
      immer genau ein Bereich im Fokus. Sichtbarkeit scroll-gekoppelt (JS setzt opacity/transform). */
-  .sect{opacity:0;will-change:opacity,transform;min-height:100vh;display:flex;flex-direction:column;justify-content:center}
+  .sect{position:relative;padding-block:120px}
+  /* Reveal-on-Scroll: blendet beim Reinscrollen sanft ein und bleibt (kein Deck-Snap mehr) */
+  .reveal{opacity:0;transform:translateY(30px);transition:opacity .75s cubic-bezier(.16,1,.3,1),transform .75s cubic-bezier(.16,1,.3,1);will-change:opacity,transform}
+  .reveal.in{opacity:1;transform:none}
   /* build terminal */
   .jterm{position:relative;opacity:0;transform:translateY(20px);animation:rise 1s ease .5s forwards}
   @keyframes rise{to{opacity:1;transform:none}}
@@ -190,8 +197,8 @@
   /* scroll progress */
   .sprog{position:fixed;top:0;left:0;height:2px;background:linear-gradient(90deg,var(--mint),var(--cyan));z-index:200;width:0}
   @media(max-width:980px){.hgrid{grid-template-columns:1fr;gap:40px}.caps{grid-template-columns:repeat(2,1fr)}.proc{grid-template-columns:repeat(2,1fr)}.pstep:nth-child(2)::after{display:none}.abt{grid-template-columns:1fr}}
-  @media(max-width:720px){.navl{display:none}.burg{display:block}section{padding:80px 0}.caps{grid-template-columns:1fr}.proc{grid-template-columns:1fr}.pstep::after{display:none}.hstats{gap:24px}}
-  @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition-duration:.01ms!important}html{scroll-snap-type:none}body>header,body>section{scroll-snap-align:none}.reveal{opacity:1;transform:none}.sect{opacity:1;transform:none}.jterm{opacity:1;transform:none}}
+  @media(max-width:720px){.navl{display:none}.burg{display:block}.sect{padding-block:84px}.caps{grid-template-columns:1fr}.proc{grid-template-columns:1fr}.pstep::after{display:none}.hstats{gap:24px}}
+  @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition-duration:.01ms!important}.reveal{opacity:1!important;transform:none!important}.sect{opacity:1}.jterm{opacity:1;transform:none}}
 </style>
 <noscript><style>.sect{opacity:1!important;transform:none!important}</style></noscript>
 </head>
@@ -366,31 +373,13 @@
   addEventListener('scroll',()=>{const h=document.documentElement.scrollHeight-innerHeight;sprog.style.width=(h>0?scrollY/h*100:0)+'%';},{passive:true});
   // scroll-gekoppelter Bereich-Reveal: Sichtbarkeit haengt direkt an der Scroll-Position
   const REDM=matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const sects=[...document.querySelectorAll('.sect')];
-  function updateReveal(){
-    const vh=innerHeight;
-    for(const s of sects){
-      const r=s.getBoundingClientRect();
-      if(REDM){s.style.opacity='1';s.style.transform='none';continue;}
-      // Ein-/Ausblend-Fenster: breites Plateau (Bereich bleibt voll sichtbar), schnelle Raender
-      let pIn=(vh*0.86-r.top)/(vh*0.38);    pIn=pIn<0?0:pIn>1?1:pIn;
-      let pOut=(r.bottom-vh*0.14)/(vh*0.38);pOut=pOut<0?0:pOut>1?1:pOut;
-      const op=pIn<pOut?pIn:pOut;           // Opacity-Treiber
-      const oe=op*op*(3-2*op);
-      // Richtungs-Flug: kommt von UNTEN rein, durchquert die Mitte, fliegt nach OBEN raus
-      const FLY=vh*0.30;
-      let ty;
-      if(pIn<=pOut){const e=pIn*pIn*(3-2*pIn);  ty=(1-e)*FLY;}   // Eintritt: +unten -> 0
-      else         {const e=pOut*pOut*(3-2*pOut);ty=-(1-e)*FLY;} // Austritt: 0 -> -oben
-      s.style.opacity=oe.toFixed(3);
-      s.style.transform='translateY('+ty.toFixed(1)+'px)';
-    }
-  }
-  function staggerIn(){}
-  function observeReveals(){}
-  if(REDM){updateReveal();}
-  else{(function revLoop(){updateReveal();requestAnimationFrame(revLoop);})();}
-  addEventListener('resize',updateReveal,{passive:true});
+  // Reveal-on-Scroll: blendet beim Reinscrollen einmal ein und bleibt; Gruppen [data-stagger] versetzt
+  document.querySelectorAll('[data-stagger]').forEach(c=>{
+    [...c.children].forEach((el,i)=>{ if(el.classList.contains('reveal')) el.style.transitionDelay=(i*0.09).toFixed(2)+'s'; });
+  });
+  const revObs=new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); revObs.unobserve(e.target); } }),{threshold:.12,rootMargin:'0px 0px -7% 0px'});
+  function updateReveal(){ document.querySelectorAll('.reveal:not(.in)').forEach(e=>revObs.observe(e)); }
+  updateReveal();
   // scroll-spy
   const navlinks=[...navl.querySelectorAll('a[href^="#"]')];
   const spy=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){navlinks.forEach(a=>a.classList.toggle('act',a.getAttribute('href')==='#'+e.target.id));}}),{rootMargin:'-45% 0px -50% 0px'});
@@ -434,10 +423,18 @@
   // smooth-scroll (Lenis) — das „kenshin"-Scrollgefühl + Grid-Parallax
   let lenis=null;
   (function(){
-    // Lenis deaktiviert zugunsten von CSS scroll-snap (Deck-Effekt). Anker-Links nutzen nativen Smooth-Scroll.
-    const grid=document.querySelector('.fx-grid');
-    if(grid)addEventListener('scroll',()=>{grid.style.backgroundPosition='0 '+(scrollY*0.18)+'px';},{passive:true});
-    document.querySelectorAll('a[href^="#"]').forEach(a=>{const id=a.getAttribute('href');if(id.length>1)a.addEventListener('click',e=>{const tg=document.querySelector(id);if(tg){e.preventDefault();tg.scrollIntoView({behavior:'smooth',block:'start'});}});});
+    const grid=document.querySelector('.fx-grid'),glow=document.querySelector('.fx-glow');
+    // Parallax-Tiefe: Grid-Pattern fliesst langsam mit, Glow driftet dezenter
+    const parallax=y=>{ if(grid)grid.style.backgroundPosition='0 '+(y*0.14).toFixed(1)+'px'; if(glow)glow.style.transform='translateX(-50%) translateY('+(y*0.08).toFixed(1)+'px)'; };
+    const anchors=()=>document.querySelectorAll('a[href^="#"]').forEach(a=>{const id=a.getAttribute('href');if(id.length>1)a.addEventListener('click',e=>{const tg=document.querySelector(id);if(tg){e.preventDefault();lenis?lenis.scrollTo(tg,{offset:-64}):tg.scrollIntoView({behavior:'smooth',block:'start'});}});});
+    if(REDM||typeof Lenis==='undefined'){
+      addEventListener('scroll',()=>parallax(scrollY),{passive:true});anchors();return;
+    }
+    lenis=new Lenis({duration:1.15,easing:t=>Math.min(1,1.001-Math.pow(2,-10*t)),smoothWheel:true,touchMultiplier:1.6});
+    function raf(time){lenis.raf(time);requestAnimationFrame(raf);}
+    requestAnimationFrame(raf);
+    lenis.on('scroll',({scroll})=>parallax(scroll));
+    anchors();
   })();
   // mouse-spotlight (folgt der Maus, rAF-gedrosselt)
   (function(){
