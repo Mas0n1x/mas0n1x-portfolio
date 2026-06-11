@@ -13,7 +13,9 @@
 <style>
   :root{--bg:#04060a;--panel:rgba(0,255,170,0.02);--line:rgba(0,255,170,0.16);--line2:rgba(0,255,170,0.34);--mint:#00ffaa;--cyan:#22d3ee;--amber:#ffb020;--text:#dffaf0;--text2:#6f8a82;--text3:#3d514c;--glow:rgba(0,255,170,0.5);--container:1240px;--mono:'JetBrains Mono',monospace}
   *{margin:0;padding:0;box-sizing:border-box}
-  html{scroll-behavior:smooth}
+  html{scroll-behavior:smooth;scroll-snap-type:y mandatory}
+  /* Deck/Snap: jeder Bereich rastet als eigenes Vollbild-Modul ein (ein Scroll = ein Modul) */
+  body>header,body>section{scroll-snap-align:start;scroll-snap-stop:always}
   /* Lenis smooth-scroll */
   html.lenis,html.lenis body{height:auto}
   .lenis.lenis-smooth{scroll-behavior:auto!important}
@@ -33,9 +35,10 @@
   @keyframes spin{to{transform:rotate(360deg)}}
   @keyframes blink{50%{opacity:0}}
   .wrap{max-width:var(--container);margin:0 auto;padding:0 28px}
-  section{padding:150px 0;position:relative}
+  section{padding:90px 0;position:relative}
   /* eigenständige Trennlinie zwischen Sektionen (fadet nicht mit) */
-  .divider{max-width:calc(var(--container) - 40px);margin:0 auto;height:1px;background:linear-gradient(90deg,transparent,var(--line2) 35%,var(--line2) 65%,transparent);position:relative}
+  /* Trennlinien deaktiviert: bei bildschirmhohen Bereichen wuerden sie im Leerraum schweben */
+  .divider{display:none}
   .divider::after{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(45deg);width:7px;height:7px;background:var(--mint);box-shadow:0 0 12px var(--glow)}
   /* HUD frame util */
   .hud{position:relative;border:1px solid var(--line);background:var(--panel)}
@@ -79,8 +82,9 @@
   .hstats{display:flex;gap:34px;margin-top:42px}
   .hstats .n{font-family:'Space Grotesk',sans-serif;font-size:1.8rem;font-weight:600;font-variant-numeric:tabular-nums}
   .hstats .l{font-family:var(--mono);font-size:.68rem;color:var(--text3);text-transform:uppercase;letter-spacing:.08em}
-  /* Bereiche: Sichtbarkeit scroll-gekoppelt — JS setzt opacity/transform live an der Scroll-Position */
-  .sect{opacity:0;will-change:opacity,transform}
+  /* Bereiche: jeder Bereich fuellt den Bildschirm, Inhalt vertikal zentriert — so ist beim Scrollen
+     immer genau ein Bereich im Fokus. Sichtbarkeit scroll-gekoppelt (JS setzt opacity/transform). */
+  .sect{opacity:0;will-change:opacity,transform;min-height:100vh;display:flex;flex-direction:column;justify-content:center}
   /* build terminal */
   .jterm{position:relative;opacity:0;transform:translateY(20px);animation:rise 1s ease .5s forwards}
   @keyframes rise{to{opacity:1;transform:none}}
@@ -343,15 +347,19 @@
     const vh=innerHeight;
     for(const s of sects){
       const r=s.getBoundingClientRect();
-      // Eintritt von unten: Oberkante 95% -> 42% des Viewports; Austritt oben: Unterkante 5% -> 58%
-      const pIn=(vh*0.95-r.top)/(vh*0.53);
-      const pOut=(r.bottom-vh*0.05)/(vh*0.53);
-      let p=pIn<pOut?pIn:pOut;
-      p=p<0?0:p>1?1:p;
-      // sanfte ease-Kurve fuer mehr "Tiefe"
-      const e=p*p*(3-2*p);
-      if(REDM){s.style.opacity='1';s.style.transform='none';}
-      else{s.style.opacity=e.toFixed(3);s.style.transform='translateY('+((1-e)*72).toFixed(1)+'px)';}
+      if(REDM){s.style.opacity='1';s.style.transform='none';continue;}
+      // Ein-/Ausblend-Fenster: breites Plateau (Bereich bleibt voll sichtbar), schnelle Raender
+      let pIn=(vh*0.86-r.top)/(vh*0.38);    pIn=pIn<0?0:pIn>1?1:pIn;
+      let pOut=(r.bottom-vh*0.14)/(vh*0.38);pOut=pOut<0?0:pOut>1?1:pOut;
+      const op=pIn<pOut?pIn:pOut;           // Opacity-Treiber
+      const oe=op*op*(3-2*op);
+      // Richtungs-Flug: kommt von UNTEN rein, durchquert die Mitte, fliegt nach OBEN raus
+      const FLY=vh*0.30;
+      let ty;
+      if(pIn<=pOut){const e=pIn*pIn*(3-2*pIn);  ty=(1-e)*FLY;}   // Eintritt: +unten -> 0
+      else         {const e=pOut*pOut*(3-2*pOut);ty=-(1-e)*FLY;} // Austritt: 0 -> -oben
+      s.style.opacity=oe.toFixed(3);
+      s.style.transform='translateY('+ty.toFixed(1)+'px)';
     }
   }
   function staggerIn(){}
@@ -402,13 +410,10 @@
   // smooth-scroll (Lenis) — das „kenshin"-Scrollgefühl + Grid-Parallax
   let lenis=null;
   (function(){
-    if(REDM||typeof Lenis==='undefined')return;
-    lenis=new Lenis({duration:1.15,easing:t=>Math.min(1,1.001-Math.pow(2,-10*t)),smoothWheel:true,touchMultiplier:1.6});
-    function raf(time){lenis.raf(time);requestAnimationFrame(raf);}
-    requestAnimationFrame(raf);
-    document.querySelectorAll('a[href^="#"]').forEach(a=>{const id=a.getAttribute('href');if(id.length>1)a.addEventListener('click',e=>{const tg=document.querySelector(id);if(tg){e.preventDefault();lenis.scrollTo(tg,{offset:-64});}});});
+    // Lenis deaktiviert zugunsten von CSS scroll-snap (Deck-Effekt). Anker-Links nutzen nativen Smooth-Scroll.
     const grid=document.querySelector('.fx-grid');
-    lenis.on('scroll',({scroll})=>{if(grid)grid.style.backgroundPosition='0 '+(scroll*0.18)+'px';});
+    if(grid)addEventListener('scroll',()=>{grid.style.backgroundPosition='0 '+(scrollY*0.18)+'px';},{passive:true});
+    document.querySelectorAll('a[href^="#"]').forEach(a=>{const id=a.getAttribute('href');if(id.length>1)a.addEventListener('click',e=>{const tg=document.querySelector(id);if(tg){e.preventDefault();tg.scrollIntoView({behavior:'smooth',block:'start'});}});});
   })();
   // mouse-spotlight (folgt der Maus, rAF-gedrosselt)
   (function(){
