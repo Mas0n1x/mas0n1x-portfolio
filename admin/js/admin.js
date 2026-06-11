@@ -3194,17 +3194,23 @@ document.querySelectorAll('.nav-item[data-section]').forEach(item => {
 });
 
 // ==================== GESCHÄFTSDATEN ====================
-const BIZ_FIELDS = ['biz_company','biz_vatid','biz_street','biz_email','biz_zip','biz_city','biz_bank','biz_iban','biz_bic'];
+// Mappt die Formularfelder auf die settings-Keys — nutzt die vorhandenen impressum_*-Keys,
+// damit die Daten direkt ins Impressum (index.html) fliessen; Bank/USt-ID sind neu.
+const BIZ_MAP = {
+  biz_company: 'impressum_name', biz_street: 'impressum_street', biz_zip: 'impressum_zip',
+  biz_city: 'impressum_city', biz_email: 'impressum_email', biz_vatid: 'impressum_vatid',
+  biz_bank: 'bank_name', biz_iban: 'bank_iban', biz_bic: 'bank_bic'
+};
 async function loadBusinessData() {
   try {
     const s = await api('/settings');
-    BIZ_FIELDS.forEach(k => { const el = document.getElementById(k); if (el) el.value = s[k] || ''; });
+    Object.entries(BIZ_MAP).forEach(([id, key]) => { const el = document.getElementById(id); if (el) el.value = s[key] || ''; });
   } catch (e) { console.error('Geschäftsdaten laden fehlgeschlagen:', e); }
 }
 document.getElementById('business-form')?.addEventListener('submit', async (e) => {
   e.preventDefault();
   const body = {};
-  BIZ_FIELDS.forEach(k => { const el = document.getElementById(k); if (el) body[k] = el.value.trim(); });
+  Object.entries(BIZ_MAP).forEach(([id, key]) => { const el = document.getElementById(id); if (el) body[key] = el.value.trim(); });
   try { await api('/settings', { method: 'POST', body }); showToast('Geschäftsdaten gespeichert', 'success'); }
   catch (err) { showToast(err.message || 'Speichern fehlgeschlagen', 'error'); }
 });
