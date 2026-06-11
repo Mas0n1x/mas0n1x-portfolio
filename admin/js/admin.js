@@ -1960,7 +1960,7 @@ function downloadInvoice() {
       <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; font-size: 12px; line-height: 1.5; color: #000; padding: 40px; }
-        .invoice-header { display: flex; justify-content: space-between; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 2px solid #00ff88; }
+        .invoice-header { display: flex; justify-content: space-between; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 2px solid #00ffaa; }
         .invoice-logo { width: 80px; height: 80px; object-fit: contain; margin-bottom: 12px; border-radius: 12px; }
         .invoice-title { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
         .invoice-meta { color: #666; font-size: 11px; }
@@ -1976,7 +1976,7 @@ function downloadInvoice() {
         .invoice-total { display: flex; justify-content: flex-end; margin-bottom: 40px; }
         .total-box { width: 250px; }
         .total-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; }
-        .grand-total { font-weight: 700; font-size: 16px; border-bottom: 2px solid #00ff88; padding: 12px 0; margin-top: 8px; }
+        .grand-total { font-weight: 700; font-size: 16px; border-bottom: 2px solid #00ffaa; padding: 12px 0; margin-top: 8px; }
         .invoice-footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; }
         .payment-info { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 20px; }
         .payment-info h4 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #999; margin-bottom: 8px; }
@@ -2412,7 +2412,7 @@ function renderRevenueDonut(rev) {
       labels: ['Bezahlt', 'Offen', 'Überfällig'],
       datasets: [{
         data: empty ? [1] : [paid, open, overdue],
-        backgroundColor: empty ? ['rgba(255,255,255,0.05)'] : ['#00ff88', '#ffaa00', '#ff4444'],
+        backgroundColor: empty ? ['rgba(255,255,255,0.05)'] : ['#00ffaa', '#ffaa00', '#ff4444'],
         borderWidth: 0, hoverOffset: 6,
       }],
     },
@@ -2445,7 +2445,7 @@ async function renderProjectsDonut() {
       labels: ['Abgeschlossen', 'In Arbeit', 'Sonstige'],
       datasets: [{
         data: empty ? [1] : [done, prog, other],
-        backgroundColor: empty ? ['rgba(255,255,255,0.05)'] : ['#00ff88', '#ffaa00', 'rgba(255,255,255,0.14)'],
+        backgroundColor: empty ? ['rgba(255,255,255,0.05)'] : ['#00ffaa', '#ffaa00', 'rgba(255,255,255,0.14)'],
         borderWidth: 0, hoverOffset: 6,
       }],
     },
@@ -3083,9 +3083,9 @@ function downloadQuote() {
       <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; font-size: 12px; line-height: 1.5; color: #000; padding: 40px; }
-        .invoice-header { display: flex; justify-content: space-between; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 2px solid #00d4ff; }
+        .invoice-header { display: flex; justify-content: space-between; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 2px solid #22d3ee; }
         .invoice-logo { width: 80px; height: 80px; object-fit: contain; margin-bottom: 12px; border-radius: 12px; }
-        .invoice-title { font-size: 28px; font-weight: 700; margin-bottom: 8px; color: #00d4ff; }
+        .invoice-title { font-size: 28px; font-weight: 700; margin-bottom: 8px; color: #22d3ee; }
         .invoice-meta { color: #666; font-size: 11px; }
         .invoice-meta div { margin-bottom: 4px; }
         .invoice-parties { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 40px; }
@@ -3100,7 +3100,7 @@ function downloadQuote() {
         .invoice-total { display: flex; justify-content: flex-end; margin-bottom: 40px; }
         .total-box { width: 280px; }
         .total-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; }
-        .grand-total { font-weight: 700; font-size: 16px; border-bottom: 2px solid #00d4ff; padding: 12px 0; margin-top: 8px; }
+        .grand-total { font-weight: 700; font-size: 16px; border-bottom: 2px solid #22d3ee; padding: 12px 0; margin-top: 8px; }
         .invoice-footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; }
         .quote-timeline { margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; }
         .invoice-notes { font-size: 11px; color: #666; font-style: italic; margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee; white-space: pre-line; }
@@ -4423,7 +4423,7 @@ function openNewSkillModal() {
   document.getElementById('skill-icon').value = 'fab fa-js';
   document.getElementById('skill-category').value = 'frontend';
   document.getElementById('skill-level').value = '80';
-  document.getElementById('skill-color').value = '#00ff88';
+  document.getElementById('skill-color').value = '#00ffaa';
   document.getElementById('skill-sort-order').value = '0';
   document.getElementById('skill-active').checked = true;
   updateSkillPreview();
@@ -4440,7 +4440,7 @@ async function editSkill(id) {
   document.getElementById('skill-icon').value = skill.icon;
   document.getElementById('skill-category').value = skill.category || 'frontend';
   document.getElementById('skill-level').value = skill.level;
-  document.getElementById('skill-color').value = skill.color || '#00ff88';
+  document.getElementById('skill-color').value = skill.color || '#00ffaa';
   document.getElementById('skill-sort-order').value = skill.sort_order || 0;
   document.getElementById('skill-active').checked = skill.is_active;
   updateSkillPreview();
@@ -4500,7 +4500,7 @@ function updateSkillPreview() {
   const name = document.getElementById('skill-name')?.value || 'JavaScript';
   const icon = document.getElementById('skill-icon')?.value || 'fab fa-js';
   const level = document.getElementById('skill-level')?.value || 80;
-  const color = document.getElementById('skill-color')?.value || '#00ff88';
+  const color = document.getElementById('skill-color')?.value || '#00ffaa';
 
   const preview = document.getElementById('skill-preview-badge');
   if (preview) {
@@ -5029,7 +5029,7 @@ const DISCORD_DEFAULTS = {
   welcome: {
     title: 'Willkommen!',
     description: 'Willkommen auf dem **Mas0n1x Development** Server, {user}!\nWir freuen uns, dich in unserer Community begrüssen zu dürfen.\nHier findest du professionellen Support, kannst Projekte anfragen und dich mit anderen Entwicklern austauschen.',
-    color: '#00ff88',
+    color: '#00ffaa',
     footer: 'Du bist unser {memberCount}. Mitglied!'
   },
   leave: {
@@ -5102,11 +5102,11 @@ const DISCORD_DEFAULTS = {
     ]
   },
   products: [
-    { emoji: '💻', name: 'Web-Entwicklung', price: 'ab 499€', color: '#00ff88', description: 'Moderne, responsive Websites und Web-Applikationen mit aktuellen Technologien und Best Practices.', features: '➜ Responsive Design für alle Geräte\n➜ SEO-Optimierung & Performance\n➜ Moderne Frameworks & sauberer Code\n➜ Admin-Dashboards & CMS-Integration' },
-    { emoji: '📱', name: 'App-Entwicklung', price: 'ab 799€', color: '#00d4ff', description: 'Native und Cross-Platform Apps mit intuitiver User Experience.', features: '➜ Cross-Platform Kompatibilität\n➜ Intuitive Benutzeroberfläche\n➜ Offline-Funktionalität\n➜ Push-Benachrichtigungen & Updates' },
+    { emoji: '💻', name: 'Web-Entwicklung', price: 'ab 499€', color: '#00ffaa', description: 'Moderne, responsive Websites und Web-Applikationen mit aktuellen Technologien und Best Practices.', features: '➜ Responsive Design für alle Geräte\n➜ SEO-Optimierung & Performance\n➜ Moderne Frameworks & sauberer Code\n➜ Admin-Dashboards & CMS-Integration' },
+    { emoji: '📱', name: 'App-Entwicklung', price: 'ab 799€', color: '#22d3ee', description: 'Native und Cross-Platform Apps mit intuitiver User Experience.', features: '➜ Cross-Platform Kompatibilität\n➜ Intuitive Benutzeroberfläche\n➜ Offline-Funktionalität\n➜ Push-Benachrichtigungen & Updates' },
     { emoji: '🤖', name: 'Discord Bots', price: 'ab 199€', color: '#a855f7', description: 'Maßgeschneiderte Discord Bot Entwicklung für Moderation, Unterhaltung und Verwaltung.', features: '➜ Moderation & Auto-Moderation\n➜ Ticket- & Supportsysteme\n➜ Custom Commands & Interaktionen\n➜ Dashboard & Web-Interface' },
     { emoji: '⚙️', name: 'Backend-Systeme', price: 'ab 599€', color: '#ffaa00', description: 'Skalierbare APIs, Datenbanken und Server-Infrastruktur.', features: '➜ REST & GraphQL APIs\n➜ Datenbank-Design & Optimierung\n➜ Docker & Server-Setup\n➜ Monitoring & Wartung' },
-    { emoji: '🎨', name: 'Frontend-Systeme', price: 'ab 399€', color: '#00ff88', description: 'Interaktive Benutzeroberflächen mit modernen Frameworks und sauberem Code.', features: '➜ Moderne UI/UX Design\n➜ Animationen & Micro-Interactions\n➜ Barrierefreiheit & Accessibility\n➜ Performance-Optimierung' },
+    { emoji: '🎨', name: 'Frontend-Systeme', price: 'ab 399€', color: '#00ffaa', description: 'Interaktive Benutzeroberflächen mit modernen Frameworks und sauberem Code.', features: '➜ Moderne UI/UX Design\n➜ Animationen & Micro-Interactions\n➜ Barrierefreiheit & Accessibility\n➜ Performance-Optimierung' },
     { emoji: '🐧', name: 'Linux Server Setup', price: 'ab 149€', color: '#f97316', description: 'Professionelle Einrichtung und Konfiguration von Linux-Servern für Hosting, Gameserver und Entwicklungsumgebungen.', features: '➜ Server-Installation & Härtung\n➜ Docker & Container-Setup\n➜ Nginx, Apache & Reverse Proxy\n➜ Monitoring, Backups & Wartung' },
   ],
   ticketCategories: [
@@ -5406,7 +5406,7 @@ async function setupGithubAllRepos() {
     let html = `<strong>Fertig!</strong> ${result.total} Repositories gefunden.<br><br>`;
 
     if (result.added.length > 0) {
-      html += `<span style="color:#00ff88;">&#10004; Webhook hinzugefügt (${result.added.length}):</span><br>`;
+      html += `<span style="color:#00ffaa;">&#10004; Webhook hinzugefügt (${result.added.length}):</span><br>`;
       html += result.added.map(r => `&nbsp;&nbsp;- ${r}`).join('<br>') + '<br><br>';
     }
 
@@ -5450,16 +5450,16 @@ function addGithubOrgItem(orgName) {
   const item = document.createElement('div');
   item.className = 'github-org-item';
   item.dataset.org = orgName;
-  item.style.cssText = 'display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(0,255,136,0.05);border:1px solid rgba(0,255,136,0.2);border-radius:8px;';
+  item.style.cssText = 'display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(0,255,170,0.05);border:1px solid rgba(0,255,170,0.2);border-radius:8px;';
 
   const icon = document.createElement('i');
   icon.className = 'fas fa-building';
-  icon.style.color = '#00ff88';
+  icon.style.color = '#00ffaa';
 
   const link = document.createElement('a');
   link.href = `https://github.com/${encodeURIComponent(orgName)}`;
   link.target = '_blank';
-  link.style.cssText = 'color:#00ff88;flex:1;text-decoration:none;font-family:"JetBrains Mono",monospace;font-size:0.9rem;';
+  link.style.cssText = 'color:#00ffaa;flex:1;text-decoration:none;font-family:"JetBrains Mono",monospace;font-size:0.9rem;';
   link.textContent = orgName;
 
   const removeBtn = document.createElement('button');
@@ -5531,7 +5531,7 @@ async function setupGithubOrgRepos() {
     let html = `<strong>Fertig!</strong> ${result.total} Repositories in ${result.orgCount} Organisation(en) gefunden.<br><br>`;
 
     if (result.added.length > 0) {
-      html += `<span style="color:#00ff88;">&#10004; Webhook hinzugefügt (${result.added.length}):</span><br>`;
+      html += `<span style="color:#00ffaa;">&#10004; Webhook hinzugefügt (${result.added.length}):</span><br>`;
       html += result.added.map(r => `&nbsp;&nbsp;- ${r}`).join('<br>') + '<br><br>';
     }
 
@@ -5877,7 +5877,7 @@ function addDiscordProductItem(p) {
       </div>
       <div class="form-group" style="flex: 0 0 70px;">
         <label>Farbe</label>
-        <input type="color" class="discord-product-color" value="${p.color || '#00ff88'}">
+        <input type="color" class="discord-product-color" value="${p.color || '#00ffaa'}">
       </div>
       <button class="btn-icon danger" onclick="this.closest('.discord-dynamic-item').remove()" style="align-self: flex-end;"><i class="fas fa-trash"></i></button>
     </div>
@@ -5899,7 +5899,7 @@ function getDiscordProducts() {
     emoji: item.querySelector('.discord-product-emoji')?.value || '',
     name: item.querySelector('.discord-product-name')?.value || '',
     price: item.querySelector('.discord-product-price')?.value || '',
-    color: item.querySelector('.discord-product-color')?.value || '#00ff88',
+    color: item.querySelector('.discord-product-color')?.value || '#00ffaa',
     description: item.querySelector('.discord-product-desc')?.value || '',
     features: item.querySelector('.discord-product-features')?.value || '',
   })).filter(p => p.name);

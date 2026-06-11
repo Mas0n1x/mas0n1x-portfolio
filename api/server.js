@@ -684,6 +684,48 @@ async function fetchGithubRepos() {
   return repos;
 }
 
+// Commits des laufenden Jahres via GraphQL-Contributions (oeffentlich + privat, da eigener Token)
+async function fetchGithubCommitsThisYear() {
+  const token = process.env.GITHUB_TOKEN;
+  if (!token) { const e = new Error('GITHUB_TOKEN fehlt'); e.code = 'NO_TOKEN'; throw e; }
+  const year = new Date().getFullYear();
+  const query = 'query($from:DateTime!,$to:DateTime!){viewer{contributionsCollection(from:$from,to:$to){totalCommitContributions restrictedContributionsCount}}}';
+  const variables = { from: `${year}-01-01T00:00:00Z`, to: `${year}-12-31T23:59:59Z` };
+  const r = await fetch('https://api.github.com/graphql', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', 'User-Agent': 'mas0n1x-portfolio' },
+    body: JSON.stringify({ query, variables })
+  });
+  if (!r.ok) { const e = new Error('GitHub GraphQL ' + r.status); e.code = 'API_' + r.status; throw e; }
+  const j = await r.json();
+  const c = j.data && j.data.viewer && j.data.viewer.contributionsCollection;
+  if (!c) return 0;
+  return (c.totalCommitContributions || 0) + (c.restrictedContributionsCount || 0);
+}
+
+// Oeffentliche Hero-Statistiken (Repo-Anzahl + Commits dieses Jahr), 1h gecacht
+let _ghStatsCache = { at: 0, data: null };
+app.get('/api/github/stats', async (req, res) => {
+  const TTL = 60 * 60 * 1000;
+  const year = new Date().getFullYear();
+  if (_ghStatsCache.data && (Date.now() - _ghStatsCache.at) < TTL) {
+    return res.json(_ghStatsCache.data);
+  }
+  try {
+    const [repos, commits] = await Promise.all([
+      fetchGithubRepos().then(r => r.length),
+      fetchGithubCommitsThisYear().catch(() => null)
+    ]);
+    const data = { repos, commits, year };
+    _ghStatsCache = { at: Date.now(), data };
+    res.json(data);
+  } catch (e) {
+    // Fallback: gecachte Repo-Anzahl aus der DB (Hero bleibt nie leer)
+    const row = dbGet('SELECT COUNT(*) AS c FROM github_projects');
+    res.json({ repos: row ? row.c : null, commits: null, year, stale: true });
+  }
+});
+
 // Repo-Basisdaten in DB cachen, ohne Kuratierung (selected/custom/images) zu überschreiben
 function upsertGithubRepo(repo) {
   const vals = [

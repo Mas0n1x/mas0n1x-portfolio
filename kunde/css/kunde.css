@@ -4,19 +4,29 @@
  * Alle Rechte vorbehalten.
  */
 :root {
-  --bg-primary: #0a0a0a;
-  --bg-secondary: #111111;
-  --bg-card: #161616;
-  --text-primary: #ffffff;
-  --text-secondary: #a0a0a0;
-  --text-muted: #666666;
-  --accent: #ff3366;
-  --accent-secondary: #00d4ff;
-  --border-color: #222222;
-  --border-accent: rgba(0, 212, 255, 0.3);
-  --success: #00ff88;
-  --warning: #ffaa00;
-  --danger: #ff4444;
+  /* FUI-Palette — exakt wie die Landing Page (index.html) */
+  --bg-primary: #04060a;
+  --bg-secondary: #070b11;
+  --bg-card: #0a0e14;
+  --text-primary: #dffaf0;
+  --text-secondary: #6f8a82;
+  --text-muted: #3d514c;
+  --accent: #00ffaa;
+  --accent-secondary: #00ffaa;
+  --border-color: rgba(0, 255, 170, 0.16);
+  --border-accent: rgba(0, 255, 170, 0.34);
+  --success: #00ffaa;
+  --warning: #ffb020;
+  --danger: #ff4d5e;
+  /* Landing-Page-Aliase fuer neue FUI-Elemente */
+  --mint: #00ffaa;
+  --cyan: #22d3ee;
+  --amber: #ffb020;
+  --line: rgba(0, 255, 170, 0.16);
+  --line2: rgba(0, 255, 170, 0.34);
+  --glow: rgba(0, 255, 170, 0.5);
+  --panel: rgba(0, 255, 170, 0.02);
+  --mono: 'JetBrains Mono', monospace;
 }
 
 * {
@@ -27,10 +37,26 @@
 
 body {
   font-family: 'Inter', sans-serif;
-  background: var(--bg-primary);
+  background-color: var(--bg-primary);
+  /* FUI-Signatur: dezentes Grid + Scanlines (fix, wie Landing Page) */
+  background-image:
+    repeating-linear-gradient(0deg, transparent 0, transparent 2px, rgba(0, 255, 170, 0.012) 3px, transparent 4px),
+    linear-gradient(rgba(0, 255, 170, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 170, 0.035) 1px, transparent 1px);
+  background-size: auto, 50px 50px, 50px 50px;
+  background-attachment: fixed;
   color: var(--text-primary);
   min-height: 100vh;
   line-height: 1.6;
+}
+
+/* Display-Typo (konsistent mit der Landing Page) */
+h1, h2,
+.login-container h1,
+.page-header h1,
+.modal-header h2 {
+  font-family: 'Space Grotesk', sans-serif;
+  letter-spacing: -0.02em;
 }
 
 .hidden {
@@ -106,7 +132,7 @@ body {
 .form-group select:focus {
   outline: none;
   border-color: var(--accent-secondary);
-  box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+  box-shadow: 0 0 0 3px rgba(0, 255, 170, 0.1);
 }
 
 .error-message {
@@ -138,13 +164,15 @@ body {
   justify-content: center;
   gap: 8px;
   padding: 14px 24px;
-  background: linear-gradient(135deg, var(--accent-secondary), #0099cc);
-  color: #fff;
+  background: var(--accent);
+  color: #000;
   border: none;
-  border-radius: 10px;
+  border-radius: 0;
+  clip-path: polygon(9px 0, 100% 0, 100% calc(100% - 9px), calc(100% - 9px) 100%, 0 100%, 0 9px);
   font-family: inherit;
   font-size: 0.95rem;
   font-weight: 600;
+  letter-spacing: 0.01em;
   cursor: pointer;
   transition: all 0.3s ease;
   text-decoration: none;
@@ -153,7 +181,7 @@ body {
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0, 212, 255, 0.3);
+  box-shadow: 0 8px 20px rgba(0, 255, 170, 0.3);
 }
 
 .btn-secondary {
@@ -299,7 +327,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 212, 255, 0.1);
+  background: rgba(0, 255, 170, 0.1);
   border-radius: 14px;
   font-size: 1.8rem;
 }
@@ -349,7 +377,7 @@ body {
 }
 
 .request-status.in_progress {
-  background: rgba(0, 212, 255, 0.15);
+  background: rgba(0, 255, 170, 0.15);
   color: var(--accent-secondary);
 }
 
@@ -385,8 +413,8 @@ body {
 .progress-section {
   margin-top: 14px;
   padding: 14px;
-  background: linear-gradient(135deg, rgba(0, 212, 255, 0.08) 0%, rgba(0, 212, 255, 0.02) 100%);
-  border: 1px solid rgba(0, 212, 255, 0.2);
+  background: linear-gradient(135deg, rgba(0, 255, 170, 0.08) 0%, rgba(0, 255, 170, 0.02) 100%);
+  border: 1px solid rgba(0, 255, 170, 0.2);
   border-radius: 12px;
 }
 
@@ -420,7 +448,7 @@ body {
 
 .progress-bar-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--accent-secondary), #00ff88);
+  background: linear-gradient(90deg, var(--cyan), var(--mint));
   border-radius: 4px;
   transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
@@ -504,8 +532,8 @@ body {
 
 /* ==================== PROGRESS CARD (Detail View) ==================== */
 .progress-card {
-  background: linear-gradient(145deg, var(--bg-secondary) 0%, rgba(0, 212, 255, 0.05) 100%);
-  border: 1px solid rgba(0, 212, 255, 0.25);
+  background: linear-gradient(145deg, var(--bg-secondary) 0%, rgba(0, 255, 170, 0.05) 100%);
+  border: 1px solid rgba(0, 255, 170, 0.25);
   border-radius: 16px;
   padding: 20px;
   margin-bottom: 20px;
@@ -537,7 +565,7 @@ body {
   font-size: 1.5rem;
   font-weight: 700;
   color: var(--accent-secondary);
-  text-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
+  text-shadow: 0 0 20px rgba(0, 255, 170, 0.4);
 }
 
 .progress-card-bar {
@@ -551,11 +579,11 @@ body {
 
 .progress-card-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--accent-secondary), #00ff88);
+  background: linear-gradient(90deg, var(--cyan), var(--mint));
   border-radius: 6px;
   transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
-  box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
+  box-shadow: 0 0 15px rgba(0, 255, 170, 0.4);
 }
 
 .progress-card-milestones {
@@ -574,7 +602,7 @@ body {
 .progress-card-milestones span.active {
   color: var(--accent-secondary);
   font-weight: 600;
-  background: rgba(0, 212, 255, 0.1);
+  background: rgba(0, 255, 170, 0.1);
 }
 
 /* ==================== DEADLINE CARD (Detail View) ==================== */
@@ -759,8 +787,8 @@ body {
 }
 
 .chat-message.customer {
-  background: rgba(0, 212, 255, 0.1);
-  border: 1px solid rgba(0, 212, 255, 0.2);
+  background: rgba(0, 255, 170, 0.1);
+  border: 1px solid rgba(0, 255, 170, 0.2);
   margin-left: auto;
   border-bottom-right-radius: 4px;
 }
@@ -857,7 +885,7 @@ body {
 
 .pdf-preview i {
   font-size: 2.5rem;
-  color: #ff4444;
+  color: #ff4d5e;
 }
 
 .pdf-preview span {
@@ -1144,7 +1172,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 212, 255, 0.1);
+  background: rgba(0, 255, 170, 0.1);
   border-radius: 10px;
   color: var(--accent-secondary);
   font-size: 1.1rem;
@@ -1529,7 +1557,7 @@ body {
 
 .appointment-status.pending {
   background: rgba(255, 170, 0, 0.15);
-  color: #ffaa00;
+  color: #ffb020;
 }
 
 .appointment-status.confirmed {
@@ -1539,11 +1567,11 @@ body {
 
 .appointment-status.cancelled {
   background: rgba(255, 68, 68, 0.15);
-  color: #ff4444;
+  color: #ff4d5e;
 }
 
 .appointment-status.completed {
-  background: rgba(0, 212, 255, 0.15);
+  background: rgba(0, 255, 170, 0.15);
   color: var(--accent-secondary);
 }
 
@@ -1624,7 +1652,7 @@ body {
 .faq-category {
   display: inline-block;
   padding: 4px 10px;
-  background: rgba(0, 212, 255, 0.1);
+  background: rgba(0, 255, 170, 0.1);
   color: var(--accent-secondary);
   border-radius: 20px;
   font-size: 0.7rem;
