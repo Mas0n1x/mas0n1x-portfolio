@@ -226,7 +226,6 @@ async function openRequest(id) {
 
     loadMessages(id);
     loadDocuments(id);
-    initReviewSection(id, request.status);
   } catch (e) {
     alert(e.message);
   }
@@ -835,49 +834,28 @@ function switchView(view) {
   }
 }
 
-// ==================== FAQ ====================
-async function loadFAQs() {
+// ==================== FAQ (statisch) ====================
+const KUNDE_FAQS = [
+  { question: 'Wie sehe ich den Stand meines Projekts?', answer: 'Unter „Meine Anfragen" siehst du zu jeder Anfrage den aktuellen Status sowie Nachrichten und Zwischenstände von mir.' },
+  { question: 'Wie kann ich dir Dateien schicken?', answer: 'Öffne eine Anfrage und hänge in den Nachrichten direkt Dateien an — ich bekomme sie sofort.' },
+  { question: 'Wie buche ich einen Termin?', answer: 'Im Tab „Termine" wählst du Datum und Uhrzeit für ein Gespräch. Ich bestätige den Termin zeitnah.' },
+  { question: 'Wo finde ich meine Rechnungen?', answer: 'Im Tab „Rechnungen" siehst du alle Rechnungen, kannst sie als PDF drucken und — falls ein Bezahllink hinterlegt ist — direkt bezahlen.' },
+  { question: 'Wie erreiche ich dich am schnellsten?', answer: 'Am besten direkt in der jeweiligen Anfrage per Nachricht — oder per E-Mail an support@mas0n1x.online.' }
+];
+function loadFAQs() {
   const container = document.getElementById('faq-list');
   if (!container) return;
-
-  container.innerHTML = `
-    <div style="text-align: center; padding: 40px;">
-      <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--primary);"></i>
+  container.innerHTML = KUNDE_FAQS.map((faq, index) => `
+    <div class="faq-item" data-faq-id="${index}">
+      <div class="faq-question" onclick="toggleFAQ(${index})">
+        <span>${escapeHtml(faq.question)}</span>
+        <i class="fas fa-chevron-down faq-toggle"></i>
+      </div>
+      <div class="faq-answer">
+        <p>${escapeHtml(faq.answer)}</p>
+      </div>
     </div>
-  `;
-
-  try {
-    const faqs = await api('/faqs');
-
-    if (faqs.length === 0) {
-      container.innerHTML = `
-        <div class="faq-empty">
-          <i class="fas fa-question-circle"></i>
-          <p>Noch keine FAQs vorhanden</p>
-        </div>
-      `;
-      return;
-    }
-
-    container.innerHTML = faqs.map((faq, index) => `
-      <div class="faq-item" data-faq-id="${faq.id}">
-        <div class="faq-question" onclick="toggleFAQ(${index})">
-          <span>${escapeHtml(faq.question)}</span>
-          <i class="fas fa-chevron-down faq-toggle"></i>
-        </div>
-        <div class="faq-answer">
-          <p>${escapeHtml(faq.answer)}</p>
-        </div>
-      </div>
-    `).join('');
-  } catch (e) {
-    container.innerHTML = `
-      <div class="faq-empty">
-        <i class="fas fa-exclamation-triangle"></i>
-        <p>Fehler beim Laden der FAQs</p>
-      </div>
-    `;
-  }
+  `).join('');
 }
 
 function toggleFAQ(index) {

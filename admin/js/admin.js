@@ -137,8 +137,6 @@ document.querySelectorAll('.nav-item[data-section]').forEach(item => {
       loadAnalytics();
     } else if (section === 'appointments') {
       loadAdminAppointments();
-    } else if (section === 'faqs') {
-      loadAdminFAQs();
     } else if (section === 'discord') {
       loadDiscordSection();
     } else if (section === 'projects') {
@@ -4305,14 +4303,8 @@ document.getElementById('faq-modal')?.addEventListener('click', (e) => {
 document.querySelectorAll('.nav-item[data-section]').forEach(item => {
   const existingHandler = item._sectionHandler;
   item.addEventListener('click', () => {
-    if (item.dataset.section === 'reviews') {
-      loadReviews();
-    }
     if (item.dataset.section === 'templates') {
       loadTemplates();
-    }
-    if (item.dataset.section === 'faq' || item.dataset.section === 'faqs') {
-      loadFaqs();
     }
     if (item.dataset.section === 'contracts') {
       loadContractTemplates();
@@ -4979,21 +4971,19 @@ async function deleteBackup(filename) {
 async function loadBackupSettings() {
   try {
     const settings = await api('/settings');
-    document.getElementById('backup-enabled').checked = settings.backup_enabled === 'true';
-    document.getElementById('auto-payment-reminders').checked = settings.auto_payment_reminders === 'true';
+    const el = document.getElementById('auto-payment-reminders');
+    if (el) el.checked = settings.auto_payment_reminders === 'true';
   } catch (e) {
     // Settings not found
   }
 }
 
 async function saveBackupSettings() {
-  const backup_enabled = document.getElementById('backup-enabled').checked.toString();
   const auto_payment_reminders = document.getElementById('auto-payment-reminders').checked.toString();
-
   try {
     await api('/settings', {
       method: 'POST',
-      body: { backup_enabled, auto_payment_reminders }
+      body: { auto_payment_reminders }
     });
     showToast('Einstellungen gespeichert!', 'success');
   } catch (e) {

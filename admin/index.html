@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="css/admin.css?v=23">
+  <link rel="stylesheet" href="css/admin.css?v=24">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
@@ -74,12 +74,6 @@
         </a>
         <a href="#" class="nav-item" data-section="services">
           <i class="fas fa-cogs"></i> Services
-        </a>
-        <a href="#" class="nav-item" data-section="reviews">
-          <i class="fas fa-star"></i> Bewertungen
-        </a>
-        <a href="#" class="nav-item" data-section="faqs">
-          <i class="fas fa-question-circle"></i> FAQs
         </a>
 
         <div class="nav-category">Finanzen</div>
@@ -861,45 +855,6 @@
         </div>
       </section>
 
-      <!-- Reviews Section -->
-      <section id="section-reviews" class="content-section">
-        <div class="section-header">
-          <h1><i class="fas fa-star"></i> Kundenbewertungen</h1>
-        </div>
-        <div class="info-box">
-          <i class="fas fa-info-circle"></i>
-          <span>Verwalte Kundenbewertungen. Genehmigte Bewertungen können auf der Portfolio-Seite angezeigt werden.</span>
-        </div>
-
-        <!-- Reviews Stats -->
-        <div class="dashboard-stats" style="margin-bottom: 24px;">
-          <div class="stat-card primary">
-            <div class="stat-icon"><i class="fas fa-star"></i></div>
-            <div class="stat-info">
-              <span class="stat-value" id="total-reviews">0</span>
-              <span class="stat-label">Bewertungen</span>
-            </div>
-          </div>
-          <div class="stat-card warning">
-            <div class="stat-icon"><i class="fas fa-clock"></i></div>
-            <div class="stat-info">
-              <span class="stat-value" id="pending-reviews">0</span>
-              <span class="stat-label">Ausstehend</span>
-            </div>
-          </div>
-          <div class="stat-card info">
-            <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
-            <div class="stat-info">
-              <span class="stat-value" id="avg-rating">-</span>
-              <span class="stat-label">Durchschnitt</span>
-            </div>
-          </div>
-        </div>
-
-        <div id="reviews-list" class="reviews-list">
-          <!-- Reviews loaded dynamically -->
-        </div>
-      </section>
 
       <!-- Templates Section -->
       <section id="section-templates" class="content-section">
@@ -1020,15 +975,9 @@
           <span>Verwalte manuelle und automatische Backups deiner Datenbank. Automatische Backups werden täglich erstellt wenn aktiviert.</span>
         </div>
 
-        <!-- Backup Settings -->
+        <!-- Zahlungserinnerungen (Backup-Automatik liegt unter Einstellungen → Daten & Backup) -->
         <div class="settings-card" style="margin-bottom: 24px;">
-          <h3><i class="fas fa-cog"></i> Automatisierung</h3>
-          <div class="form-group">
-            <label class="checkbox-label">
-              <input type="checkbox" id="backup-enabled">
-              <span>Automatische tägliche Backups aktivieren</span>
-            </label>
-          </div>
+          <h3><i class="fas fa-bell"></i> Zahlungserinnerungen</h3>
           <div class="form-group">
             <label class="checkbox-label">
               <input type="checkbox" id="auto-payment-reminders">
@@ -1036,7 +985,7 @@
             </label>
           </div>
           <button id="save-backup-settings-btn" class="btn-primary" style="margin-top: 10px;">
-            <i class="fas fa-save"></i> Einstellungen speichern
+            <i class="fas fa-save"></i> Speichern
           </button>
         </div>
 
@@ -1815,75 +1764,7 @@
         </div>
       </section>
 
-      <!-- FAQs Section -->
-      <section id="section-faqs" class="content-section">
-        <div class="section-header">
-          <h1><i class="fas fa-question-circle"></i> FAQ-Verwaltung</h1>
-          <button id="add-faq-btn" class="btn-primary">
-            <i class="fas fa-plus"></i> Neue FAQ
-          </button>
-        </div>
-        <div class="info-box">
-          <i class="fas fa-info-circle"></i>
-          <span>FAQs werden im Kundenportal angezeigt. Ordne sie nach Wichtigkeit mit Drag & Drop.</span>
-        </div>
 
-        <!-- FAQ Stats -->
-        <div class="dashboard-stats" style="margin-bottom: 24px;">
-          <div class="stat-card primary">
-            <div class="stat-icon"><i class="fas fa-question-circle"></i></div>
-            <div class="stat-info">
-              <span class="stat-value" id="total-faqs">0</span>
-              <span class="stat-label">FAQs</span>
-            </div>
-          </div>
-          <div class="stat-card success">
-            <div class="stat-icon"><i class="fas fa-eye"></i></div>
-            <div class="stat-info">
-              <span class="stat-value" id="active-faqs">0</span>
-              <span class="stat-label">Aktiv</span>
-            </div>
-          </div>
-        </div>
-
-        <div id="faq-list" class="faqs-admin-list">
-          <!-- FAQs loaded dynamically -->
-        </div>
-      </section>
-
-      <!-- FAQ Modal -->
-      <div id="faq-modal" class="modal">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h2 id="faq-modal-title">Neue FAQ</h2>
-            <button class="modal-close" data-close-modal>
-              <i class="fas fa-times"></i>
-            </button>
-          </div>
-          <div class="modal-body">
-            <input type="hidden" id="faq-id">
-            <div class="form-group">
-              <label for="faq-question">Frage</label>
-              <input type="text" id="faq-question" placeholder="z.B. Wie lange dauert ein Projekt?">
-            </div>
-            <div class="form-group">
-              <label for="faq-answer">Antwort</label>
-              <textarea id="faq-answer" rows="6" placeholder="Ausführliche Antwort..."></textarea>
-            </div>
-            <div class="form-group">
-              <label>
-                <input type="checkbox" id="faq-active" checked>
-                Aktiv (im Kundenportal sichtbar)
-              </label>
-            </div>
-            <div class="modal-footer">
-              <button id="save-faq-btn" class="btn-primary">
-                <i class="fas fa-save"></i> Speichern
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
 
       <!-- Appointments Section -->
       <section id="section-appointments" class="content-section">
@@ -2416,6 +2297,6 @@
     </div>
   </div>
 
-  <script src="js/admin.js?v=23"></script>
+  <script src="js/admin.js?v=24"></script>
 </body>
 </html>
