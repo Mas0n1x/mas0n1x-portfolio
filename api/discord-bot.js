@@ -1219,15 +1219,35 @@ class DiscordBot {
 
   // ── Aktive Projekte (Components V2) ───────────────────────────
 
+  // Letzte Repos (eigener Account + Org) nach Aktivitaet, live von der GitHub-API
+  async fetchRecentRepos(limit = 5) {
+    const token = process.env.GITHUB_TOKEN;
+    if (!token) return [];
+    try {
+      const r = await fetch('https://api.github.com/user/repos?per_page=' + limit + '&affiliation=owner,organization_member&sort=pushed', {
+        headers: { Authorization: 'Bearer ' + token, Accept: 'application/vnd.github+json', 'User-Agent': 'mas0n1x-portfolio', 'X-GitHub-Api-Version': '2022-11-28' }
+      });
+      if (!r.ok) return [];
+      return await r.json();
+    } catch (e) { console.error('fetchRecentRepos:', e.message); return []; }
+  }
+  _relTime(iso) {
+    const d = Date.parse(iso); if (isNaN(d)) return '';
+    const s = Math.floor((Date.now() - d) / 1000);
+    if (s < 3600) return 'vor wenigen Minuten';
+    const h = Math.floor(s / 3600); if (h < 24) return `vor ${h} Std.`;
+    const dd = Math.floor(h / 24); if (dd < 30) return `vor ${dd} Tag${dd === 1 ? '' : 'en'}`;
+    const mo = Math.floor(dd / 30); if (mo < 12) return `vor ${mo} Monat${mo === 1 ? '' : 'en'}`;
+    return `vor ${Math.floor(mo / 12)} Jahr(en)`;
+  }
+
   async sendActiveProjectsEmbed(channelId) {
     if (!this.client || !this.isConnected) throw new Error('Bot nicht verbunden');
 
     const channel = await this.client.channels.fetch(channelId);
     if (!channel) throw new Error('Channel nicht gefunden');
 
-    const projects = this.dbAll(
-      "SELECT * FROM projects WHERE status = 'active' ORDER BY sort_order ASC, id DESC"
-    );
+    const repos = await this.fetchRecentRepos(5);
 
     const sentMessages = [];
 
@@ -1236,8 +1256,8 @@ class DiscordBot {
       .setAccentColor(0x00ff88);
     headerContainer.addTextDisplayComponents(
       new TextDisplayBuilder().setContent(
-        '# 🚀 Aktive Projekte\n' +
-        'Ein Blick auf die Projekte, an denen aktuell gearbeitet wird.'
+        '# 🚀 Letzte GitHub-Aktivität\n' +
+        'Die Repositories, an denen ich zuletzt gearbeitet habe.'
       )
     );
     const headerMsg = await channel.send({
@@ -1246,11 +1266,11 @@ class DiscordBot {
     });
     sentMessages.push(headerMsg.id);
 
-    if (!projects || projects.length === 0) {
+    if (!repos || repos.length === 0) {
       const emptyContainer = new ContainerBuilder()
         .setAccentColor(0xffaa00);
       emptyContainer.addTextDisplayComponents(
-        new TextDisplayBuilder().setContent('_Aktuell sind keine Projekte als aktiv markiert._')
+        new TextDisplayBuilder().setContent('_Aktuell keine GitHub-Aktivität abrufbar._')
       );
       const emptyMsg = await channel.send({
         components: [emptyContainer],
@@ -1261,42 +1281,35 @@ class DiscordBot {
       return sentMessages;
     }
 
-    // Jedes aktive Projekt als eigener Container
-    for (const project of projects) {
+    // Jedes Repo als eigener Container
+    for (const repo of repos) {
       const container = new ContainerBuilder()
         .setAccentColor(0x00ff88);
 
+      const privTag = repo.private ? ' 🔒' : '';
       container.addTextDisplayComponents(
-        new TextDisplayBuilder().setContent(`## ${project.title}`)
+        new TextDisplayBuilder().setContent(`## ${repo.name}${privTag}`)
       );
 
-      if (project.description) {
+      if (repo.description) {
         container.addTextDisplayComponents(
-          new TextDisplayBuilder().setContent(project.description)
+          new TextDisplayBuilder().setContent(repo.description)
         );
       }
 
       container.addSeparatorComponents(new SeparatorBuilder().setDivider(true));
 
-      // Fortschrittsbalken
-      const progress = Math.max(0, Math.min(100, parseInt(project.progress, 10) || 0));
-      const filled = Math.round(progress / 10);
-      const bar = '█'.repeat(filled) + '░'.repeat(10 - filled);
-      let detailsText = `**Fortschritt:** \`${bar}\` ${progress}%`;
-
-      // Tech-Tags
-      const tags = this._parseJSON(project.tags, []);
-      if (tags && tags.length > 0) {
-        detailsText += `\n**Tech:** ${tags.join(' · ')}`;
-      }
-
+      const meta = [];
+      if (repo.language) meta.push(`💻 ${repo.language}`);
+      if (repo.stargazers_count) meta.push(`⭐ ${repo.stargazers_count}`);
+      if (repo.pushed_at) meta.push(`🕒 aktiv ${this._relTime(repo.pushed_at)}`);
       container.addTextDisplayComponents(
-        new TextDisplayBuilder().setContent(detailsText)
+        new TextDisplayBuilder().setContent(meta.join('  ·  ') || '–')
       );
 
-      if (project.link) {
+      if (!repo.private && repo.html_url) {
         container.addTextDisplayComponents(
-          new TextDisplayBuilder().setContent(`🔗 [Projekt ansehen](${project.link})`)
+          new TextDisplayBuilder().setContent(`🔗 [Repository ansehen](${repo.html_url})`)
         );
       }
 
@@ -1322,7 +1335,7 @@ class DiscordBot {
     });
     sentMessages.push(ctaMsg.id);
 
-    this.log('projects', channelId, null, null, { count: projects.length });
+    this.log('projects', channelId, null, null, { count: repos.length });
     return sentMessages;
   }
 
