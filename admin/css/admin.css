@@ -5497,3 +5497,7 @@ body {
 .ic{width:1em;height:1em;display:inline-block;vertical-align:-0.125em;flex-shrink:0;stroke:currentColor;fill:none}
 .ic.spin{animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
+
+.subsec-head{font-family:'Space Grotesk',sans-serif;font-size:1.05rem;font-weight:600;color:var(--text-primary);margin:6px 0 16px;display:flex;align-items:center;gap:9px}
+.subsec-head .ic{color:var(--accent);width:1.1em;height:1.1em}
+.subsec-note{font-family:'Inter',sans-serif;font-size:.8rem;font-weight:400;color:var(--text-secondary)}

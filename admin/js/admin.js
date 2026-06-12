@@ -3232,6 +3232,7 @@ document.querySelectorAll('.nav-item[data-section]').forEach(item => {
     }
     if (item.dataset.section === 'bookings') {
       loadBookings();
+      loadAdminAppointments();
     }
     if (item.dataset.section === 'invoices') {
       setTimeout(() => {

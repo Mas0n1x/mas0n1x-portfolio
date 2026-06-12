@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/admin.css?v=29">
+  <link rel="stylesheet" href="css/admin.css?v=30">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
@@ -538,7 +538,57 @@
 
       <!-- Bookings Section -->
       <section id="section-bookings" class="content-section">
-        <div class="section-header"><h1><svg class="ic"><use href="#fa-calendar-check"></use></svg> Terminbuchungen</h1></div>
+        <div class="section-header"><h1><svg class="ic"><use href="#fa-calendar-check"></use></svg> Termine</h1></div>
+
+        <h2 class="subsec-head"><svg class="ic"><use href="#fa-id-card"></use></svg> Kundentermine <span class="subsec-note">aus dem Kundenportal</span></h2>
+        <div class="info-box">
+          <svg class="ic"><use href="#fa-info-circle"></use></svg>
+          <span>Verwalte hier alle Kundentermine. Bestätige oder lehne Terminanfragen ab.</span>
+        </div>
+
+        <!-- Appointment Stats -->
+        <div class="dashboard-stats" style="margin-bottom: 24px;">
+          <div class="stat-card warning">
+            <div class="stat-icon"><svg class="ic"><use href="#fa-clock"></use></svg></div>
+            <div class="stat-info">
+              <span class="stat-value" id="pending-appointments">0</span>
+              <span class="stat-label">Ausstehend</span>
+            </div>
+          </div>
+          <div class="stat-card success">
+            <div class="stat-icon"><svg class="ic"><use href="#fa-check"></use></svg></div>
+            <div class="stat-info">
+              <span class="stat-value" id="confirmed-appointments">0</span>
+              <span class="stat-label">Bestätigt</span>
+            </div>
+          </div>
+          <div class="stat-card primary">
+            <div class="stat-icon"><svg class="ic"><use href="#fa-calendar"></use></svg></div>
+            <div class="stat-info">
+              <span class="stat-value" id="upcoming-appointments">0</span>
+              <span class="stat-label">Diese Woche</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Appointment Filters -->
+        <div class="appointment-filters">
+          <button class="filter-btn active" data-filter="pending">
+            <svg class="ic"><use href="#fa-clock"></use></svg> Ausstehend
+          </button>
+          <button class="filter-btn" data-filter="confirmed">
+            <svg class="ic"><use href="#fa-check"></use></svg> Bestätigt
+          </button>
+          <button class="filter-btn" data-filter="all">
+            <svg class="ic"><use href="#fa-list"></use></svg> Alle
+          </button>
+        </div>
+
+        <div id="appointments-admin-list" class="appointments-admin-list">
+          <!-- Appointments loaded dynamically -->
+        </div>
+
+        <h2 class="subsec-head" style="margin-top:32px"><svg class="ic"><use href="#fa-comments"></use></svg> Erstgespräch-Anfragen <span class="subsec-note">von der Website (15-Min-Gespräch)</span></h2>
         <div id="bookings-list" class="bookings-list"></div>
       </section>
 
@@ -1686,57 +1736,7 @@
 
 
       <!-- Appointments Section -->
-      <section id="section-appointments" class="content-section">
-        <div class="section-header">
-          <h1><svg class="ic"><use href="#fa-calendar-check"></use></svg> Terminverwaltung</h1>
-        </div>
-        <div class="info-box">
-          <svg class="ic"><use href="#fa-info-circle"></use></svg>
-          <span>Verwalte hier alle Kundentermine. Bestätige oder lehne Terminanfragen ab.</span>
-        </div>
-
-        <!-- Appointment Stats -->
-        <div class="dashboard-stats" style="margin-bottom: 24px;">
-          <div class="stat-card warning">
-            <div class="stat-icon"><svg class="ic"><use href="#fa-clock"></use></svg></div>
-            <div class="stat-info">
-              <span class="stat-value" id="pending-appointments">0</span>
-              <span class="stat-label">Ausstehend</span>
-            </div>
-          </div>
-          <div class="stat-card success">
-            <div class="stat-icon"><svg class="ic"><use href="#fa-check"></use></svg></div>
-            <div class="stat-info">
-              <span class="stat-value" id="confirmed-appointments">0</span>
-              <span class="stat-label">Bestätigt</span>
-            </div>
-          </div>
-          <div class="stat-card primary">
-            <div class="stat-icon"><svg class="ic"><use href="#fa-calendar"></use></svg></div>
-            <div class="stat-info">
-              <span class="stat-value" id="upcoming-appointments">0</span>
-              <span class="stat-label">Diese Woche</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Appointment Filters -->
-        <div class="appointment-filters">
-          <button class="filter-btn active" data-filter="pending">
-            <svg class="ic"><use href="#fa-clock"></use></svg> Ausstehend
-          </button>
-          <button class="filter-btn" data-filter="confirmed">
-            <svg class="ic"><use href="#fa-check"></use></svg> Bestätigt
-          </button>
-          <button class="filter-btn" data-filter="all">
-            <svg class="ic"><use href="#fa-list"></use></svg> Alle
-          </button>
-        </div>
-
-        <div id="appointments-admin-list" class="appointments-admin-list">
-          <!-- Appointments loaded dynamically -->
-        </div>
-      </section>
+      
 
       <!-- Settings Section -->
       <section id="section-settings" class="content-section">
@@ -2448,6 +2448,6 @@
     </div>
   </div>
 
-  <script src="js/admin.js?v=32"></script>
+  <script src="js/admin.js?v=33"></script>
 </body>
 </html>
