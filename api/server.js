@@ -1281,6 +1281,8 @@ app.post('/api/email/test', requireAuth, async (req, res) => {
   const smtpUser = dbGet('SELECT value FROM settings WHERE key = ?', ['smtp_user'])?.value;
   const smtpPass = dbGet('SELECT value FROM settings WHERE key = ?', ['smtp_pass'])?.value;
   const fromName = dbGet('SELECT value FROM settings WHERE key = ?', ['smtp_from_name'])?.value || 'Mas0n1x Portfolio';
+  // Absenderadresse separat vom SMTP-User (z.B. Brevo-Relay: User = Login-ID, Absender = echte Adresse)
+  const fromAddr = dbGet('SELECT value FROM settings WHERE key = ?', ['smtp_from'])?.value || smtpUser;
 
   if (!smtpHost || !smtpUser || !smtpPass) {
     return res.status(400).json({ error: 'SMTP-Einstellungen unvollständig. Bitte alle Felder ausfüllen.' });
@@ -1309,7 +1311,7 @@ app.post('/api/email/test', requireAuth, async (req, res) => {
     });
 
     await transporter.sendMail({
-      from: `"${fromName}" <${smtpUser}>`,
+      from: `"${fromName}" <${fromAddr}>`,
       to: to,
       subject: 'Test-E-Mail - Mas0n1x Portfolio',
       html: `
@@ -1339,6 +1341,8 @@ async function sendNotificationEmail(to, subject, htmlContent) {
   const smtpUser = dbGet('SELECT value FROM settings WHERE key = ?', ['smtp_user'])?.value;
   const smtpPass = dbGet('SELECT value FROM settings WHERE key = ?', ['smtp_pass'])?.value;
   const fromName = dbGet('SELECT value FROM settings WHERE key = ?', ['smtp_from_name'])?.value || 'Mas0n1x Portfolio';
+  // Absenderadresse separat vom SMTP-User (z.B. Brevo-Relay: User = Login-ID, Absender = echte Adresse)
+  const fromAddr = dbGet('SELECT value FROM settings WHERE key = ?', ['smtp_from'])?.value || smtpUser;
 
   if (!smtpHost || !smtpUser || !smtpPass) return false;
 
@@ -1352,7 +1356,7 @@ async function sendNotificationEmail(to, subject, htmlContent) {
     });
 
     await transporter.sendMail({
-      from: `"${fromName}" <${smtpUser}>`,
+      from: `"${fromName}" <${fromAddr}>`,
       to,
       subject,
       html: htmlContent

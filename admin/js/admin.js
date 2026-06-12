@@ -3572,6 +3572,7 @@ async function loadEmailSettings() {
     document.getElementById('smtp-user').value = settings.smtp_user || '';
     document.getElementById('smtp-pass').value = settings.smtp_pass || '';
     document.getElementById('smtp-from-name').value = settings.smtp_from_name || '';
+    document.getElementById('smtp-from').value = settings.smtp_from || '';
 
     document.getElementById('notify-new-message').checked = settings.notify_new_message !== 'false';
     document.getElementById('notify-new-request').checked = settings.notify_new_request !== 'false';
@@ -3604,6 +3605,7 @@ document.getElementById('save-email-settings-btn')?.addEventListener('click', as
     smtp_user: document.getElementById('smtp-user').value,
     smtp_pass: document.getElementById('smtp-pass').value,
     smtp_from_name: document.getElementById('smtp-from-name').value,
+    smtp_from: document.getElementById('smtp-from').value,
     notify_new_message: document.getElementById('notify-new-message').checked.toString(),
     notify_new_request: document.getElementById('notify-new-request').checked.toString(),
     notify_status_change: document.getElementById('notify-status-change').checked.toString(),

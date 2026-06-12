@@ -2119,17 +2119,23 @@
             </div>
             <div class="form-row">
               <div class="form-group">
-                <label>Benutzername / E-Mail</label>
-                <input type="email" id="smtp-user" placeholder="deine@email.de">
+                <label>Benutzername / Login-ID</label>
+                <input type="text" id="smtp-user" placeholder="z.B. Brevo-Login-ID">
               </div>
               <div class="form-group">
-                <label>Passwort / App-Passwort</label>
+                <label>Passwort / SMTP-Key</label>
                 <input type="password" id="smtp-pass" placeholder="********">
               </div>
             </div>
-            <div class="form-group">
-              <label>Absender-Name</label>
-              <input type="text" id="smtp-from-name" placeholder="Mas0n1x Portfolio">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Absender-Name</label>
+                <input type="text" id="smtp-from-name" placeholder="Mas0n1x">
+              </div>
+              <div class="form-group">
+                <label>Absender-Adresse</label>
+                <input type="email" id="smtp-from" placeholder="support@mas0n1x.online">
+              </div>
             </div>
 
             <div class="set-divider"></div>
@@ -2552,6 +2558,6 @@
     </div>
   </div>
 
-  <script src="js/admin.js?v=28"></script>
+  <script src="js/admin.js?v=29"></script>
 </body>
 </html>
