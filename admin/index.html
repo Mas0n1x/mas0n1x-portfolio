@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="css/admin.css?v=18">
+  <link rel="stylesheet" href="css/admin.css?v=19">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
@@ -54,6 +54,9 @@
         <div class="nav-category">Übersicht</div>
         <a href="#" class="nav-item active" data-section="dashboard">
           <i class="fas fa-tachometer-alt"></i> Dashboard
+        </a>
+        <a href="#" class="nav-item" data-section="analytics">
+          <i class="fas fa-chart-line"></i> Analytics
         </a>
         <a href="#" class="nav-item" data-section="requests">
           <i class="fas fa-inbox"></i> Anfragen <span id="request-badge" class="nav-badge hidden">0</span>
@@ -242,6 +245,24 @@
             </div>
           </div>
         </div>
+      </section>
+
+      <!-- Analytics Section -->
+      <section id="section-analytics" class="content-section">
+        <div class="section-header"><h1><i class="fas fa-chart-line"></i> Analytics</h1></div>
+        <div class="an-kpis">
+          <div class="an-kpi"><div class="an-kpi-label">Conversion-Rate</div><div class="an-kpi-val" id="an-conversion">–</div><div class="an-kpi-sub" id="an-conversion-sub"></div></div>
+          <div class="an-kpi"><div class="an-kpi-label">Anfragen gesamt</div><div class="an-kpi-val" id="an-total">–</div></div>
+          <div class="an-kpi"><div class="an-kpi-label">Ø Antwortzeit</div><div class="an-kpi-val" id="an-response">–</div></div>
+          <div class="an-kpi"><div class="an-kpi-label">Umsatz (6 Mon.)</div><div class="an-kpi-val" id="an-revenue">–</div></div>
+        </div>
+        <div class="an-grid">
+          <div class="an-card"><div class="set-eyebrow">Verlauf</div><h3>Anfragen pro Monat</h3><div class="an-canvas"><canvas id="an-requests-chart"></canvas></div></div>
+          <div class="an-card"><div class="set-eyebrow">Umsatz</div><h3>Umsatz pro Monat (bezahlt)</h3><div class="an-canvas"><canvas id="an-revenue-chart"></canvas></div></div>
+          <div class="an-card"><div class="set-eyebrow">Verteilung</div><h3>Projekttypen</h3><div class="an-canvas"><canvas id="an-types-chart"></canvas></div></div>
+          <div class="an-card"><div class="set-eyebrow">Pipeline</div><h3>Status-Verteilung</h3><div class="an-canvas"><canvas id="an-status-chart"></canvas></div></div>
+        </div>
+        <div class="an-card"><div class="set-eyebrow">Kunden</div><h3>Top-Kunden</h3><div id="an-customers" class="an-customers"></div></div>
       </section>
 
       <!-- Requests Section -->
@@ -2371,6 +2392,6 @@
     </div>
   </div>
 
-  <script src="js/admin.js?v=18"></script>
+  <script src="js/admin.js?v=19"></script>
 </body>
 </html>

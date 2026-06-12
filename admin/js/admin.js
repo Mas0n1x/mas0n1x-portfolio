@@ -3207,6 +3207,9 @@ document.querySelectorAll('.nav-item[data-section]').forEach(item => {
     if (item.dataset.section === 'dashboard') {
       loadDashboard();
     }
+    if (item.dataset.section === 'analytics') {
+      setTimeout(loadAnalytics, 60);
+    }
     if (item.dataset.section === 'invoices') {
       setTimeout(() => {
         initInvoice();
@@ -3366,6 +3369,49 @@ document.getElementById('save-backup-auto-btn')?.addEventListener('click', async
   try { await api('/settings', { method: 'POST', body }); showToast('Backup-Automatik gespeichert', 'success'); loadBackupAuto(); }
   catch (e) { showToast(e.message || 'Speichern fehlgeschlagen', 'error'); }
 });
+
+// ==================== ANALYTICS ====================
+let anCharts = {};
+async function loadAnalytics() {
+  if (typeof Chart === 'undefined') return;
+  try {
+    const d = await api('/admin/analytics');
+    const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+    set('an-conversion', (d.conversion?.rate || 0) + '%');
+    set('an-conversion-sub', `${d.conversion?.completed || 0} von ${d.conversion?.total || 0} abgeschlossen`);
+    set('an-total', d.conversion?.total || 0);
+    set('an-response', (d.avgResponseTimeHours || 0) + ' Std');
+    const totalRev = (d.revenuePerMonth || []).reduce((s, m) => s + (m.revenue || 0), 0);
+    set('an-revenue', totalRev.toLocaleString('de-DE') + ' €');
+
+    const grid = 'rgba(255,255,255,0.05)';
+    const axis = { ticks: { color: '#8aa39b', font: { size: 10 } }, grid: { color: grid } };
+    const barOpts = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ...axis, grid: { display: false } }, y: { ...axis, beginAtZero: true } } };
+    const mkBar = (id, labels, data, color) => {
+      const c = document.getElementById(id); if (!c) return;
+      if (anCharts[id]) anCharts[id].destroy();
+      anCharts[id] = new Chart(c, { type: 'bar', data: { labels, datasets: [{ data, backgroundColor: color, borderRadius: 6, maxBarThickness: 40 }] }, options: barOpts });
+    };
+    const mkDonut = (id, labels, data) => {
+      const c = document.getElementById(id); if (!c) return;
+      if (anCharts[id]) anCharts[id].destroy();
+      const empty = data.reduce((a, b) => a + b, 0) === 0;
+      anCharts[id] = new Chart(c, { type: 'doughnut', data: { labels, datasets: [{ data: empty ? [1] : data, backgroundColor: empty ? [grid] : ['#00ffaa', '#22d3ee', '#ffb020', '#a78bfa', '#ff4d5e', '#5eead4'], borderWidth: 0, hoverOffset: 6 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '62%', plugins: { legend: { position: 'bottom', labels: { color: '#8aa39b', font: { size: 11 }, padding: 12, boxWidth: 12 } }, tooltip: { enabled: !empty } } } });
+    };
+    const mo = a => (a || []).map(m => m.month);
+    mkBar('an-requests-chart', mo(d.requestsPerMonth), (d.requestsPerMonth || []).map(m => m.count), '#00ffaa');
+    mkBar('an-revenue-chart', mo(d.revenuePerMonth), (d.revenuePerMonth || []).map(m => m.revenue || 0), '#22d3ee');
+    mkDonut('an-types-chart', (d.projectTypes || []).map(t => t.project_type || '–'), (d.projectTypes || []).map(t => t.count));
+    mkDonut('an-status-chart', (d.statusDistribution || []).map(s => s.status || '–'), (d.statusDistribution || []).map(s => s.count));
+
+    const cust = document.getElementById('an-customers');
+    if (cust) {
+      cust.innerHTML = (d.topCustomers || []).filter(c => c.email).map(c =>
+        `<div class="an-cust-row"><div class="an-cust-name">${escapeHtml(c.name || c.email)}${c.company ? ` <small>${escapeHtml(c.company)}</small>` : ''}</div><div class="an-cust-stat"><b>${c.request_count}</b> Anfragen · ${c.completed_count} fertig</div></div>`
+      ).join('') || '<div class="intg-loading">Noch keine Kunden.</div>';
+    }
+  } catch (e) { console.error('Analytics laden:', e); }
+}
 
 // ==================== LOGIN-HISTORIE ====================
 async function loadLoginHistory() {
