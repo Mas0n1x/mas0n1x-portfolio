@@ -3229,6 +3229,7 @@ document.querySelectorAll('.nav-item[data-section]').forEach(item => {
       loadNotifyRouting();
       load2faStatus();
       loadLoginHistory();
+      loadBackupAuto();
     }
   });
 });
@@ -3341,6 +3342,29 @@ document.getElementById('twofa-disable-btn')?.addEventListener('click', async ()
   if (!password) return;
   try { await api('/2fa/disable', { method: 'POST', body: { password } }); showToast('2FA deaktiviert', 'success'); load2faStatus(); }
   catch (e) { showToast(e.message || 'Passwort falsch', 'error'); }
+});
+
+// ==================== BACKUP-AUTOMATIK ====================
+async function loadBackupAuto() {
+  try {
+    const s = await api('/settings');
+    const on = s.backup_auto_enabled === 'true';
+    const en = document.getElementById('backup-auto-enabled'); if (en) en.checked = on;
+    const iv = document.getElementById('backup-interval'); if (iv) iv.value = s.backup_interval || 'daily';
+    const kp = document.getElementById('backup-keep'); if (kp) kp.value = s.backup_keep || '7';
+    const last = document.getElementById('backup-last'); if (last) last.textContent = s.backup_last ? new Date(s.backup_last).toLocaleString('de-DE') : '—';
+    const badge = document.getElementById('backup-auto-badge');
+    if (badge) { badge.textContent = on ? 'An' : 'Aus'; badge.className = 'set-badge ' + (on ? 'on' : 'off'); }
+  } catch (e) { console.error('Backup-Automatik laden:', e); }
+}
+document.getElementById('save-backup-auto-btn')?.addEventListener('click', async () => {
+  const body = {
+    backup_auto_enabled: document.getElementById('backup-auto-enabled').checked ? 'true' : 'false',
+    backup_interval: document.getElementById('backup-interval').value,
+    backup_keep: String(parseInt(document.getElementById('backup-keep').value, 10) || 7)
+  };
+  try { await api('/settings', { method: 'POST', body }); showToast('Backup-Automatik gespeichert', 'success'); loadBackupAuto(); }
+  catch (e) { showToast(e.message || 'Speichern fehlgeschlagen', 'error'); }
 });
 
 // ==================== LOGIN-HISTORIE ====================

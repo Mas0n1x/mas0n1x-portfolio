@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="css/admin.css?v=16">
+  <link rel="stylesheet" href="css/admin.css?v=17">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
@@ -2011,6 +2011,29 @@
             <div class="set-actions"><button id="import-data-btn" class="btn-secondary"><i class="fas fa-file-import"></i> Bestehende Daten importieren</button></div>
           </div>
 
+          <!-- Backup-Automatik -->
+          <div class="set-card">
+            <div class="set-eyebrow">Daten</div>
+            <div class="set-head">
+              <h3><i class="fas fa-clock-rotate-left"></i> Backup-Automatik</h3>
+              <span class="set-badge off" id="backup-auto-badge">Aus</span>
+            </div>
+            <p class="set-desc">Erstellt automatisch Backups der Datenbank nach Zeitplan und räumt alte Backups auf.</p>
+            <div class="form-group">
+              <label class="toggle-switch">
+                <input type="checkbox" id="backup-auto-enabled">
+                <span class="toggle-slider"></span>
+                <span class="toggle-label">Automatische Backups</span>
+              </label>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label for="backup-interval">Intervall</label><select id="backup-interval"><option value="daily">Täglich</option><option value="weekly">Wöchentlich</option></select></div>
+              <div class="form-group"><label for="backup-keep">Aufbewahrung (Anzahl)</label><input type="number" id="backup-keep" min="1" max="100" value="7"></div>
+            </div>
+            <div class="set-hint">Letztes Auto-Backup: <code id="backup-last">—</code></div>
+            <div class="set-actions"><button class="btn-primary" id="save-backup-auto-btn"><i class="fas fa-save"></i> Speichern</button></div>
+          </div>
+
           <!-- Integrationen-Health-Check -->
           <div class="set-card">
             <div class="set-eyebrow">Integrationen</div>
@@ -2348,6 +2371,6 @@
     </div>
   </div>
 
-  <script src="js/admin.js?v=16"></script>
+  <script src="js/admin.js?v=17"></script>
 </body>
 </html>

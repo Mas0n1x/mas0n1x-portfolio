@@ -2850,28 +2850,48 @@ app.get('/api/admin/email-logs', requireAuth, (req, res) => {
 
 // ==================== BACKUP AUTOMATION API ====================
 // Manual backup trigger
-app.post('/api/admin/backup', requireAuth, (req, res) => {
+// ===== Backup-Helfer + Automatik =====
+function createBackup(type) {
+  const backupDir = path.join(__dirname, '..', 'backups');
+  if (!fs.existsSync(backupDir)) fs.mkdirSync(backupDir, { recursive: true });
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+  const filename = `backup-${type}-${timestamp}.db`;
+  const buffer = Buffer.from(db.export());
+  fs.writeFileSync(path.join(backupDir, filename), buffer);
+  dbRun('INSERT INTO backup_logs (filename, size, type) VALUES (?, ?, ?)', [filename, buffer.length, type]);
+  return { filename, size: buffer.length };
+}
+// Aufbewahrung: nur die letzten `keep` Auto-Backups behalten, aeltere (Datei + Log) loeschen
+function pruneAutoBackups(keep) {
   try {
     const backupDir = path.join(__dirname, '..', 'backups');
-    if (!fs.existsSync(backupDir)) {
-      fs.mkdirSync(backupDir, { recursive: true });
-    }
+    const autos = dbAll("SELECT id, filename FROM backup_logs WHERE type = 'auto' ORDER BY id DESC");
+    autos.slice(Math.max(1, keep)).forEach(b => {
+      try { const p = path.join(backupDir, b.filename); if (fs.existsSync(p)) fs.unlinkSync(p); } catch (e) {}
+      dbRun('DELETE FROM backup_logs WHERE id = ?', [b.id]);
+    });
+  } catch (e) { console.error('Backup-Prune:', e.message); }
+}
+// Scheduler: prueft, ob ein automatisches Backup faellig ist (restart-robust via backup_last)
+function checkAutoBackup() {
+  try {
+    if (dbGet("SELECT value FROM settings WHERE key = 'backup_auto_enabled'")?.value !== 'true') return;
+    const interval = dbGet("SELECT value FROM settings WHERE key = 'backup_interval'")?.value || 'daily';
+    const last = dbGet("SELECT value FROM settings WHERE key = 'backup_last'")?.value;
+    const ms = interval === 'weekly' ? 7 * 24 * 3600 * 1000 : 24 * 3600 * 1000;
+    if (last && (Date.now() - Date.parse(last)) < ms) return;
+    createBackup('auto');
+    dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('backup_last', ?)", [new Date().toISOString()]);
+    pruneAutoBackups(parseInt(dbGet("SELECT value FROM settings WHERE key = 'backup_keep'")?.value || '7', 10));
+    console.log('Auto-Backup erstellt');
+  } catch (e) { console.error('Auto-Backup:', e.message); }
+}
+setInterval(checkAutoBackup, 15 * 60 * 1000);
+setTimeout(checkAutoBackup, 30 * 1000);
 
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const filename = `backup-manual-${timestamp}.db`;
-    const backupPath = path.join(backupDir, filename);
-
-    const data = db.export();
-    const buffer = Buffer.from(data);
-    fs.writeFileSync(backupPath, buffer);
-
-    // Log backup
-    dbRun(
-      'INSERT INTO backup_logs (filename, size, type) VALUES (?, ?, ?)',
-      [filename, buffer.length, 'manual']
-    );
-
-    res.json({ success: true, filename, size: buffer.length });
+app.post('/api/admin/backup', requireAuth, (req, res) => {
+  try {
+    res.json({ success: true, ...createBackup('manual') });
   } catch (e) {
     console.error('Backup error:', e);
     res.status(500).json({ error: 'Backup fehlgeschlagen: ' + e.message });
