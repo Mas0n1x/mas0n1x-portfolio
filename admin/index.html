@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/admin.css?v=25">
+  <link rel="stylesheet" href="css/admin.css?v=26">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
@@ -369,9 +369,6 @@
         </a>
 
         <div class="nav-category">System</div>
-        <a href="#" class="nav-item" data-section="legal">
-          <svg class="ic"><use href="#fa-gavel"></use></svg> Rechtliches
-        </a>
         <a href="#" class="nav-item" data-section="settings">
           <svg class="ic"><use href="#fa-sliders-h"></use></svg> Einstellungen
         </a>
@@ -1684,199 +1681,7 @@
       </section>
 
       <!-- Legal Section -->
-      <section id="section-legal" class="content-section">
-        <div class="section-header">
-          <h1><svg class="ic"><use href="#fa-gavel"></use></svg> Rechtliches verwalten</h1>
-        </div>
-        <div class="info-box">
-          <svg class="ic"><use href="#fa-info-circle"></use></svg>
-          <span>Verwalte hier alle rechtlichen Texte für deine Website: Impressum, Datenschutz, AGB und Widerrufsbelehrung.</span>
-        </div>
-
-        <!-- Legal Tabs -->
-        <div class="legal-tabs">
-          <button class="legal-tab active" data-legal-tab="impressum">
-            <svg class="ic"><use href="#fa-id-card"></use></svg> Impressum
-          </button>
-          <button class="legal-tab" data-legal-tab="datenschutz">
-            <svg class="ic"><use href="#fa-shield-alt"></use></svg> Datenschutz
-          </button>
-          <button class="legal-tab" data-legal-tab="agb">
-            <svg class="ic"><use href="#fa-file-contract"></use></svg> AGB
-          </button>
-          <button class="legal-tab" data-legal-tab="widerruf">
-            <svg class="ic"><use href="#fa-undo-alt"></use></svg> Widerruf
-          </button>
-        </div>
-
-        <!-- Impressum Tab -->
-        <div id="legal-impressum-tab" class="legal-tab-content active">
-          <div class="settings-card">
-            <h3><svg class="ic"><use href="#fa-user"></use></svg> Angaben gemäß § 5 TMG</h3>
-            <form id="impressum-form">
-              <div class="form-group">
-                <label>Vollständiger Name</label>
-                <input type="text" id="imp-name" placeholder="Max Mustermann">
-              </div>
-              <div class="form-group">
-                <label>Straße und Hausnummer</label>
-                <input type="text" id="imp-street" placeholder="Musterstraße 1">
-              </div>
-              <div class="form-row">
-                <div class="form-group">
-                  <label>PLZ</label>
-                  <input type="text" id="imp-zip" placeholder="12345">
-                </div>
-                <div class="form-group">
-                  <label>Stadt</label>
-                  <input type="text" id="imp-city" placeholder="Musterstadt">
-                </div>
-              </div>
-              <div class="form-group">
-                <label>Land</label>
-                <input type="text" id="imp-country" placeholder="Deutschland">
-              </div>
-            </form>
-          </div>
-
-          <div class="settings-card">
-            <h3><svg class="ic"><use href="#fa-envelope"></use></svg> Kontakt</h3>
-            <div class="form-row">
-              <div class="form-group">
-                <label>E-Mail</label>
-                <input type="email" id="imp-email" placeholder="mail@example.com">
-              </div>
-              <div class="form-group">
-                <label>Telefon (optional)</label>
-                <input type="tel" id="imp-phone" placeholder="+49 123 456789">
-              </div>
-            </div>
-          </div>
-
-          <div class="settings-card">
-            <h3><svg class="ic"><use href="#fa-briefcase"></use></svg> Geschäftliche Angaben (optional)</h3>
-            <div class="form-group">
-              <label>Umsatzsteuer-ID</label>
-              <input type="text" id="imp-ustid" placeholder="DE123456789">
-            </div>
-            <div class="form-group">
-              <label>Berufsbezeichnung / Tätigkeit</label>
-              <input type="text" id="imp-job" placeholder="Softwareentwickler">
-            </div>
-          </div>
-
-          <div class="settings-card">
-            <h3><svg class="ic"><use href="#fa-shield-alt"></use></svg> Haftungsausschluss</h3>
-            <div class="form-group">
-              <label>Zusätzlicher Text (optional)</label>
-              <textarea id="imp-disclaimer" rows="4" placeholder="Haftung für Inhalte, Links, etc."></textarea>
-            </div>
-          </div>
-
-          <button id="save-impressum-btn" class="btn-primary" style="margin-top: 20px;">
-            <svg class="ic"><use href="#fa-save"></use></svg> Impressum speichern
-          </button>
-        </div>
-
-        <!-- Datenschutz Tab -->
-        <div id="legal-datenschutz-tab" class="legal-tab-content">
-          <div class="settings-card">
-            <div class="legal-info-banner">
-              <svg class="ic"><use href="#fa-info-circle"></use></svg>
-              <div>
-                <strong>Automatische Generierung</strong>
-                <p>Die Datenschutzerklärung wird automatisch basierend auf deinen Impressum-Daten generiert. Du kannst unten einen eigenen Text verwenden, falls du individuelle Anpassungen benötigst.</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="settings-card">
-            <h3><svg class="ic"><use href="#fa-edit"></use></svg> Eigene Datenschutzerklärung (optional)</h3>
-            <div class="form-group">
-              <label>
-                <input type="checkbox" id="datenschutz-custom-toggle">
-                Eigenen Text verwenden
-              </label>
-            </div>
-            <div id="datenschutz-custom-container" class="hidden">
-              <div class="form-group">
-                <label>Eigene Datenschutzerklärung</label>
-                <textarea id="datenschutz-custom" rows="20" placeholder="Geben Sie hier Ihren eigenen Datenschutztext ein..."></textarea>
-              </div>
-            </div>
-          </div>
-
-          <button id="save-datenschutz-btn" class="btn-primary" style="margin-top: 20px;">
-            <svg class="ic"><use href="#fa-save"></use></svg> Datenschutz speichern
-          </button>
-        </div>
-
-        <!-- AGB Tab -->
-        <div id="legal-agb-tab" class="legal-tab-content">
-          <div class="settings-card">
-            <div class="legal-info-banner">
-              <svg class="ic"><use href="#fa-info-circle"></use></svg>
-              <div>
-                <strong>Automatische Generierung</strong>
-                <p>Die AGB werden automatisch für Software-Entwicklungsdienstleistungen generiert. Du kannst unten einen eigenen Text verwenden, falls du individuelle Anpassungen benötigst.</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="settings-card">
-            <h3><svg class="ic"><use href="#fa-edit"></use></svg> Eigene AGB (optional)</h3>
-            <div class="form-group">
-              <label>
-                <input type="checkbox" id="agb-custom-toggle">
-                Eigenen Text verwenden
-              </label>
-            </div>
-            <div id="agb-custom-container" class="hidden">
-              <div class="form-group">
-                <label>Eigene AGB</label>
-                <textarea id="agb-custom" rows="20" placeholder="Geben Sie hier Ihre eigenen AGB ein..."></textarea>
-              </div>
-            </div>
-          </div>
-
-          <button id="save-agb-btn" class="btn-primary" style="margin-top: 20px;">
-            <svg class="ic"><use href="#fa-save"></use></svg> AGB speichern
-          </button>
-        </div>
-
-        <!-- Widerruf Tab -->
-        <div id="legal-widerruf-tab" class="legal-tab-content">
-          <div class="settings-card">
-            <div class="legal-info-banner">
-              <svg class="ic"><use href="#fa-info-circle"></use></svg>
-              <div>
-                <strong>Automatische Generierung</strong>
-                <p>Die Widerrufsbelehrung wird automatisch für Dienstleistungen generiert. Du kannst unten einen eigenen Text verwenden, falls du individuelle Anpassungen benötigst.</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="settings-card">
-            <h3><svg class="ic"><use href="#fa-edit"></use></svg> Eigene Widerrufsbelehrung (optional)</h3>
-            <div class="form-group">
-              <label>
-                <input type="checkbox" id="widerruf-custom-toggle">
-                Eigenen Text verwenden
-              </label>
-            </div>
-            <div id="widerruf-custom-container" class="hidden">
-              <div class="form-group">
-                <label>Eigene Widerrufsbelehrung</label>
-                <textarea id="widerruf-custom" rows="20" placeholder="Geben Sie hier Ihre eigene Widerrufsbelehrung ein..."></textarea>
-              </div>
-            </div>
-          </div>
-
-          <button id="save-widerruf-btn" class="btn-primary" style="margin-top: 20px;">
-            <svg class="ic"><use href="#fa-save"></use></svg> Widerruf speichern
-          </button>
-        </div>
-      </section>
+      
 
       <!-- Analytics Section -->
       <section id="section-analytics" class="content-section">
@@ -2056,6 +1861,7 @@
           <button class="set-nav-btn" data-group="benachrichtigungen"><svg class="ic"><use href="#fa-bell"></use></svg> Benachrichtigungen</button>
           <button class="set-nav-btn" data-group="integrationen"><svg class="ic"><use href="#fa-plug"></use></svg> Integrationen</button>
           <button class="set-nav-btn" data-group="daten"><svg class="ic"><use href="#fa-database"></use></svg> Daten &amp; Backup</button>
+          <button class="set-nav-btn" data-group="rechtliches"><svg class="ic"><use href="#fa-gavel"></use></svg> Rechtliches</button>
         </div>
 
         <div class="set-grid">
@@ -2366,6 +2172,196 @@
           </div>
         </div>
         </div>
+      <div class="set-pane" data-group="rechtliches">
+<div class="info-box">
+          <svg class="ic"><use href="#fa-info-circle"></use></svg>
+          <span>Verwalte hier alle rechtlichen Texte für deine Website: Impressum, Datenschutz, AGB und Widerrufsbelehrung.</span>
+        </div>
+
+        <!-- Legal Tabs -->
+        <div class="legal-tabs">
+          <button class="legal-tab active" data-legal-tab="impressum">
+            <svg class="ic"><use href="#fa-id-card"></use></svg> Impressum
+          </button>
+          <button class="legal-tab" data-legal-tab="datenschutz">
+            <svg class="ic"><use href="#fa-shield-alt"></use></svg> Datenschutz
+          </button>
+          <button class="legal-tab" data-legal-tab="agb">
+            <svg class="ic"><use href="#fa-file-contract"></use></svg> AGB
+          </button>
+          <button class="legal-tab" data-legal-tab="widerruf">
+            <svg class="ic"><use href="#fa-undo-alt"></use></svg> Widerruf
+          </button>
+        </div>
+
+        <!-- Impressum Tab -->
+        <div id="legal-impressum-tab" class="legal-tab-content active">
+          <div class="settings-card">
+            <h3><svg class="ic"><use href="#fa-user"></use></svg> Angaben gemäß § 5 TMG</h3>
+            <form id="impressum-form">
+              <div class="form-group">
+                <label>Vollständiger Name</label>
+                <input type="text" id="imp-name" placeholder="Max Mustermann">
+              </div>
+              <div class="form-group">
+                <label>Straße und Hausnummer</label>
+                <input type="text" id="imp-street" placeholder="Musterstraße 1">
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>PLZ</label>
+                  <input type="text" id="imp-zip" placeholder="12345">
+                </div>
+                <div class="form-group">
+                  <label>Stadt</label>
+                  <input type="text" id="imp-city" placeholder="Musterstadt">
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Land</label>
+                <input type="text" id="imp-country" placeholder="Deutschland">
+              </div>
+            </form>
+          </div>
+
+          <div class="settings-card">
+            <h3><svg class="ic"><use href="#fa-envelope"></use></svg> Kontakt</h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label>E-Mail</label>
+                <input type="email" id="imp-email" placeholder="mail@example.com">
+              </div>
+              <div class="form-group">
+                <label>Telefon (optional)</label>
+                <input type="tel" id="imp-phone" placeholder="+49 123 456789">
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-card">
+            <h3><svg class="ic"><use href="#fa-briefcase"></use></svg> Geschäftliche Angaben (optional)</h3>
+            <div class="form-group">
+              <label>Umsatzsteuer-ID</label>
+              <input type="text" id="imp-ustid" placeholder="DE123456789">
+            </div>
+            <div class="form-group">
+              <label>Berufsbezeichnung / Tätigkeit</label>
+              <input type="text" id="imp-job" placeholder="Softwareentwickler">
+            </div>
+          </div>
+
+          <div class="settings-card">
+            <h3><svg class="ic"><use href="#fa-shield-alt"></use></svg> Haftungsausschluss</h3>
+            <div class="form-group">
+              <label>Zusätzlicher Text (optional)</label>
+              <textarea id="imp-disclaimer" rows="4" placeholder="Haftung für Inhalte, Links, etc."></textarea>
+            </div>
+          </div>
+
+          <button id="save-impressum-btn" class="btn-primary" style="margin-top: 20px;">
+            <svg class="ic"><use href="#fa-save"></use></svg> Impressum speichern
+          </button>
+        </div>
+
+        <!-- Datenschutz Tab -->
+        <div id="legal-datenschutz-tab" class="legal-tab-content">
+          <div class="settings-card">
+            <div class="legal-info-banner">
+              <svg class="ic"><use href="#fa-info-circle"></use></svg>
+              <div>
+                <strong>Automatische Generierung</strong>
+                <p>Die Datenschutzerklärung wird automatisch basierend auf deinen Impressum-Daten generiert. Du kannst unten einen eigenen Text verwenden, falls du individuelle Anpassungen benötigst.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-card">
+            <h3><svg class="ic"><use href="#fa-edit"></use></svg> Eigene Datenschutzerklärung (optional)</h3>
+            <div class="form-group">
+              <label>
+                <input type="checkbox" id="datenschutz-custom-toggle">
+                Eigenen Text verwenden
+              </label>
+            </div>
+            <div id="datenschutz-custom-container" class="hidden">
+              <div class="form-group">
+                <label>Eigene Datenschutzerklärung</label>
+                <textarea id="datenschutz-custom" rows="20" placeholder="Geben Sie hier Ihren eigenen Datenschutztext ein..."></textarea>
+              </div>
+            </div>
+          </div>
+
+          <button id="save-datenschutz-btn" class="btn-primary" style="margin-top: 20px;">
+            <svg class="ic"><use href="#fa-save"></use></svg> Datenschutz speichern
+          </button>
+        </div>
+
+        <!-- AGB Tab -->
+        <div id="legal-agb-tab" class="legal-tab-content">
+          <div class="settings-card">
+            <div class="legal-info-banner">
+              <svg class="ic"><use href="#fa-info-circle"></use></svg>
+              <div>
+                <strong>Automatische Generierung</strong>
+                <p>Die AGB werden automatisch für Software-Entwicklungsdienstleistungen generiert. Du kannst unten einen eigenen Text verwenden, falls du individuelle Anpassungen benötigst.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-card">
+            <h3><svg class="ic"><use href="#fa-edit"></use></svg> Eigene AGB (optional)</h3>
+            <div class="form-group">
+              <label>
+                <input type="checkbox" id="agb-custom-toggle">
+                Eigenen Text verwenden
+              </label>
+            </div>
+            <div id="agb-custom-container" class="hidden">
+              <div class="form-group">
+                <label>Eigene AGB</label>
+                <textarea id="agb-custom" rows="20" placeholder="Geben Sie hier Ihre eigenen AGB ein..."></textarea>
+              </div>
+            </div>
+          </div>
+
+          <button id="save-agb-btn" class="btn-primary" style="margin-top: 20px;">
+            <svg class="ic"><use href="#fa-save"></use></svg> AGB speichern
+          </button>
+        </div>
+
+        <!-- Widerruf Tab -->
+        <div id="legal-widerruf-tab" class="legal-tab-content">
+          <div class="settings-card">
+            <div class="legal-info-banner">
+              <svg class="ic"><use href="#fa-info-circle"></use></svg>
+              <div>
+                <strong>Automatische Generierung</strong>
+                <p>Die Widerrufsbelehrung wird automatisch für Dienstleistungen generiert. Du kannst unten einen eigenen Text verwenden, falls du individuelle Anpassungen benötigst.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-card">
+            <h3><svg class="ic"><use href="#fa-edit"></use></svg> Eigene Widerrufsbelehrung (optional)</h3>
+            <div class="form-group">
+              <label>
+                <input type="checkbox" id="widerruf-custom-toggle">
+                Eigenen Text verwenden
+              </label>
+            </div>
+            <div id="widerruf-custom-container" class="hidden">
+              <div class="form-group">
+                <label>Eigene Widerrufsbelehrung</label>
+                <textarea id="widerruf-custom" rows="20" placeholder="Geben Sie hier Ihre eigene Widerrufsbelehrung ein..."></textarea>
+              </div>
+            </div>
+          </div>
+
+          <button id="save-widerruf-btn" class="btn-primary" style="margin-top: 20px;">
+            <svg class="ic"><use href="#fa-save"></use></svg> Widerruf speichern
+          </button>
+        </div>
+      </div>
       </section>
     </main>
   </div>
@@ -2556,6 +2552,6 @@
     </div>
   </div>
 
-  <script src="js/admin.js?v=27"></script>
+  <script src="js/admin.js?v=28"></script>
 </body>
 </html>

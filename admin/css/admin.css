@@ -759,6 +759,8 @@ body {
 .set-nav-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
 .set-card[data-group]{display:none}
 .set-card[data-group].show{display:block}
+.set-pane[data-group]{display:none}
+.set-pane[data-group].show{display:block}
 .set-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;align-items:start}
 .set-card{position:relative;background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:26px 26px 24px;transition:border-color .25s}
 .set-card:hover{border-color:rgba(0,255,170,.28)}

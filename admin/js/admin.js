@@ -3239,9 +3239,6 @@ document.querySelectorAll('.nav-item[data-section]').forEach(item => {
         initInvoiceTabs();
       }, 100);
     }
-    if (item.dataset.section === 'legal') {
-      loadLegalSettings();
-    }
     if (item.dataset.section === 'customers') {
       loadCustomers();
     }
@@ -3259,6 +3256,7 @@ document.querySelectorAll('.nav-item[data-section]').forEach(item => {
       loadBackups();
       loadBackupSettings();
       loadEmailLogs();
+      loadLegalSettings();
       initSettingsGroups();
     }
   });
@@ -3415,7 +3413,7 @@ function initSettingsGroups() {
 }
 function showSettingsGroup(group) {
   document.querySelectorAll('#section-settings .set-nav-btn').forEach(b => b.classList.toggle('active', b.dataset.group === group));
-  document.querySelectorAll('#section-settings .set-card[data-group]').forEach(c => c.classList.toggle('show', c.dataset.group === group));
+  document.querySelectorAll('#section-settings .set-card[data-group], #section-settings .set-pane[data-group]').forEach(c => c.classList.toggle('show', c.dataset.group === group));
 }
 
 // ==================== ANALYTICS ====================
