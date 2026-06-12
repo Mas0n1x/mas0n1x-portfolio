@@ -37,6 +37,7 @@ services:
       - ./admin:/usr/share/nginx/html/admin:ro
       - ./kunde:/usr/share/nginx/html/kunde:ro
       - ./logo.png:/usr/share/nginx/html/logo.png:ro
+      - ./og-image.png:/usr/share/nginx/html/og-image.png:ro
       - ./custom anwendungen.png:/usr/share/nginx/html/custom anwendungen.png:ro
       - ./custom website.png:/usr/share/nginx/html/custom website.png:ro
       - ./dashboard.png:/usr/share/nginx/html/dashboard.png:ro
