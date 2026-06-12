@@ -1421,7 +1421,8 @@ app.post('/api/customer/review', requireCustomerAuth, (req, res) => {
 
   adminNotify('review', {
     subject: 'Neue Bewertung erhalten',
-    html: `<h2>Neue Bewertung (${esc(rating)}★)</h2><p><b>${esc(title)}</b></p><p>${esc(content)}</p>`
+    html: `<h2>Neue Bewertung (${esc(rating)}★)</h2><p><b>${esc(title)}</b></p><p>${esc(content)}</p>`,
+    discordText: `**${rating}★ — ${String(title || '').substring(0, 200)}**\n${String(content || '').substring(0, 1500)}`
   });
 
   res.json({ success: true });
@@ -1435,10 +1436,16 @@ function notifyAllowed(event, channel, def) {
   if (v === undefined || v === null || v === '') return def;
   return v === 'true';
 }
-function adminNotify(event, { subject, html }) {
-  if (!notifyAllowed(event, 'email', false)) return;
-  const to = dbGet("SELECT value FROM settings WHERE key = 'impressum_email'")?.value;
-  if (to && subject && html) sendNotificationEmail(to, subject, html).catch(e => console.error('Admin-Alert-Mail:', e.message));
+function adminNotify(event, { subject, html, discordText }) {
+  // E-Mail an die Geschaefts-E-Mail
+  if (notifyAllowed(event, 'email', false)) {
+    const to = dbGet("SELECT value FROM settings WHERE key = 'impressum_email'")?.value;
+    if (to && subject && html) sendNotificationEmail(to, subject, html).catch(e => console.error('Admin-Alert-Mail:', e.message));
+  }
+  // Discord-Alert in den Anfragen-Channel
+  if (notifyAllowed(event, 'discord', false) && discordBot && discordBot.sendAlert) {
+    discordBot.sendAlert(subject, discordText || '').catch(e => console.error('Admin-Alert-Discord:', e.message));
+  }
 }
 const esc = s => String(s || '').replace(/[<>&]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]));
 
@@ -1660,7 +1667,8 @@ app.post('/api/requests/:id/messages', requestUpload.single('file'), (req, res) 
   if (senderType === 'customer') {
     adminNotify('message', {
       subject: `Neue Kundennachricht (Anfrage #${requestId})`,
-      html: `<h2>Neue Nachricht zu Anfrage #${requestId}</h2><p>${esc(content)}</p>`
+      html: `<h2>Neue Nachricht zu Anfrage #${requestId}</h2><p>${esc(content)}</p>`,
+      discordText: `Anfrage #${requestId}:\n${String(content || '').substring(0, 1500)}`
     });
   }
 

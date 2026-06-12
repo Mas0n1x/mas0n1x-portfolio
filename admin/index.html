@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="css/admin.css?v=17">
+  <link rel="stylesheet" href="css/admin.css?v=18">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
@@ -2089,12 +2089,12 @@
               <div class="ntf-row">
                 <span class="ntf-evt">Neue Bewertung</span>
                 <label class="ntf-chk"><input type="checkbox" id="notify_review_email"></label>
-                <span class="ntf-na" title="Kein Discord-Sender für dieses Ereignis">—</span>
+                <label class="ntf-chk"><input type="checkbox" id="notify_review_discord"></label>
               </div>
               <div class="ntf-row">
                 <span class="ntf-evt">Neue Kundennachricht</span>
                 <label class="ntf-chk"><input type="checkbox" id="notify_message_email"></label>
-                <span class="ntf-na" title="Kein Discord-Sender für dieses Ereignis">—</span>
+                <label class="ntf-chk"><input type="checkbox" id="notify_message_discord"></label>
               </div>
             </div>
             <div class="set-actions"><button id="save-notify-btn" class="btn-primary"><i class="fas fa-save"></i> Routing speichern</button></div>
@@ -2371,6 +2371,6 @@
     </div>
   </div>
 
-  <script src="js/admin.js?v=17"></script>
+  <script src="js/admin.js?v=18"></script>
 </body>
 </html>

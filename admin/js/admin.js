@@ -3285,7 +3285,7 @@ async function loadIntegrations() {
 document.getElementById('integrations-refresh')?.addEventListener('click', loadIntegrations);
 
 // ==================== BENACHRICHTIGUNGS-ROUTING ====================
-const NOTIFY_KEYS = { notify_request_email: false, notify_request_discord: true, notify_review_email: false, notify_message_email: false };
+const NOTIFY_KEYS = { notify_request_email: false, notify_request_discord: true, notify_review_email: false, notify_review_discord: false, notify_message_email: false, notify_message_discord: false };
 async function loadNotifyRouting() {
   try {
     const s = await api('/settings');

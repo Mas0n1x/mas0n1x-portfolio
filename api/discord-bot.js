@@ -291,6 +291,24 @@ class DiscordBot {
     }
   }
 
+  // Generischer Admin-Alert in den Anfragen-Channel (fuer Bewertungen, Nachrichten, ...)
+  async sendAlert(title, description) {
+    const channelId = this.getConfig('channel_requests');
+    if (!this.client || !this.isConnected || !channelId) return;
+    try {
+      const channel = await this.client.channels.fetch(channelId);
+      if (!channel) return;
+      const embed = new EmbedBuilder()
+        .setTitle(String(title || 'Benachrichtigung').substring(0, 256))
+        .setColor(0x00ffaa)
+        .setTimestamp();
+      if (description) embed.setDescription(String(description).substring(0, 4096));
+      await channel.send({ embeds: [embed] });
+    } catch (e) {
+      console.error('Discord sendAlert error:', e.message);
+    }
+  }
+
   getStatus() {
     if (!this.client || !this.isConnected) {
       return { connected: false, guild: null, memberCount: 0, uptime: 0, ping: 0 };
