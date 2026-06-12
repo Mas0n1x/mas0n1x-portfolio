@@ -3212,6 +3212,9 @@ document.querySelectorAll('.nav-item[data-section]').forEach(item => {
     if (item.dataset.section === 'analytics') {
       setTimeout(loadAnalytics, 60);
     }
+    if (item.dataset.section === 'bookings') {
+      loadBookings();
+    }
     if (item.dataset.section === 'invoices') {
       setTimeout(() => {
         initInvoice();
@@ -3414,6 +3417,33 @@ async function loadAnalytics() {
     }
   } catch (e) { console.error('Analytics laden:', e); }
 }
+
+// ==================== TERMINBUCHUNGEN ====================
+async function loadBookings() {
+  const el = document.getElementById('bookings-list');
+  if (!el) return;
+  try {
+    const rows = await api('/admin/bookings');
+    const badge = document.getElementById('booking-badge');
+    const neu = rows.filter(b => b.status === 'neu').length;
+    if (badge) { if (neu > 0) { badge.textContent = neu; badge.classList.remove('hidden'); } else badge.classList.add('hidden'); }
+    if (!rows.length) { el.innerHTML = '<div class="empty-state"><i class="fas fa-calendar"></i><h3>Keine Buchungen</h3><p>Erstgespräch-Buchungen von der Website erscheinen hier.</p></div>'; return; }
+    const STAT = ['neu', 'bestätigt', 'erledigt', 'abgelehnt'];
+    el.innerHTML = rows.map(b => `<div class="bk-item">
+      <div class="bk-item-main">
+        <div class="bk-item-when"><b>${escapeHtml(b.date)}</b> · ${escapeHtml(b.time_slot)} Uhr</div>
+        <div class="bk-item-who">${escapeHtml(b.name)} · <a href="mailto:${escapeHtml(b.email)}">${escapeHtml(b.email)}</a></div>
+        ${b.message ? `<div class="bk-item-msg">${escapeHtml(b.message)}</div>` : ''}
+      </div>
+      <div class="bk-item-actions">
+        <select class="bk-item-status" onchange="updateBooking(${b.id}, this.value)">${STAT.map(s => `<option value="${s}"${b.status === s ? ' selected' : ''}>${s}</option>`).join('')}</select>
+        <button class="btn-icon danger" onclick="deleteBooking(${b.id})" title="Löschen"><i class="fas fa-trash"></i></button>
+      </div>
+    </div>`).join('');
+  } catch (e) { el.innerHTML = '<div class="empty-state">Buchungen nicht abrufbar.</div>'; }
+}
+async function updateBooking(id, status) { try { await api('/admin/bookings/' + id, { method: 'PUT', body: { status } }); showToast('Status aktualisiert', 'success'); loadBookings(); } catch (e) { showToast('Fehler', 'error'); } }
+async function deleteBooking(id) { if (!confirm('Diese Buchung löschen?')) return; try { await api('/admin/bookings/' + id, { method: 'DELETE' }); showToast('Gelöscht', 'success'); loadBookings(); } catch (e) { showToast('Fehler', 'error'); } }
 
 // ==================== SALES-KANBAN ====================
 const KB_COLS = [

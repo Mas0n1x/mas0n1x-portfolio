@@ -264,6 +264,20 @@ async function initDatabase() {
     )
   `);
 
+  // Oeffentliche Erstgespraech-Buchungen (ohne Kundenkonto)
+  db.run(`
+    CREATE TABLE IF NOT EXISTS bookings (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      email TEXT NOT NULL,
+      date TEXT NOT NULL,
+      time_slot TEXT NOT NULL,
+      message TEXT,
+      status TEXT DEFAULT 'neu',
+      created_at TEXT DEFAULT (datetime('now'))
+    )
+  `);
+
   // Contract templates table
   db.run(`
     CREATE TABLE IF NOT EXISTS contract_templates (
@@ -1437,14 +1451,14 @@ function notifyAllowed(event, channel, def) {
   if (v === undefined || v === null || v === '') return def;
   return v === 'true';
 }
-function adminNotify(event, { subject, html, discordText }) {
+function adminNotify(event, { subject, html, discordText }, def = {}) {
   // E-Mail an die Geschaefts-E-Mail
-  if (notifyAllowed(event, 'email', false)) {
+  if (notifyAllowed(event, 'email', def.email || false)) {
     const to = dbGet("SELECT value FROM settings WHERE key = 'impressum_email'")?.value;
     if (to && subject && html) sendNotificationEmail(to, subject, html).catch(e => console.error('Admin-Alert-Mail:', e.message));
   }
   // Discord-Alert in den Anfragen-Channel
-  if (notifyAllowed(event, 'discord', false) && discordBot && discordBot.sendAlert) {
+  if (notifyAllowed(event, 'discord', def.discord || false) && discordBot && discordBot.sendAlert) {
     discordBot.sendAlert(subject, discordText || '').catch(e => console.error('Admin-Alert-Discord:', e.message));
   }
 }
@@ -2205,17 +2219,58 @@ app.get('/api/appointments/available', (req, res) => {
     return res.status(400).json({ error: 'Datum erforderlich' });
   }
 
-  // Get booked slots for the date
+  // Belegte Slots: Kunden-Termine + oeffentliche Buchungen
   const bookedSlots = dbAll(
     'SELECT time_slot FROM appointments WHERE date = ? AND status != ?',
     [date, 'cancelled']
   ).map(a => a.time_slot);
+  const bookingSlots = dbAll(
+    "SELECT time_slot FROM bookings WHERE date = ? AND status != 'abgelehnt'",
+    [date]
+  ).map(b => b.time_slot);
+  const taken = new Set([...bookedSlots, ...bookingSlots]);
 
-  // Available time slots (9:00 - 18:00, hourly)
   const allSlots = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
-  const availableSlots = allSlots.filter(slot => !bookedSlots.includes(slot));
+  const availableSlots = allSlots.filter(slot => !taken.has(slot));
 
   res.json(availableSlots);
+});
+
+// Oeffentliche Erstgespraech-Buchung (kein Konto noetig)
+app.post('/api/booking', (req, res) => {
+  const { name, email, date, time_slot, message } = req.body;
+  if (!name || !email || !date || !time_slot) return res.status(400).json({ error: 'Name, E-Mail, Datum und Uhrzeit sind erforderlich.' });
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return res.status(400).json({ error: 'Bitte eine gueltige E-Mail angeben.' });
+  const takenA = dbGet("SELECT 1 AS x FROM appointments WHERE date = ? AND time_slot = ? AND status != 'cancelled'", [date, time_slot]);
+  const takenB = dbGet("SELECT 1 AS x FROM bookings WHERE date = ? AND time_slot = ? AND status != 'abgelehnt'", [date, time_slot]);
+  if (takenA || takenB) return res.status(409).json({ error: 'Dieser Termin ist leider schon vergeben.' });
+  const r = dbRun('INSERT INTO bookings (name, email, date, time_slot, message) VALUES (?, ?, ?, ?, ?)',
+    [String(name).slice(0, 120), String(email).slice(0, 160), date, time_slot, String(message || '').slice(0, 2000)]);
+  // Admin-Benachrichtigung (Buchungen immer melden)
+  adminNotify('booking', {
+    subject: 'Neue Terminbuchung',
+    html: `<h2>Neue Terminbuchung</h2><p><b>${esc(name)}</b> (${esc(email)})<br><b>Termin:</b> ${esc(date)} um ${esc(time_slot)} Uhr</p>${message ? `<p>${esc(message)}</p>` : ''}`,
+    discordText: `**${String(name).substring(0, 100)}** — ${date} ${time_slot} Uhr\n${email}${message ? '\n' + String(message).substring(0, 1000) : ''}`
+  }, { email: true, discord: true });
+  // Bestaetigung an den Besucher
+  sendNotificationEmail(email, 'Terminbestätigung — Mas0n1x',
+    `<h2>Danke für deine Buchung!</h2><p>Hallo ${esc(name)},</p><p>dein kostenloses Erstgespräch ist vorgemerkt für <b>${esc(date)} um ${esc(time_slot)} Uhr</b>. Ich melde mich kurz zur Bestätigung.</p><p>— Mas0n1x</p>`
+  ).catch(() => {});
+  res.json({ success: true, id: r.lastInsertRowid });
+});
+
+app.get('/api/admin/bookings', requireAuth, (req, res) => {
+  res.json(dbAll('SELECT * FROM bookings ORDER BY id DESC'));
+});
+
+app.put('/api/admin/bookings/:id', requireAuth, (req, res) => {
+  dbRun('UPDATE bookings SET status = ? WHERE id = ?', [req.body.status || 'neu', parseInt(req.params.id)]);
+  res.json({ success: true });
+});
+
+app.delete('/api/admin/bookings/:id', requireAuth, (req, res) => {
+  dbRun('DELETE FROM bookings WHERE id = ?', [parseInt(req.params.id)]);
+  res.json({ success: true });
 });
 
 // Customer: Book appointment

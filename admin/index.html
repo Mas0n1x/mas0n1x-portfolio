@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="css/admin.css?v=20">
+  <link rel="stylesheet" href="css/admin.css?v=21">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
@@ -57,6 +57,9 @@
         </a>
         <a href="#" class="nav-item" data-section="analytics">
           <i class="fas fa-chart-line"></i> Analytics
+        </a>
+        <a href="#" class="nav-item" data-section="bookings">
+          <i class="fas fa-calendar-check"></i> Termine <span id="booking-badge" class="nav-badge hidden">0</span>
         </a>
         <a href="#" class="nav-item" data-section="requests">
           <i class="fas fa-inbox"></i> Anfragen <span id="request-badge" class="nav-badge hidden">0</span>
@@ -263,6 +266,12 @@
           <div class="an-card"><div class="set-eyebrow">Pipeline</div><h3>Status-Verteilung</h3><div class="an-canvas"><canvas id="an-status-chart"></canvas></div></div>
         </div>
         <div class="an-card"><div class="set-eyebrow">Kunden</div><h3>Top-Kunden</h3><div id="an-customers" class="an-customers"></div></div>
+      </section>
+
+      <!-- Bookings Section -->
+      <section id="section-bookings" class="content-section">
+        <div class="section-header"><h1><i class="fas fa-calendar-check"></i> Terminbuchungen</h1></div>
+        <div id="bookings-list" class="bookings-list"></div>
       </section>
 
       <!-- Requests Section -->
@@ -2393,6 +2402,6 @@
     </div>
   </div>
 
-  <script src="js/admin.js?v=20"></script>
+  <script src="js/admin.js?v=21"></script>
 </body>
 </html>

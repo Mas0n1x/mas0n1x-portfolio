@@ -191,6 +191,19 @@
   .mbox h3{font-family:'Space Grotesk',sans-serif;font-size:1.1rem;margin:18px 0 8px;color:var(--mint)}
   .mbox p{color:var(--text2);line-height:1.7;margin-bottom:8px}
   .mdesc{color:var(--text2);line-height:1.7;margin:14px 0 22px}
+  /* Buchungs-Widget */
+  .bk-form{display:flex;flex-direction:column;gap:14px}
+  .bk-label{display:flex;flex-direction:column;gap:7px;font-family:var(--mono);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--text2)}
+  .bk-form input,.bk-form textarea{background:var(--bg);border:1px solid var(--line);color:var(--text);font-family:'Inter',sans-serif;font-size:.95rem;padding:12px 14px;border-radius:0;clip-path:polygon(7px 0,100% 0,100% calc(100% - 7px),calc(100% - 7px) 100%,0 100%,0 7px)}
+  .bk-form input:focus,.bk-form textarea:focus{outline:none;border-color:var(--mint)}
+  .bk-form input[type=date]{color-scheme:dark}
+  .bk-slots{display:flex;flex-wrap:wrap;gap:8px;min-height:38px}
+  .bk-hint{color:var(--text3);font-size:.82rem;font-family:'Inter',sans-serif;text-transform:none;letter-spacing:0}
+  .bk-slot{background:var(--panel);border:1px solid var(--line);color:var(--text2);font-family:var(--mono);font-size:.82rem;padding:8px 14px;cursor:pointer;transition:.15s}
+  .bk-slot:hover{border-color:var(--line2);color:var(--text)}
+  .bk-slot.sel{background:var(--mint);color:#000;border-color:var(--mint)}
+  .bk-status{font-size:.86rem;margin-top:2px}
+  .bk-status.ok{color:var(--mint)}.bk-status.err{color:var(--amber)}
   /* cookie */
   .cookie{position:fixed;bottom:20px;left:20px;right:20px;max-width:480px;margin:0 auto;z-index:900;background:#06090d;border:1px solid var(--line2);padding:20px 22px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;transform:translateY(140%);transition:transform .5s;clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px))}
   .cookie.show{transform:none}
@@ -353,6 +366,7 @@
     <p>Erzähl mir in 2 Minuten, was du brauchst — ich melde mich mit einer ehrlichen Einschätzung.</p>
     <div class="acts">
       <a href="/projekt-starten.html" class="btn btn-p">Projekt starten <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      <button type="button" class="btn btn-g" onclick="openBooking()">15-Min-Gespräch buchen</button>
       <a href="mailto:support@mas0n1x.online" class="btn btn-g">Direktkanal</a>
     </div>
   </div>
@@ -362,6 +376,21 @@
 
 <div id="dm" class="modal"><div class="mov" onclick="cd()"></div><div class="mbox" data-lenis-prevent><button class="mclose" onclick="cd()" aria-label="Schließen"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button><div id="db"></div></div></div>
 <div id="lm" class="modal"><div class="mov" onclick="cl()"></div><div class="mbox" data-lenis-prevent><button class="mclose" onclick="cl()" aria-label="Schließen"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button><div id="lb"></div></div></div>
+<div id="bm" class="modal"><div class="mov" onclick="cb()"></div><div class="mbox" data-lenis-prevent><button class="mclose" onclick="cb()" aria-label="Schließen"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button>
+  <span class="eyebrow">Kostenlos &amp; unverbindlich</span>
+  <h2 style="font-family:'Space Grotesk',sans-serif;font-size:1.7rem;margin:12px 0 6px">15-Minuten-Erstgespräch</h2>
+  <p class="mdesc">Wähl einen Tag und eine Uhrzeit — wir klären kurz, ob und wie ich dir helfen kann.</p>
+  <div class="bk-form">
+    <label class="bk-label">Tag<input type="date" id="bk-date"></label>
+    <div class="bk-label">Uhrzeit</div>
+    <div id="bk-slots" class="bk-slots"><span class="bk-hint">Bitte zuerst einen Tag wählen.</span></div>
+    <label class="bk-label">Name<input type="text" id="bk-name" placeholder="Dein Name" autocomplete="name"></label>
+    <label class="bk-label">E-Mail<input type="email" id="bk-email" placeholder="dein@mail.de" autocomplete="email"></label>
+    <label class="bk-label">Nachricht (optional)<textarea id="bk-msg" rows="2" placeholder="Worum geht's?"></textarea></label>
+    <button class="btn btn-p" id="bk-submit" onclick="submitBooking()" style="width:100%;justify-content:center">Termin anfragen</button>
+    <p id="bk-status" class="bk-status"></p>
+  </div>
+</div></div>
 
 <div class="cookie" id="cookie"><p>Diese Seite nutzt nur technisch notwendige Daten. Mehr in der <a href="#" data-legal="datenschutz">Datenschutzerklärung</a>.</p><button onclick="okCookie()">Verstanden</button></div>
 
@@ -397,6 +426,13 @@
   async function load(){const g=document.getElementById('arch-grid');try{const r=await fetch('/api/projects');if(!r.ok)throw 0;const ps=await r.json();g.innerHTML=ps.map((p,i)=>{const im=(p.images&&p.images.length)?p.images:(p.image?[{path:p.image}]:[]);const st={in_progress:'IN ARBEIT',completed:'AKTIV',planned:'GEPLANT'}[p.status]||'AKTIV';return `<div class="acard reveal" data-i="${i}"><div class="athumb">${im.length?`<img src="${im[0].path}" alt="${esc(p.title)}" loading="lazy">`:(p.logo?`<img class="alogo" src="${p.logo}" alt="${esc(p.title)}">`:'<svg class="icon ph" aria-hidden="true"><use href="#i-code"/></svg>')}<span class="aidx">// ${String(i+1).padStart(2,'0')}</span><span class="astat">${st}</span></div><div class="abody"><div class="atags">${(p.tags||[]).slice(0,4).map(t=>`<span class="atag">${esc(t)}</span>`).join('')}</div><h3>${esc(p.title)}</h3><p>${esc(p.description||'')}</p>${metaLine(p)}<span class="amore">Details ▸</span></div></div>`;}).join('');g.querySelectorAll('.acard').forEach(c=>c.onclick=()=>od(ps[+c.dataset.i]));updateReveal();}catch(e){g.innerHTML='<p style="color:var(--text3);grid-column:1/-1">Projekte aktuell nicht erreichbar.</p>';}}
   function od(p){if(!p)return;const im=(p.images&&p.images.length)?p.images:(p.image?[{path:p.image}]:[]);const detail=esc(p.detail||p.description||'').replace(/\n/g,'<br>');const code=(p.repo_url&&!p.private)?`<a href="${esc(p.repo_url)}" target="_blank" rel="noopener" class="btn btn-g"><svg class="icon" aria-hidden="true"><use href="#i-github"/></svg> Code</a>`:'';const meta=[p.language,p.stars?('★ '+p.stars):'',p.pushed_at?('aktiv '+relTime(p.pushed_at)):''].filter(Boolean).map(m=>`<span class="atag">${esc(m)}</span>`).join('');document.getElementById('db').innerHTML=`${im.length?`<div class="mgal">${im.map(x=>`<img src="${x.path}" alt="${esc(p.title)}" loading="lazy">`).join('')}</div>`:''}<h2>${esc(p.title)}</h2><div class="atags">${(p.tags||[]).map(t=>`<span class="atag">${esc(t)}</span>`).join('')}${meta}</div><p class="mdesc">${detail}</p><div class="acts" style="display:flex;gap:12px;flex-wrap:wrap">${p.link?`<a href="${esc(p.link)}" target="_blank" rel="noopener" class="btn btn-p">Ansehen <svg class="icon" aria-hidden="true"><use href="#i-ext"/></svg></a>`:''}${code}</div>`;document.getElementById('dm').classList.add('open');document.body.style.overflow='hidden';lenis&&lenis.stop();}
   function cd(){document.getElementById('dm').classList.remove('open');document.body.style.overflow='';lenis&&lenis.start();}
+  // Terminbuchung
+  let bkSlot=null;
+  function openBooking(){const m=document.getElementById('bm');const dt=document.getElementById('bk-date');const tm=new Date();tm.setDate(tm.getDate()+1);dt.min=new Date().toISOString().split('T')[0];dt.value=tm.toISOString().split('T')[0];['bk-name','bk-email','bk-msg'].forEach(id=>document.getElementById(id).value='');const st=document.getElementById('bk-status');st.textContent='';st.className='bk-status';document.getElementById('bk-submit').disabled=false;bkSlot=null;loadBkSlots();m.classList.add('open');document.body.style.overflow='hidden';lenis&&lenis.stop();}
+  function cb(){document.getElementById('bm').classList.remove('open');document.body.style.overflow='';lenis&&lenis.start();}
+  async function loadBkSlots(){const date=document.getElementById('bk-date').value;const wrap=document.getElementById('bk-slots');bkSlot=null;if(!date){wrap.innerHTML='<span class="bk-hint">Bitte zuerst einen Tag wählen.</span>';return;}wrap.innerHTML='<span class="bk-hint">Lade Zeiten …</span>';try{const r=await fetch('/api/appointments/available?date='+encodeURIComponent(date));const slots=await r.json();if(!slots.length){wrap.innerHTML='<span class="bk-hint">Keine freien Zeiten an diesem Tag.</span>';return;}wrap.innerHTML=slots.map(s=>'<button type="button" class="bk-slot" data-slot="'+s+'">'+s+'</button>').join('');wrap.querySelectorAll('.bk-slot').forEach(b=>b.onclick=()=>{wrap.querySelectorAll('.bk-slot').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');bkSlot=b.dataset.slot;});}catch(e){wrap.innerHTML='<span class="bk-hint">Zeiten nicht abrufbar.</span>';}}
+  async function submitBooking(){const st=document.getElementById('bk-status');const name=document.getElementById('bk-name').value.trim();const email=document.getElementById('bk-email').value.trim();const message=document.getElementById('bk-msg').value.trim();const date=document.getElementById('bk-date').value;st.className='bk-status';if(!name||!email||!date||!bkSlot){st.textContent='Bitte Tag, Uhrzeit, Name und E-Mail ausfüllen.';st.classList.add('err');return;}const btn=document.getElementById('bk-submit');btn.disabled=true;try{const r=await fetch('/api/booking',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,date,time_slot:bkSlot,message})});const d=await r.json();if(!r.ok)throw new Error(d.error||'Fehler');st.textContent='✓ Termin angefragt! Du bekommst gleich eine Bestätigung per E-Mail.';st.classList.add('ok');['bk-name','bk-email','bk-msg'].forEach(id=>document.getElementById(id).value='');bkSlot=null;document.querySelectorAll('#bk-slots .bk-slot').forEach(x=>x.classList.remove('sel'));}catch(e){st.textContent=e.message||'Buchung fehlgeschlagen.';st.classList.add('err');btn.disabled=false;}}
+  document.getElementById('bk-date')&&document.getElementById('bk-date').addEventListener('change',loadBkSlots);
   // legal
   let LS=null;async function loadLegal(){if(LS)return LS;try{const r=await fetch('/api/settings');if(r.ok)LS=await r.json();}catch(e){}return LS||{};}
   function f(s,k){return s&&s[k]?esc(s[k]):'';}
