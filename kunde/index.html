@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="css/kunde.css?v=3">
+  <link rel="stylesheet" href="css/kunde.css?v=4">
 </head>
 <body>
   <!-- Login Screen -->
@@ -237,6 +237,19 @@
     </main>
   </div>
 
-  <script src="js/kunde.js?v=3"></script>
+  <!-- Rechnung Detail/Druck -->
+  <div id="invoice-modal" class="iv-modal">
+    <div class="iv-overlay" onclick="closeInvoice()"></div>
+    <div class="iv-box">
+      <div class="iv-actions no-print">
+        <button class="btn-primary" onclick="printInvoice()"><i class="fas fa-print"></i> Drucken / Als PDF</button>
+        <a id="invoice-pay" class="btn-primary pay" href="#" target="_blank" rel="noopener" style="display:none"><i class="fas fa-credit-card"></i> Jetzt bezahlen</a>
+        <button class="btn-secondary" onclick="closeInvoice()">Schließen</button>
+      </div>
+      <div id="invoice-body"></div>
+    </div>
+  </div>
+
+  <script src="js/kunde.js?v=4"></script>
 </body>
 </html>

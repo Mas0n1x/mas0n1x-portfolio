@@ -63,6 +63,8 @@ async function initDatabase() {
   } catch (e) {
     // Column already exists, ignore
   }
+  // Zahlungslink pro Rechnung (Stripe Payment Link / PayPal.me / ...)
+  try { db.run("ALTER TABLE invoices ADD COLUMN payment_link TEXT"); } catch (e) {}
 
   db.run(`
     CREATE TABLE IF NOT EXISTS services (
@@ -1151,12 +1153,15 @@ app.delete('/api/services/:id', requireAuth, (req, res) => {
 // ==================== SETTINGS ROUTES ====================
 
 app.get('/api/settings', (req, res) => {
-  const settings = dbAll('SELECT * FROM settings');
-  const result = {};
-  settings.forEach(s => {
-    result[s.key] = s.value;
+  const all = {};
+  dbAll('SELECT * FROM settings').forEach(s => { all[s.key] = s.value; });
+  // Authentifizierter Admin sieht alles; oeffentlich nur ungefaehrliche Keys (Impressum/Legal)
+  if (req.session && req.session.authenticated) return res.json(all);
+  const pub = {};
+  Object.keys(all).forEach(k => {
+    if (k.startsWith('impressum_') || k === 'datenschutz_custom' || k === 'agb_custom') pub[k] = all[k];
   });
-  res.json(result);
+  res.json(pub);
 });
 
 app.post('/api/settings', requireAuth, (req, res) => {
@@ -1870,12 +1875,12 @@ app.get('/api/invoices', requireAuth, (req, res) => {
 
 // Create invoice
 app.post('/api/invoices', requireAuth, (req, res) => {
-  const { invoice_number, customer_id, customer_name, customer_address, amount, tax, total, status, due_date, notes, items } = req.body;
+  const { invoice_number, customer_id, customer_name, customer_address, amount, tax, total, status, due_date, notes, items, payment_link } = req.body;
 
   const result = dbRun(
-    `INSERT INTO invoices (invoice_number, customer_id, customer_name, customer_address, amount, tax, total, status, due_date, notes, items)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [invoice_number, customer_id || null, customer_name, customer_address, amount, tax, total, status || 'offen', due_date, notes, JSON.stringify(items)]
+    `INSERT INTO invoices (invoice_number, customer_id, customer_name, customer_address, amount, tax, total, status, due_date, notes, items, payment_link)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [invoice_number, customer_id || null, customer_name, customer_address, amount, tax, total, status || 'offen', due_date, notes, JSON.stringify(items), payment_link || null]
   );
 
   // Log activity
@@ -1889,13 +1894,18 @@ app.post('/api/invoices', requireAuth, (req, res) => {
 
 // Update invoice status
 app.put('/api/invoices/:id', requireAuth, (req, res) => {
-  const { status, paid_date } = req.body;
-
+  const { status, paid_date, payment_link } = req.body;
+  const inv = dbGet('SELECT * FROM invoices WHERE id = ?', [req.params.id]);
+  if (!inv) return res.status(404).json({ error: 'Rechnung nicht gefunden' });
   dbRun(
-    'UPDATE invoices SET status = ?, paid_date = ? WHERE id = ?',
-    [status, paid_date || null, req.params.id]
+    'UPDATE invoices SET status = ?, paid_date = ?, payment_link = ? WHERE id = ?',
+    [
+      status !== undefined ? status : inv.status,
+      paid_date !== undefined ? paid_date : inv.paid_date,
+      payment_link !== undefined ? payment_link : inv.payment_link,
+      req.params.id
+    ]
   );
-
   res.json({ success: true });
 });
 
@@ -2365,9 +2375,19 @@ app.get('/api/customer/appointments', requireCustomerAuth, (req, res) => {
 // Rechnungen des eingeloggten Kunden (Self-Service)
 app.get('/api/customer/invoices', requireCustomerAuth, (req, res) => {
   res.json(dbAll(
-    'SELECT id, invoice_number, amount, tax, total, status, due_date, paid_date, created_at FROM invoices WHERE customer_id = ? ORDER BY id DESC',
+    'SELECT id, invoice_number, amount, tax, total, status, due_date, paid_date, payment_link, created_at FROM invoices WHERE customer_id = ? ORDER BY id DESC',
     [req.session.customerId]
   ));
+});
+
+// Einzelne Rechnung des Kunden inkl. Positionen + Absender-Geschaeftsdaten (fuer Druck/PDF)
+app.get('/api/customer/invoices/:id', requireCustomerAuth, (req, res) => {
+  const inv = dbGet('SELECT * FROM invoices WHERE id = ? AND customer_id = ?', [parseInt(req.params.id), req.session.customerId]);
+  if (!inv) return res.status(404).json({ error: 'Rechnung nicht gefunden' });
+  let items = []; try { items = JSON.parse(inv.items || '[]'); } catch (e) {}
+  const g = k => dbGet('SELECT value FROM settings WHERE key = ?', [k])?.value || '';
+  const business = { name: g('impressum_name'), street: g('impressum_street'), zip: g('impressum_zip'), city: g('impressum_city'), email: g('impressum_email'), vatid: g('impressum_vatid'), bank: g('bank_name'), iban: g('bank_iban'), bic: g('bank_bic') };
+  res.json({ ...inv, items, business });
 });
 
 // Admin: Get all appointments

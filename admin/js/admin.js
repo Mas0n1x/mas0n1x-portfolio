@@ -1874,7 +1874,8 @@ function getInvoiceData() {
     total,
     isKleinunternehmer,
     bank: document.getElementById('invoice-bank').value,
-    notes: document.getElementById('invoice-notes').value
+    notes: document.getElementById('invoice-notes').value,
+    paymentLink: document.getElementById('invoice-payment-link')?.value || ''
   };
 }
 
@@ -2792,7 +2793,8 @@ async function saveInvoiceToArchive() {
         total: data.total,
         due_date: data.dueDate,
         notes: data.notes,
-        items: data.items
+        items: data.items,
+        payment_link: data.paymentLink
       }
     });
     showToast('Rechnung gespeichert!', 'success');

@@ -757,7 +757,7 @@ async function loadInvoices() {
     if (!rows.length) { el.innerHTML = '<div class="empty-state"><i class="fas fa-file-invoice"></i><h3>Keine Rechnungen</h3><p>Hier erscheinen deine Rechnungen, sobald welche erstellt wurden.</p></div>'; return; }
     const SL = { 'bezahlt': 'Bezahlt', 'offen': 'Offen', 'überfällig': 'Überfällig' };
     const SC = { 'bezahlt': 'paid', 'offen': 'open', 'überfällig': 'overdue' };
-    el.innerHTML = rows.map(inv => `<div class="inv-item">
+    el.innerHTML = rows.map(inv => `<div class="inv-item" onclick="openInvoice(${inv.id})">
       <div class="inv-main">
         <div class="inv-num">${escapeHtml(inv.invoice_number)}</div>
         <div class="inv-meta">${inv.due_date ? 'Fällig: ' + escapeHtml(inv.due_date) : ''}${inv.paid_date ? ' · Bezahlt: ' + escapeHtml(inv.paid_date) : ''}</div>
@@ -765,10 +765,44 @@ async function loadInvoices() {
       <div class="inv-right">
         <div class="inv-total">${(inv.total || 0).toLocaleString('de-DE', { minimumFractionDigits: 2 })} €</div>
         <span class="inv-status ${SC[inv.status] || 'open'}">${SL[inv.status] || escapeHtml(inv.status || '')}</span>
+        ${inv.payment_link && inv.status !== 'bezahlt' ? `<a class="inv-pay" href="${escapeHtml(inv.payment_link)}" target="_blank" rel="noopener" onclick="event.stopPropagation()"><i class="fas fa-credit-card"></i> Bezahlen</a>` : ''}
       </div>
     </div>`).join('');
   } catch (e) { el.innerHTML = '<div class="empty-state">Rechnungen nicht abrufbar.</div>'; }
 }
+
+async function openInvoice(id) {
+  try {
+    const inv = await api('/customer/invoices/' + id);
+    const b = inv.business || {};
+    const SL = { 'bezahlt': 'Bezahlt', 'offen': 'Offen', 'überfällig': 'Überfällig' };
+    const items = inv.items || [];
+    const fmt = n => (Number(n) || 0).toLocaleString('de-DE', { minimumFractionDigits: 2 });
+    const qOf = it => it.quantity || it.qty || 1;
+    const pOf = it => it.price || it.amount || it.unit_price || 0;
+    const rows = items.length
+      ? items.map(it => `<tr><td>${escapeHtml(it.description || it.name || it.title || 'Position')}</td><td class="r">${qOf(it)}</td><td class="r">${fmt(pOf(it))} €</td><td class="r">${fmt(qOf(it) * pOf(it))} €</td></tr>`).join('')
+      : `<tr><td>Leistung</td><td class="r">1</td><td class="r">${fmt(inv.amount)} €</td><td class="r">${fmt(inv.amount)} €</td></tr>`;
+    document.getElementById('invoice-body').innerHTML = `
+      <div class="iv-doc">
+        <div class="iv-head">
+          <div class="iv-from"><strong>${escapeHtml(b.name || 'Mas0n1x')}</strong><br>${escapeHtml(b.street || '')}<br>${escapeHtml(b.zip || '')} ${escapeHtml(b.city || '')}<br>${escapeHtml(b.email || '')}</div>
+          <div class="iv-title"><h2>Rechnung</h2><div>${escapeHtml(inv.invoice_number || '')}</div></div>
+        </div>
+        <div class="iv-meta"><div><b>Datum:</b> ${escapeHtml((inv.created_at || '').split(' ')[0])}</div>${inv.due_date ? `<div><b>Fällig:</b> ${escapeHtml(inv.due_date)}</div>` : ''}<div><b>Status:</b> ${SL[inv.status] || escapeHtml(inv.status || '')}</div></div>
+        <table class="iv-table"><thead><tr><th>Beschreibung</th><th class="r">Menge</th><th class="r">Einzel</th><th class="r">Gesamt</th></tr></thead><tbody>${rows}</tbody></table>
+        <div class="iv-sum"><div><span>Netto</span><span>${fmt(inv.amount)} €</span></div><div><span>MwSt.</span><span>${fmt(inv.tax)} €</span></div><div class="iv-total"><span>Gesamt</span><span>${fmt(inv.total)} €</span></div></div>
+        ${b.iban ? `<div class="iv-bank"><b>Zahlbar an:</b> ${escapeHtml(b.bank || '')} · IBAN ${escapeHtml(b.iban)}${b.bic ? ' · BIC ' + escapeHtml(b.bic) : ''}</div>` : ''}
+        ${b.vatid ? `<div class="iv-vat">USt-IdNr.: ${escapeHtml(b.vatid)}</div>` : ''}
+      </div>`;
+    const pay = document.getElementById('invoice-pay');
+    if (inv.payment_link && inv.status !== 'bezahlt') { pay.href = inv.payment_link; pay.style.display = 'inline-flex'; } else { pay.style.display = 'none'; }
+    document.getElementById('invoice-modal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  } catch (e) { console.error('Rechnung laden:', e); }
+}
+function closeInvoice() { document.getElementById('invoice-modal').classList.remove('active'); document.body.style.overflow = ''; }
+function printInvoice() { window.print(); }
 
 function switchView(view) {
   currentView = view;
