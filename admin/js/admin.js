@@ -167,7 +167,7 @@ function showToast(message, type = 'success') {
   const toast = document.createElement('div');
   toast.className = `toast ${type}`;
   toast.innerHTML = `
-    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'exclamation-triangle'}"></i>
+    <svg class="ic"><use href="#fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'exclamation-triangle'}"></use></svg>
     <span>${message}</span>
   `;
   toastContainer.appendChild(toast);
@@ -188,11 +188,11 @@ async function loadProjects() {
     if (projects.length === 0) {
       container.innerHTML = `
         <div class="empty-state" style="grid-column: 1 / -1;">
-          <i class="fas fa-folder-open"></i>
+          <svg class="ic"><use href="#fa-folder-open"></use></svg>
           <h3>Keine Projekte vorhanden</h3>
           <p>Füge dein erstes Projekt hinzu oder importiere bestehende Daten.</p>
           <button onclick="openProjectModal()" class="btn-primary">
-            <i class="fas fa-plus"></i> Erstes Projekt hinzufügen
+            <svg class="ic"><use href="#fa-plus"></use></svg> Erstes Projekt hinzufügen
           </button>
         </div>
       `;
@@ -201,19 +201,19 @@ async function loadProjects() {
 
     container.innerHTML = projects.map(project => `
       <div class="item-card" draggable="true" data-id="${project.id}">
-        <span class="drag-handle" title="Zum Sortieren ziehen"><i class="fas fa-grip-vertical"></i></span>
+        <span class="drag-handle" title="Zum Sortieren ziehen"><svg class="ic"><use href="#fa-grip-vertical"></use></svg></span>
         <div class="item-card-image">
           ${project.logo
-            ? `<img src="${project.logo}" alt="${project.title}" onerror="this.outerHTML='<div class=\\'placeholder\\'><i class=\\'fas fa-image\\'></i></div>'">`
+            ? `<img src="${project.logo}" alt="${project.title}" onerror="this.outerHTML='<div class=\\'placeholder\\'><svg class=\\'ic\\'><use href=\\'#fa-image\\'></use></svg></div>'">`
             : (project.images && project.images.length > 0
-              ? `<img src="${project.images[0].path}" alt="${project.title}" onerror="this.outerHTML='<div class=\\'placeholder\\'><i class=\\'fas fa-image\\'></i></div>'">`
+              ? `<img src="${project.images[0].path}" alt="${project.title}" onerror="this.outerHTML='<div class=\\'placeholder\\'><svg class=\\'ic\\'><use href=\\'#fa-image\\'></use></svg></div>'">`
               : (project.image
-                ? `<img src="${project.image}" alt="${project.title}" onerror="this.outerHTML='<div class=\\'placeholder\\'><i class=\\'fas fa-image\\'></i></div>'">`
-                : `<div class="placeholder"><i class="fas fa-image"></i></div>`
+                ? `<img src="${project.image}" alt="${project.title}" onerror="this.outerHTML='<div class=\\'placeholder\\'><svg class=\\'ic\\'><use href=\\'#fa-image\\'></use></svg></div>'">`
+                : `<div class="placeholder"><svg class="ic"><use href="#fa-image"></use></svg></div>`
               ))
           }
           ${project.images && project.images.length > 1
-            ? `<span class="image-count-badge"><i class="fas fa-images"></i> ${project.images.length}</span>`
+            ? `<span class="image-count-badge"><svg class="ic"><use href="#fa-images"></use></svg> ${project.images.length}</span>`
             : ''
           }
           <span class="status-badge status-${project.status || 'completed'}">${getStatusLabel(project.status)}</span>
@@ -235,10 +235,10 @@ async function loadProjects() {
           ` : ''}
           <div class="item-card-actions">
             <button class="btn-icon" onclick="openProjectModal(${project.id})" title="Bearbeiten">
-              <i class="fas fa-edit"></i>
+              <svg class="ic"><use href="#fa-edit"></use></svg>
             </button>
             <button class="btn-icon danger" onclick="deleteProject(${project.id})" title="Löschen">
-              <i class="fas fa-trash"></i>
+              <svg class="ic"><use href="#fa-trash"></use></svg>
             </button>
           </div>
         </div>
@@ -373,7 +373,7 @@ async function openProjectModal(id = null) {
         <div class="file-input-wrapper">
           <input type="file" id="project-logo" accept=".jpg,.jpeg,.png,.gif,.webp,.svg">
           <div class="file-input-label">
-            <i class="fas fa-shield-alt"></i>
+            <svg class="ic"><use href="#fa-shield-alt"></use></svg>
             <span>Logo ausw\u00e4hlen</span>
           </div>
         </div>
@@ -381,7 +381,7 @@ async function openProjectModal(id = null) {
           ${project.logo ? `
             <img src="${project.logo}" alt="Logo Preview" style="width:80px;height:80px;object-fit:contain;" onerror="this.style.display='none'">
             <button type="button" class="remove-image" data-remove-logo="true">
-              <i class="fas fa-times"></i>
+              <svg class="ic"><use href="#fa-times"></use></svg>
             </button>
           ` : ''}
         </div>
@@ -391,7 +391,7 @@ async function openProjectModal(id = null) {
         <div class="file-input-wrapper">
           <input type="file" id="project-images" accept=".jpg,.jpeg,.png,.gif,.webp" multiple>
           <div class="file-input-label">
-            <i class="fas fa-cloud-upload-alt"></i>
+            <svg class="ic"><use href="#fa-cloud-upload-alt"></use></svg>
             <span>Bilder ausw\u00e4hlen (mehrere m\u00f6glich)</span>
           </div>
         </div>
@@ -400,15 +400,15 @@ async function openProjectModal(id = null) {
             <div class="image-preview-item" data-path="${img.path}" draggable="true">
               <img src="${img.path}" alt="Bild ${i + 1}" style="width:120px;height:90px;max-width:120px;max-height:90px;object-fit:cover;" onerror="this.style.opacity='0.3'">
               <button type="button" class="remove-image" data-remove-path="${img.path}">
-                <i class="fas fa-times"></i>
+                <svg class="ic"><use href="#fa-times"></use></svg>
               </button>
-              <div class="drag-handle"><i class="fas fa-grip-vertical"></i></div>
+              <div class="drag-handle"><svg class="ic"><use href="#fa-grip-vertical"></use></svg></div>
             </div>
           `).join('')}
         </div>
       </div>
       <button type="submit" class="btn-primary">
-        <i class="fas fa-save"></i> ${id ? 'Speichern' : 'Erstellen'}
+        <svg class="ic"><use href="#fa-save"></use></svg> ${id ? 'Speichern' : 'Erstellen'}
       </button>
     </form>
   `);
@@ -438,9 +438,9 @@ async function openProjectModal(id = null) {
         div.innerHTML = `
           <img src="${ev.target.result}" alt="Preview">
           <button type="button" class="remove-image" data-new="true">
-            <i class="fas fa-times"></i>
+            <svg class="ic"><use href="#fa-times"></use></svg>
           </button>
-          <div class="drag-handle"><i class="fas fa-grip-vertical"></i></div>
+          <div class="drag-handle"><svg class="ic"><use href="#fa-grip-vertical"></use></svg></div>
         `;
         div.querySelector('.remove-image').addEventListener('click', () => div.remove());
         imagesPreview.appendChild(div);
@@ -461,7 +461,7 @@ async function openProjectModal(id = null) {
         logoPreview.innerHTML = `
           <img src="${ev.target.result}" alt="Logo Preview" style="width:80px;height:80px;object-fit:contain;">
           <button type="button" class="remove-image" data-remove-logo="true">
-            <i class="fas fa-times"></i>
+            <svg class="ic"><use href="#fa-times"></use></svg>
           </button>
         `;
         logoPreview.style.display = 'block';
@@ -613,7 +613,7 @@ document.getElementById('add-project-btn').addEventListener('click', () => loadG
 async function loadGithubProjects(showSync) {
   const list = document.getElementById('gh-list');
   if (!list) return;
-  list.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><i class="fas fa-spinner fa-spin"></i><p>Lade GitHub-Repos …</p></div>';
+  list.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><svg class="ic spin"><use href="#fa-spinner"></use></svg><p>Lade GitHub-Repos …</p></div>';
   try {
     const data = await api('/admin/github/repos');
     GH_REPOS = data.repos || [];
@@ -624,7 +624,7 @@ async function loadGithubProjects(showSync) {
     const hint = tokenIssue
       ? 'GITHUB_TOKEN fehlt in der .env des Backends. Lege einen Personal Access Token an (Scope: repo + read:org) und trage GITHUB_TOKEN=… in /srv/mas0n1x-portfolio/.env ein, dann Backend neu starten.'
       : ('GitHub nicht erreichbar: ' + (e.message || 'Fehler'));
-    list.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><i class="fab fa-github"></i><h3>Keine Repos geladen</h3><p style="max-width:520px;margin:8px auto 0">${escapeHtml(hint)}</p></div>`;
+    list.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><svg class="ic"><use href="#fa-github"></use></svg><h3>Keine Repos geladen</h3><p style="max-width:520px;margin:8px auto 0">${escapeHtml(hint)}</p></div>`;
   }
 }
 
@@ -666,7 +666,7 @@ function renderGhRepos() {
       <div class="gh-meta"><span>★ ${r.gh_stars}</span><span>${(r.images||[]).length} Bild(er)</span><span>${escapeHtml(r.owner||'')}</span></div>
       <div class="gh-card-actions">
         <label class="gh-toggle"><input type="checkbox" ${isActive?'checked':''} onchange="ghToggle(${r.repo_id},this.checked)"><span class="gh-switch"></span>${isActive?(idx>=0?`Aktiv #${idx+1}`:'Aktiv'):'Anzeigen'}</label>
-        <button class="gh-edit" onclick="openGhModal(${r.repo_id})"><i class="fas fa-pen"></i> Bearbeiten</button>
+        <button class="gh-edit" onclick="openGhModal(${r.repo_id})"><svg class="ic"><use href="#fa-pen"></use></svg> Bearbeiten</button>
       </div>
     </div>`;
   }).join('');
@@ -735,12 +735,12 @@ function openGhModal(id) {
       </label>
       <label>Bilder <span class="hint">(mehrere möglich, erstes ist das Titelbild)</span>
         <div class="gh-imgs" id="ghf-imgs"></div>
-        <div class="gh-drop" id="ghf-drop"><i class="fas fa-cloud-upload-alt"></i> Bilder hierher ziehen oder klicken</div>
+        <div class="gh-drop" id="ghf-drop"><svg class="ic"><use href="#fa-cloud-upload-alt"></use></svg> Bilder hierher ziehen oder klicken</div>
         <input type="file" id="ghf-file" accept="image/*" multiple style="display:none">
       </label>
       <div class="gh-form-actions">
         <button class="btn-secondary" onclick="closeModal()">Abbrechen</button>
-        <button class="btn-primary" id="ghf-save"><i class="fas fa-check"></i> Speichern &amp; anzeigen</button>
+        <button class="btn-primary" id="ghf-save"><svg class="ic"><use href="#fa-check"></use></svg> Speichern &amp; anzeigen</button>
       </div>
     </div>`;
   openModal(`Projekt: ${r.name}`, content);
@@ -784,11 +784,11 @@ async function loadServices() {
     if (services.length === 0) {
       container.innerHTML = `
         <div class="empty-state" style="grid-column: 1 / -1;">
-          <i class="fas fa-cogs"></i>
+          <svg class="ic"><use href="#fa-cogs"></use></svg>
           <h3>Keine Services vorhanden</h3>
           <p>Füge deinen ersten Service hinzu oder importiere bestehende Daten.</p>
           <button onclick="openServiceModal()" class="btn-primary">
-            <i class="fas fa-plus"></i> Ersten Service hinzufügen
+            <svg class="ic"><use href="#fa-plus"></use></svg> Ersten Service hinzufügen
           </button>
         </div>
       `;
@@ -797,18 +797,18 @@ async function loadServices() {
 
     container.innerHTML = services.map(service => `
       <div class="service-card" draggable="true" data-id="${service.id}">
-        <span class="drag-handle" title="Zum Sortieren ziehen"><i class="fas fa-grip-vertical"></i></span>
+        <span class="drag-handle" title="Zum Sortieren ziehen"><svg class="ic"><use href="#fa-grip-vertical"></use></svg></span>
         <div class="service-card-icon">
-          <i class="${service.icon}"></i>
+          ${iconSvg(service.icon)}
         </div>
         <h3>${escapeHtml(service.title)}</h3>
         <p>${escapeHtml(service.description || '')}</p>
         <div class="service-card-actions">
           <button class="btn-icon" onclick="openServiceModal(${service.id})" title="Bearbeiten">
-            <i class="fas fa-edit"></i>
+            <svg class="ic"><use href="#fa-edit"></use></svg>
           </button>
           <button class="btn-icon danger" onclick="deleteService(${service.id})" title="Löschen">
-            <i class="fas fa-trash"></i>
+            <svg class="ic"><use href="#fa-trash"></use></svg>
           </button>
         </div>
       </div>
@@ -867,7 +867,7 @@ async function openServiceModal(id = null) {
         <input type="number" id="service-order" value="${service.sort_order || 0}" min="0">
       </div>
       <button type="submit" class="btn-primary">
-        <i class="fas fa-save"></i> ${id ? 'Speichern' : 'Erstellen'}
+        <svg class="ic"><use href="#fa-save"></use></svg> ${id ? 'Speichern' : 'Erstellen'}
       </button>
     </form>
   `);
@@ -1144,7 +1144,7 @@ async function loadRequests() {
     if (requests.length === 0) {
       container.innerHTML = `
         <div class="empty-state">
-          <i class="fas fa-inbox"></i>
+          <svg class="ic"><use href="#fa-inbox"></use></svg>
           <h3>Keine Anfragen vorhanden</h3>
           <p>Sobald Kunden Projekte anfragen, erscheinen sie hier.</p>
         </div>
@@ -1161,9 +1161,9 @@ async function loadRequests() {
           <h3>${getProjectTypeLabel(request.project_type)}</h3>
           <p>${escapeHtml(request.email)}</p>
           <div class="request-meta">
-            <span><i class="fas fa-euro-sign"></i> ${getBudgetLabel(request.budget)}</span>
-            <span><i class="fas fa-clock"></i> ${getTimelineLabel(request.timeline)}</span>
-            <span><i class="fas fa-calendar"></i> ${formatDate(request.created_at)}</span>
+            <span><svg class="ic"><use href="#fa-euro-sign"></use></svg> ${getBudgetLabel(request.budget)}</span>
+            <span><svg class="ic"><use href="#fa-clock"></use></svg> ${getTimelineLabel(request.timeline)}</span>
+            <span><svg class="ic"><use href="#fa-calendar"></use></svg> ${formatDate(request.created_at)}</span>
           </div>
         </div>
         <span class="request-status ${request.status}">${getRequestStatusLabel(request.status)}</span>
@@ -1257,7 +1257,7 @@ async function loadMessages(requestId) {
     if (messages.length === 0) {
       container.innerHTML = `
         <div style="text-align: center; color: var(--text-muted); padding: 40px;">
-          <i class="fas fa-comments" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+          <svg class="ic" style="font-size: 2rem; margin-bottom: 10px; display: block;"><use href="#fa-comments"></use></svg>
           Noch keine Nachrichten
         </div>
       `;
@@ -1294,7 +1294,7 @@ async function loadQuickReplies() {
     if (templates.length === 0) {
       container.innerHTML = `
         <div class="quick-replies-empty">
-          <i class="fas fa-bolt"></i>
+          <svg class="ic"><use href="#fa-bolt"></use></svg>
           <p>Keine Vorlagen vorhanden</p>
           <small>Erstelle Vorlagen im Bereich "Vorlagen"</small>
         </div>
@@ -1305,7 +1305,7 @@ async function loadQuickReplies() {
     container.innerHTML = templates.map(t => `
       <div class="quick-reply-item" onclick="insertQuickReply(${t.id})" data-content="${escapeHtml(t.content).replace(/"/g, '&quot;')}">
         <div class="quick-reply-name">
-          <i class="fas fa-file-alt"></i>
+          <svg class="ic"><use href="#fa-file-alt"></use></svg>
           ${escapeHtml(t.name)}
           <span class="quick-reply-category">${getCategoryLabel(t.category)}</span>
         </div>
@@ -1600,7 +1600,7 @@ function renderFileAttachment(filePath, originalName) {
       <div class="file-attachment image-attachment">
         <img src="${filePath}" alt="${escapeHtml(originalName)}" class="file-preview-image" loading="lazy">
         <a href="${filePath}" target="_blank" class="file-download-link">
-          <i class="fas fa-download"></i> ${escapeHtml(originalName)}
+          <svg class="ic"><use href="#fa-download"></use></svg> ${escapeHtml(originalName)}
         </a>
       </div>
     `;
@@ -1610,15 +1610,15 @@ function renderFileAttachment(filePath, originalName) {
     return `
       <div class="file-attachment pdf-attachment">
         <div class="pdf-preview">
-          <i class="fas fa-file-pdf"></i>
+          <svg class="ic"><use href="#fa-file-pdf"></use></svg>
           <span>PDF Dokument</span>
         </div>
         <div class="file-attachment-info">
           <a href="${filePath}" target="_blank" class="file-view-link">
-            <i class="fas fa-external-link-alt"></i> Öffnen
+            <svg class="ic"><use href="#fa-external-link-alt"></use></svg> Öffnen
           </a>
           <a href="${filePath}" download class="file-download-link">
-            <i class="fas fa-download"></i> ${escapeHtml(originalName)}
+            <svg class="ic"><use href="#fa-download"></use></svg> ${escapeHtml(originalName)}
           </a>
         </div>
       </div>
@@ -1633,7 +1633,7 @@ function renderFileAttachment(filePath, originalName) {
           Ihr Browser unterstützt kein Video.
         </video>
         <a href="${filePath}" download class="file-download-link">
-          <i class="fas fa-download"></i> ${escapeHtml(originalName)}
+          <svg class="ic"><use href="#fa-download"></use></svg> ${escapeHtml(originalName)}
         </a>
       </div>
     `;
@@ -1647,7 +1647,7 @@ function renderFileAttachment(filePath, originalName) {
           Ihr Browser unterstützt kein Audio.
         </audio>
         <a href="${filePath}" download class="file-download-link">
-          <i class="fas fa-download"></i> ${escapeHtml(originalName)}
+          <svg class="ic"><use href="#fa-download"></use></svg> ${escapeHtml(originalName)}
         </a>
       </div>
     `;
@@ -1655,9 +1655,9 @@ function renderFileAttachment(filePath, originalName) {
 
   return `
     <a href="${filePath}" target="_blank" class="chat-message-file">
-      <i class="fas ${fileIcon}"></i>
+      ${iconSvg(fileIcon)}
       <span>${escapeHtml(originalName)}</span>
-      <i class="fas fa-download download-icon"></i>
+      <svg class="ic"><use href="#fa-download"></use></svg>
     </a>
   `;
 }
@@ -1668,7 +1668,7 @@ function openImageModal(src, alt) {
   modal.innerHTML = `
     <div class="image-modal-backdrop"></div>
     <div class="image-modal-content">
-      <button class="image-modal-close"><i class="fas fa-times"></i></button>
+      <button class="image-modal-close"><svg class="ic"><use href="#fa-times"></use></svg></button>
       <img src="${src}" alt="${escapeHtml(alt)}">
       <div class="image-modal-caption">${escapeHtml(alt)}</div>
     </div>
@@ -1814,7 +1814,7 @@ function addInvoiceItem() {
         <input type="number" class="item-price" value="0" step="0.01" min="0">
       </div>
       <button type="button" class="btn-icon danger remove-item" style="align-self: flex-end; margin-bottom: 16px;">
-        <i class="fas fa-trash"></i>
+        <svg class="ic"><use href="#fa-trash"></use></svg>
       </button>
     </div>
   `;
@@ -2219,7 +2219,7 @@ async function loadCustomers() {
     console.error('Error loading customers:', e);
     document.getElementById('customers-list').innerHTML = `
       <div class="empty-customers">
-        <i class="fas fa-users"></i>
+        <svg class="ic"><use href="#fa-users"></use></svg>
         <h3>Keine Kunden gefunden</h3>
         <p>Es sind noch keine Kunden registriert.</p>
       </div>
@@ -2248,7 +2248,7 @@ function renderCustomers(customers) {
   if (customers.length === 0) {
     container.innerHTML = `
       <div class="empty-customers">
-        <i class="fas fa-users"></i>
+        <svg class="ic"><use href="#fa-users"></use></svg>
         <h3>Keine Kunden gefunden</h3>
         <p>Es sind noch keine Kunden registriert.</p>
       </div>
@@ -2270,13 +2270,13 @@ function renderCustomers(customers) {
         </div>
         <div class="customer-meta">
           <span class="request-count">
-            <i class="fas fa-folder"></i>
+            <svg class="ic"><use href="#fa-folder"></use></svg>
             ${customer.request_count || 0} Anfragen
           </span>
           <span class="date">Seit ${createdDate}</span>
         </div>
         <button class="customer-actions-btn" onclick="event.stopPropagation(); openCustomerDetail(${customer.id})">
-          <i class="fas fa-eye"></i>
+          <svg class="ic"><use href="#fa-eye"></use></svg>
         </button>
       </div>
     `;
@@ -2528,7 +2528,7 @@ async function loadDashboard() {
       activitiesContainer.innerHTML = data.activities.map(activity => `
         <div class="activity-item">
           <div class="activity-icon">
-            <i class="fas ${getActivityIcon(activity.type)}"></i>
+            ${iconSvg(getActivityIcon(activity.type))}
           </div>
           <div class="activity-content">
             <div class="activity-text">${escapeHtml(activity.description)}</div>
@@ -2565,7 +2565,7 @@ const CMD = { open: false, index: 0, results: [], cache: { projects: null, custo
 function getNavCommands() {
   return [...document.querySelectorAll('.sidebar-nav .nav-item[data-section]')].map(el => ({
     type: 'Navigation',
-    icon: el.querySelector('i')?.className || 'fas fa-arrow-right',
+    icon: el.querySelector('use')?.getAttribute('href')?.slice(1) || 'fa-arrow-right',
     label: el.textContent.trim(),
     action: () => el.click(),
   }));
@@ -2601,7 +2601,7 @@ function renderCmdResults(query) {
   if (CMD.results.length === 0) { container.innerHTML = '<div class="cmd-empty">Nichts gefunden</div>'; return; }
   container.innerHTML = CMD.results.map((c, i) => `
     <div class="cmd-item ${i === 0 ? 'active' : ''}" data-i="${i}">
-      <i class="${c.icon}"></i>
+      ${iconSvg(c.icon)}
       <span class="cmd-label">${escapeHtml(c.label)}</span>
       <span class="cmd-type">${c.type}</span>
     </div>`).join('');
@@ -2702,7 +2702,7 @@ function renderInvoiceArchive(invoices) {
   if (invoices.length === 0) {
     container.innerHTML = `
       <div class="empty-state">
-        <i class="fas fa-file-invoice"></i>
+        <svg class="ic"><use href="#fa-file-invoice"></use></svg>
         <h3>Keine Rechnungen vorhanden</h3>
         <p>Erstelle deine erste Rechnung im Rechnungsgenerator.</p>
       </div>
@@ -2728,7 +2728,7 @@ function renderInvoiceArchive(invoices) {
           <option value="überfällig" ${inv.status === 'überfällig' ? 'selected' : ''}>Überfällig</option>
         </select>
         <button class="btn-icon danger" onclick="deleteInvoice(${inv.id})" title="Löschen">
-          <i class="fas fa-trash"></i>
+          <svg class="ic"><use href="#fa-trash"></use></svg>
         </button>
       </div>
     </div>
@@ -2953,7 +2953,7 @@ function addQuoteItem() {
         <input type="number" class="quote-item-rate" value="75" step="0.01" min="0">
       </div>
       <button type="button" class="btn-icon danger remove-quote-item" style="align-self: flex-end; margin-bottom: 16px;">
-        <i class="fas fa-trash"></i>
+        <svg class="ic"><use href="#fa-trash"></use></svg>
       </button>
     </div>
   `;
@@ -3113,7 +3113,7 @@ function updateQuotePreview() {
       <div class="invoice-footer">
         ${(data.duration || data.startDate) ? `
           <div class="quote-timeline" style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
-            <h4 style="margin-bottom: 10px;"><i class="fas fa-calendar"></i> Zeitrahmen</h4>
+            <h4 style="margin-bottom: 10px;"><svg class="ic"><use href="#fa-calendar"></use></svg> Zeitrahmen</h4>
             ${data.duration ? `<p><strong>Geschätzte Dauer:</strong> ${escapeHtml(data.duration)}</p>` : ''}
             ${data.startDate ? `<p><strong>Frühester Starttermin:</strong> ${formatDate(data.startDate)}</p>` : ''}
           </div>
@@ -3470,7 +3470,7 @@ async function loadBookings() {
     const badge = document.getElementById('booking-badge');
     const neu = rows.filter(b => b.status === 'neu').length;
     if (badge) { if (neu > 0) { badge.textContent = neu; badge.classList.remove('hidden'); } else badge.classList.add('hidden'); }
-    if (!rows.length) { el.innerHTML = '<div class="empty-state"><i class="fas fa-calendar"></i><h3>Keine Buchungen</h3><p>Erstgespräch-Buchungen von der Website erscheinen hier.</p></div>'; return; }
+    if (!rows.length) { el.innerHTML = '<div class="empty-state"><svg class="ic"><use href="#fa-calendar"></use></svg><h3>Keine Buchungen</h3><p>Erstgespräch-Buchungen von der Website erscheinen hier.</p></div>'; return; }
     const STAT = ['neu', 'bestätigt', 'erledigt', 'abgelehnt'];
     el.innerHTML = rows.map(b => `<div class="bk-item">
       <div class="bk-item-main">
@@ -3480,7 +3480,7 @@ async function loadBookings() {
       </div>
       <div class="bk-item-actions">
         <select class="bk-item-status" onchange="updateBooking(${b.id}, this.value)">${STAT.map(s => `<option value="${s}"${b.status === s ? ' selected' : ''}>${s}</option>`).join('')}</select>
-        <button class="btn-icon danger" onclick="deleteBooking(${b.id})" title="Löschen"><i class="fas fa-trash"></i></button>
+        <button class="btn-icon danger" onclick="deleteBooking(${b.id})" title="Löschen"><svg class="ic"><use href="#fa-trash"></use></svg></button>
       </div>
     </div>`).join('');
   } catch (e) { el.innerHTML = '<div class="empty-state">Buchungen nicht abrufbar.</div>'; }
@@ -3786,7 +3786,7 @@ function renderUpcomingDeadlines() {
   if (upcoming.length === 0) {
     container.innerHTML = `
       <div class="empty-deadlines">
-        <i class="fas fa-calendar-check"></i>
+        <svg class="ic"><use href="#fa-calendar-check"></use></svg>
         <p>Keine anstehenden Deadlines</p>
       </div>
     `;
@@ -3848,7 +3848,7 @@ async function loadTemplates() {
     if (container) {
       container.innerHTML = `
         <div class="empty-state">
-          <i class="fas fa-file-alt"></i>
+          <svg class="ic"><use href="#fa-file-alt"></use></svg>
           <h3>Keine Vorlagen vorhanden</h3>
           <p>Erstelle Vorlagen für häufige Nachrichtenantworten.</p>
         </div>
@@ -3873,7 +3873,7 @@ function renderTemplates(templates) {
   if (templates.length === 0) {
     container.innerHTML = `
       <div class="empty-state">
-        <i class="fas fa-file-alt"></i>
+        <svg class="ic"><use href="#fa-file-alt"></use></svg>
         <h3>Keine Vorlagen vorhanden</h3>
         <p>Erstelle Vorlagen für häufige Nachrichtenantworten.</p>
       </div>
@@ -3891,13 +3891,13 @@ function renderTemplates(templates) {
       <p class="template-preview">${escapeHtml(template.content.substring(0, 150))}${template.content.length > 150 ? '...' : ''}</p>
       <div class="template-actions">
         <button class="btn btn-small btn-primary" onclick="copyTemplate(${template.id})">
-          <i class="fas fa-copy"></i> Kopieren
+          <svg class="ic"><use href="#fa-copy"></use></svg> Kopieren
         </button>
         <button class="btn btn-small btn-secondary" onclick="editTemplate(${template.id})">
-          <i class="fas fa-edit"></i> Bearbeiten
+          <svg class="ic"><use href="#fa-edit"></use></svg> Bearbeiten
         </button>
         <button class="btn btn-small btn-danger" onclick="deleteTemplate(${template.id})">
-          <i class="fas fa-trash"></i>
+          <svg class="ic"><use href="#fa-trash"></use></svg>
         </button>
       </div>
     </div>
@@ -4031,7 +4031,7 @@ function renderContractTemplates(templates) {
   if (templates.length === 0) {
     container.innerHTML = `
       <div class="empty-state">
-        <i class="fas fa-file-alt"></i>
+        <svg class="ic"><use href="#fa-file-alt"></use></svg>
         <h3>Keine Vertragsvorlagen vorhanden</h3>
         <p>Erstelle eine Vorlage um Verträge zu generieren.</p>
       </div>
@@ -4048,13 +4048,13 @@ function renderContractTemplates(templates) {
       <p class="template-preview">${escapeHtml(template.content.substring(0, 200))}${template.content.length > 200 ? '...' : ''}</p>
       <div class="template-actions">
         <button class="btn btn-small btn-primary" onclick="openGenerateContractModal(${template.id})">
-          <i class="fas fa-file-signature"></i> Generieren
+          <svg class="ic"><use href="#fa-file-signature"></use></svg> Generieren
         </button>
         <button class="btn btn-small btn-secondary" onclick="editContractTemplate(${template.id})">
-          <i class="fas fa-edit"></i> Bearbeiten
+          <svg class="ic"><use href="#fa-edit"></use></svg> Bearbeiten
         </button>
         <button class="btn btn-small btn-danger" onclick="deleteContractTemplate(${template.id})">
-          <i class="fas fa-trash"></i>
+          <svg class="ic"><use href="#fa-trash"></use></svg>
         </button>
       </div>
     </div>
@@ -4084,7 +4084,7 @@ function renderContracts(contracts) {
   if (contracts.length === 0) {
     container.innerHTML = `
       <div class="empty-state">
-        <i class="fas fa-file-signature"></i>
+        <svg class="ic"><use href="#fa-file-signature"></use></svg>
         <h3>Keine Verträge vorhanden</h3>
         <p>Generiere einen Vertrag aus einer Vorlage.</p>
       </div>
@@ -4107,8 +4107,8 @@ function renderContracts(contracts) {
           <span class="badge ${contract.status}">${statusLabels[contract.status] || contract.status}</span>
         </div>
         <div class="contract-info">
-          <p><i class="fas fa-user"></i> ${escapeHtml(contract.customer_name || 'Unbekannt')}</p>
-          <p><i class="fas fa-calendar"></i> ${formatDate(contract.created_at)}</p>
+          <p><svg class="ic"><use href="#fa-user"></use></svg> ${escapeHtml(contract.customer_name || 'Unbekannt')}</p>
+          <p><svg class="ic"><use href="#fa-calendar"></use></svg> ${formatDate(contract.created_at)}</p>
         </div>
         <div class="contract-actions">
           <select onchange="updateContractStatus(${contract.id}, this.value)" class="status-select">
@@ -4118,10 +4118,10 @@ function renderContracts(contracts) {
             <option value="cancelled" ${contract.status === 'cancelled' ? 'selected' : ''}>Storniert</option>
           </select>
           <button class="btn btn-small btn-secondary" onclick="viewContract(${contract.id})">
-            <i class="fas fa-eye"></i>
+            <svg class="ic"><use href="#fa-eye"></use></svg>
           </button>
           <button class="btn btn-small btn-danger" onclick="deleteContract(${contract.id})">
-            <i class="fas fa-trash"></i>
+            <svg class="ic"><use href="#fa-trash"></use></svg>
           </button>
         </div>
       </div>
@@ -4406,7 +4406,7 @@ function renderSkills(skills) {
   if (skills.length === 0) {
     container.innerHTML = `
       <div class="empty-state">
-        <i class="fas fa-code"></i>
+        <svg class="ic"><use href="#fa-code"></use></svg>
         <h3>Keine Skills vorhanden</h3>
         <p>Füge deine Technologien und Skills hinzu.</p>
       </div>
@@ -4436,7 +4436,7 @@ function renderSkills(skills) {
       <div class="skills-grid">
         ${categorySkills.sort((a, b) => a.sort_order - b.sort_order).map(skill => `
           <div class="skill-admin-card ${skill.is_active ? '' : 'inactive'}" style="--skill-color: ${skill.color}">
-            <div class="skill-icon"><i class="${skill.icon}"></i></div>
+            <div class="skill-icon">${iconSvg(skill.icon)}</div>
             <div class="skill-info">
               <h4>${escapeHtml(skill.name)}</h4>
               <div class="skill-level-bar">
@@ -4446,10 +4446,10 @@ function renderSkills(skills) {
             </div>
             <div class="skill-actions">
               <button class="btn-icon" onclick="editSkill(${skill.id})" title="Bearbeiten">
-                <i class="fas fa-edit"></i>
+                <svg class="ic"><use href="#fa-edit"></use></svg>
               </button>
               <button class="btn-icon danger" onclick="deleteSkill(${skill.id})" title="Löschen">
-                <i class="fas fa-trash"></i>
+                <svg class="ic"><use href="#fa-trash"></use></svg>
               </button>
             </div>
           </div>
@@ -4548,7 +4548,7 @@ function updateSkillPreview() {
   const preview = document.getElementById('skill-preview-badge');
   if (preview) {
     preview.innerHTML = `
-      <i class="${icon}" style="color: ${color}"></i>
+      ${iconSvg(icon, `color: ${color}`)}
       <span>${escapeHtml(name)}</span>
       <div class="skill-level-bar"><div class="skill-level-fill" style="width: ${level}%; background: ${color}"></div></div>
     `;
@@ -4600,7 +4600,7 @@ function renderBackups(backups) {
   if (backups.length === 0) {
     container.innerHTML = `
       <div class="empty-state">
-        <i class="fas fa-database"></i>
+        <svg class="ic"><use href="#fa-database"></use></svg>
         <h3>Keine Backups vorhanden</h3>
         <p>Erstelle ein manuelles Backup oder aktiviere automatische Backups.</p>
       </div>
@@ -4616,7 +4616,7 @@ function renderBackups(backups) {
     return `
       <div class="backup-item">
         <div class="backup-icon">
-          <i class="fas fa-${isAuto ? 'clock' : 'hand-pointer'}"></i>
+          <svg class="ic"><use href="#fa-${isAuto ? 'clock' : 'hand-pointer'}"></use></svg>
         </div>
         <div class="backup-info">
           <h4>${escapeHtml(backup.filename)}</h4>
@@ -4624,10 +4624,10 @@ function renderBackups(backups) {
         </div>
         <div class="backup-actions">
           <a href="/api/admin/backups/${encodeURIComponent(backup.filename)}" class="btn btn-small btn-secondary" download>
-            <i class="fas fa-download"></i>
+            <svg class="ic"><use href="#fa-download"></use></svg>
           </a>
           <button class="btn btn-small btn-danger" onclick="deleteBackup('${escapeHtml(backup.filename)}')">
-            <i class="fas fa-trash"></i>
+            <svg class="ic"><use href="#fa-trash"></use></svg>
           </button>
         </div>
       </div>
@@ -4915,7 +4915,7 @@ function renderAdminAppointments() {
   if (filtered.length === 0) {
     container.innerHTML = `
       <div class="appointments-empty-state">
-        <i class="fas fa-calendar-times"></i>
+        <svg class="ic"><use href="#fa-calendar-times"></use></svg>
         <p>Keine Termine gefunden</p>
       </div>
     `;
@@ -4930,10 +4930,10 @@ function renderAdminAppointments() {
   };
 
   const statusLabels = {
-    'pending': '<i class="fas fa-clock"></i> Ausstehend',
-    'confirmed': '<i class="fas fa-check"></i> Bestätigt',
-    'cancelled': '<i class="fas fa-times"></i> Abgesagt',
-    'completed': '<i class="fas fa-check-double"></i> Abgeschlossen'
+    'pending': '<svg class="ic"><use href="#fa-clock"></use></svg> Ausstehend',
+    'confirmed': '<svg class="ic"><use href="#fa-check"></use></svg> Bestätigt',
+    'cancelled': '<svg class="ic"><use href="#fa-times"></use></svg> Abgesagt',
+    'completed': '<svg class="ic"><use href="#fa-check-double"></use></svg> Abgeschlossen'
   };
 
   container.innerHTML = filtered.map(apt => {
@@ -4959,15 +4959,15 @@ function renderAdminAppointments() {
         <div class="appointment-actions">
           ${apt.status === 'pending' ? `
             <button class="btn-icon confirm" onclick="confirmAppointment(${apt.id})" title="Bestätigen">
-              <i class="fas fa-check"></i>
+              <svg class="ic"><use href="#fa-check"></use></svg>
             </button>
             <button class="btn-icon cancel" onclick="cancelAppointment(${apt.id})" title="Absagen">
-              <i class="fas fa-times"></i>
+              <svg class="ic"><use href="#fa-times"></use></svg>
             </button>
           ` : ''}
           ${apt.status === 'confirmed' ? `
             <button class="btn-icon" onclick="completeAppointment(${apt.id})" title="Als erledigt markieren">
-              <i class="fas fa-check-double"></i>
+              <svg class="ic"><use href="#fa-check-double"></use></svg>
             </button>
           ` : ''}
         </div>
@@ -5439,7 +5439,7 @@ async function setupGithubAllRepos() {
 
   const statusDiv = document.getElementById('github-repo-status');
   statusDiv.style.display = 'block';
-  statusDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Repositories werden abgerufen und Webhooks eingerichtet...';
+  statusDiv.innerHTML = '<svg class="ic spin"><use href="#fa-spinner"></use></svg> Repositories werden abgerufen und Webhooks eingerichtet...';
 
   try {
     const result = await api('/admin/discord/github-setup-all', { method: 'POST', body: { token } });
@@ -5464,7 +5464,7 @@ async function setupGithubAllRepos() {
     statusDiv.innerHTML = html;
     showToast(`Webhooks eingerichtet: ${result.added.length} neu, ${result.skipped.length} existierten bereits`, 'success');
   } catch (e) {
-    statusDiv.innerHTML = `<span style="color:#ff4444;"><i class="fas fa-exclamation-triangle"></i> Fehler: ${e.message}</span>`;
+    statusDiv.innerHTML = `<span style="color:#ff4444;"><svg class="ic"><use href="#fa-exclamation-triangle"></use></svg> Fehler: ${e.message}</span>`;
     showToast(e.message, 'error');
   }
 }
@@ -5507,7 +5507,7 @@ function addGithubOrgItem(orgName) {
   removeBtn.className = 'btn-secondary';
   removeBtn.onclick = function() { removeGithubOrg(this); };
   removeBtn.style.cssText = 'padding:4px 8px;background:#ff4444;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:0.8rem;';
-  removeBtn.innerHTML = '<i class="fas fa-trash"></i>';
+  removeBtn.innerHTML = '<svg class="ic"><use href="#fa-trash"></use></svg>';
 
   item.appendChild(icon);
   item.appendChild(link);
@@ -5564,7 +5564,7 @@ async function setupGithubOrgRepos() {
 
   const statusDiv = document.getElementById('github-org-repo-status');
   statusDiv.style.display = 'block';
-  statusDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Organisations-Repositories werden abgerufen und Webhooks eingerichtet...';
+  statusDiv.innerHTML = '<svg class="ic spin"><use href="#fa-spinner"></use></svg> Organisations-Repositories werden abgerufen und Webhooks eingerichtet...';
 
   try {
     const result = await api('/admin/discord/github-setup-orgs', { method: 'POST', body: { token, orgs } });
@@ -5589,7 +5589,7 @@ async function setupGithubOrgRepos() {
     statusDiv.innerHTML = html;
     showToast(`Org-Webhooks eingerichtet: ${result.added.length} neu, ${result.skipped.length} existierten bereits`, 'success');
   } catch (e) {
-    statusDiv.innerHTML = `<span style="color:#ff4444;"><i class="fas fa-exclamation-triangle"></i> Fehler: ${e.message}</span>`;
+    statusDiv.innerHTML = `<span style="color:#ff4444;"><svg class="ic"><use href="#fa-exclamation-triangle"></use></svg> Fehler: ${e.message}</span>`;
     showToast(e.message, 'error');
   }
 }
@@ -5675,7 +5675,7 @@ function renderGithubRepoSelection() {
   }
   listEl.innerHTML = githubRepoSelection.map((r, i) => `
     <label class="discord-toggle-row" data-repo-name="${escapeHtml(r.full_name.toLowerCase())}" style="cursor:pointer;">
-      <span>${r.private ? '<i class="fas fa-lock" style="opacity:0.6;"></i> ' : ''}${r.archived ? '<i class="fas fa-box-archive" style="opacity:0.6;"></i> ' : ''}${escapeHtml(r.full_name)}</span>
+      <span>${r.private ? '<svg class="ic" style="opacity:0.6;"><use href="#fa-lock"></use></svg> ' : ''}${r.archived ? '<svg class="ic" style="opacity:0.6;"><use href="#fa-box-archive"></use></svg> ' : ''}${escapeHtml(r.full_name)}</span>
       <label class="toggle-switch"><input type="checkbox" data-repo-idx="${i}" ${r.selected ? 'checked' : ''} onchange="githubRepoSelection[${i}].selected=this.checked"><span class="toggle-slider"></span></label>
     </label>
   `).join('');
@@ -5800,7 +5800,7 @@ function addDiscordRuleItem(text) {
     <div class="form-group">
       <input type="text" class="discord-rule-input" value="${escapeHtml(text)}" placeholder="Neue Regel...">
     </div>
-    <button class="btn-icon danger" onclick="this.closest('.discord-dynamic-item').remove()"><i class="fas fa-trash"></i></button>
+    <button class="btn-icon danger" onclick="this.closest('.discord-dynamic-item').remove()"><svg class="ic"><use href="#fa-trash"></use></svg></button>
   `;
   list.appendChild(item);
 }
@@ -5879,7 +5879,7 @@ function addDiscordSocialLinkItem(emoji, name, url) {
       <label>URL</label>
       <input type="text" class="discord-social-url" value="${escapeHtml(url)}" placeholder="https://...">
     </div>
-    <button class="btn-icon danger" onclick="this.closest('.discord-dynamic-item').remove()" style="align-self: flex-end;"><i class="fas fa-trash"></i></button>
+    <button class="btn-icon danger" onclick="this.closest('.discord-dynamic-item').remove()" style="align-self: flex-end;"><svg class="ic"><use href="#fa-trash"></use></svg></button>
   `;
   list.appendChild(item);
 }
@@ -5920,7 +5920,7 @@ function addDiscordProductItem(p) {
         <label>Farbe</label>
         <input type="color" class="discord-product-color" value="${p.color || '#00ffaa'}">
       </div>
-      <button class="btn-icon danger" onclick="this.closest('.discord-dynamic-item').remove()" style="align-self: flex-end;"><i class="fas fa-trash"></i></button>
+      <button class="btn-icon danger" onclick="this.closest('.discord-dynamic-item').remove()" style="align-self: flex-end;"><svg class="ic"><use href="#fa-trash"></use></svg></button>
     </div>
     <div class="form-group" style="width: 100%;">
       <label>Beschreibung</label>
@@ -5967,7 +5967,7 @@ function addDiscordTicketCategoryItem(cat) {
       <label>Beschreibung</label>
       <input type="text" class="discord-ticket-desc" value="${escapeHtml(cat.description || '')}" placeholder="Kurze Beschreibung">
     </div>
-    <button class="btn-icon danger" onclick="this.closest('.discord-dynamic-item').remove()" style="align-self: flex-end;"><i class="fas fa-trash"></i></button>
+    <button class="btn-icon danger" onclick="this.closest('.discord-dynamic-item').remove()" style="align-self: flex-end;"><svg class="ic"><use href="#fa-trash"></use></svg></button>
   `;
   list.appendChild(item);
 }
@@ -6049,4 +6049,11 @@ function generateDiscordWebhookSecret() {
 function parseJSON(str, fallback) {
   if (!str) return fallback;
   try { return JSON.parse(str); } catch (e) { return fallback; }
+}
+
+// SVG-Icon aus (evtl. gespeicherter Font-Awesome-)Klasse rendern – nutzt das lokale Sprite.
+function iconSvg(faClass, style) {
+  const m = String(faClass || '').match(/fa-[a-z0-9-]+/);
+  const id = m ? m[0] : 'fa-circle';
+  return `<svg class="ic"${style ? ` style="${style}"` : ''}><use href="#${id}"></use></svg>`;
 }

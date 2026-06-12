@@ -101,11 +101,11 @@ async function loadRequests() {
     if (requests.length === 0) {
       container.innerHTML = `
         <div class="empty-state">
-          <i class="fas fa-folder-open"></i>
+          <svg class="ic"><use href="#fa-folder-open"></use></svg>
           <h3>Keine Anfragen vorhanden</h3>
           <p>Starten Sie Ihr erstes Projekt!</p>
           <a href="/projekt-starten.html" class="btn-primary">
-            <i class="fas fa-plus"></i> Projekt starten
+            <svg class="ic"><use href="#fa-plus"></use></svg> Projekt starten
           </a>
         </div>
       `;
@@ -121,12 +121,12 @@ async function loadRequests() {
           <h3>${getProjectTypeLabel(req.project_type)}</h3>
           <p>${escapeHtml(req.description) || 'Keine Beschreibung'}</p>
           <div class="request-meta">
-            <span><i class="fas fa-euro-sign"></i> ${getBudgetLabel(req.budget)}</span>
-            <span><i class="fas fa-calendar"></i> ${formatDate(req.created_at)}</span>
+            <span><svg class="ic"><use href="#fa-euro-sign"></use></svg> ${getBudgetLabel(req.budget)}</span>
+            <span><svg class="ic"><use href="#fa-calendar"></use></svg> ${formatDate(req.created_at)}</span>
           </div>
           ${req.deadline ? `
             <div class="deadline-info ${isDeadlineSoon(req.deadline) ? 'urgent' : ''}">
-              <i class="fas fa-calendar-alt"></i>
+              <svg class="ic"><use href="#fa-calendar-alt"></use></svg>
               <span>Deadline: ${formatDate(req.deadline)}</span>
               ${getDaysRemaining(req.deadline)}
             </div>
@@ -134,7 +134,7 @@ async function loadRequests() {
           ${req.progress > 0 || req.status === 'in_progress' ? `
             <div class="progress-section">
               <div class="progress-header">
-                <span><i class="fas fa-tasks"></i> Fortschritt</span>
+                <span><svg class="ic"><use href="#fa-tasks"></use></svg> Fortschritt</span>
                 <span class="progress-percent">${req.progress || 0}%</span>
               </div>
               <div class="progress-bar-track">
@@ -167,7 +167,7 @@ async function openRequest(id) {
         <div class="progress-card">
           <div class="progress-card-header">
             <span class="progress-card-title">
-              <i class="fas fa-chart-line"></i>
+              <svg class="ic"><use href="#fa-chart-line"></use></svg>
               Projektfortschritt
             </span>
             <span class="progress-card-value">${request.progress || 0}%</span>
@@ -187,7 +187,7 @@ async function openRequest(id) {
       ${request.deadline ? `
         <div class="deadline-card ${isDeadlineSoon(request.deadline) ? 'urgent' : ''}">
           <div class="deadline-card-icon">
-            <i class="fas fa-calendar-alt"></i>
+            <svg class="ic"><use href="#fa-calendar-alt"></use></svg>
           </div>
           <div class="deadline-card-content">
             <span class="deadline-card-label">Deadline</span>
@@ -240,7 +240,7 @@ async function loadMessages(requestId) {
     if (messages.length === 0) {
       container.innerHTML = `
         <div style="text-align: center; color: var(--text-muted); padding: 40px;">
-          <i class="fas fa-comments" style="font-size: 2.5rem; margin-bottom: 12px; display: block;"></i>
+          <svg class="ic" style="font-size: 2.5rem; margin-bottom: 12px; display: block;"><use href="#fa-comments"></use></svg>
           Noch keine Nachrichten.<br>Schreiben Sie uns!
         </div>
       `;
@@ -356,7 +356,7 @@ function renderFileAttachment(filePath, originalName) {
       <div class="file-attachment image-attachment">
         <img src="${filePath}" alt="${escapeHtml(originalName)}" class="file-preview-image" loading="lazy">
         <a href="${filePath}" target="_blank" class="file-download-link">
-          <i class="fas fa-download"></i> ${escapeHtml(originalName)}
+          <svg class="ic"><use href="#fa-download"></use></svg> ${escapeHtml(originalName)}
         </a>
       </div>
     `;
@@ -366,15 +366,15 @@ function renderFileAttachment(filePath, originalName) {
     return `
       <div class="file-attachment pdf-attachment">
         <div class="pdf-preview">
-          <i class="fas fa-file-pdf"></i>
+          <svg class="ic"><use href="#fa-file-pdf"></use></svg>
           <span>PDF Dokument</span>
         </div>
         <div class="file-attachment-info">
           <a href="${filePath}" target="_blank" class="file-view-link">
-            <i class="fas fa-external-link-alt"></i> Öffnen
+            <svg class="ic"><use href="#fa-external-link-alt"></use></svg> Öffnen
           </a>
           <a href="${filePath}" download class="file-download-link">
-            <i class="fas fa-download"></i> ${escapeHtml(originalName)}
+            <svg class="ic"><use href="#fa-download"></use></svg> ${escapeHtml(originalName)}
           </a>
         </div>
       </div>
@@ -389,7 +389,7 @@ function renderFileAttachment(filePath, originalName) {
           Ihr Browser unterstützt kein Video.
         </video>
         <a href="${filePath}" download class="file-download-link">
-          <i class="fas fa-download"></i> ${escapeHtml(originalName)}
+          <svg class="ic"><use href="#fa-download"></use></svg> ${escapeHtml(originalName)}
         </a>
       </div>
     `;
@@ -403,7 +403,7 @@ function renderFileAttachment(filePath, originalName) {
           Ihr Browser unterstützt kein Audio.
         </audio>
         <a href="${filePath}" download class="file-download-link">
-          <i class="fas fa-download"></i> ${escapeHtml(originalName)}
+          <svg class="ic"><use href="#fa-download"></use></svg> ${escapeHtml(originalName)}
         </a>
       </div>
     `;
@@ -412,9 +412,9 @@ function renderFileAttachment(filePath, originalName) {
   // Default file attachment
   return `
     <a href="${filePath}" target="_blank" class="chat-message-file">
-      <i class="fas ${fileIcon}"></i>
+      ${iconSvg(fileIcon)}
       <span>${escapeHtml(originalName)}</span>
-      <i class="fas fa-download download-icon"></i>
+      <svg class="ic"><use href="#fa-download"></use></svg>
     </a>
   `;
 }
@@ -425,7 +425,7 @@ function openImageModal(src, alt) {
   modal.innerHTML = `
     <div class="image-modal-backdrop"></div>
     <div class="image-modal-content">
-      <button class="image-modal-close"><i class="fas fa-times"></i></button>
+      <button class="image-modal-close"><svg class="ic"><use href="#fa-times"></use></svg></button>
       <img src="${src}" alt="${escapeHtml(alt)}">
       <div class="image-modal-caption">${escapeHtml(alt)}</div>
     </div>
@@ -587,7 +587,7 @@ async function loadDocuments(requestId) {
     if (documents.length === 0) {
       container.innerHTML = `
         <div class="documents-empty">
-          <i class="fas fa-file-alt"></i>
+          <svg class="ic"><use href="#fa-file-alt"></use></svg>
           <p>Keine Dokumente vorhanden</p>
         </div>
       `;
@@ -599,20 +599,20 @@ async function loadDocuments(requestId) {
       return `
         <a href="${doc.file_path || '#'}" class="document-item" target="_blank" ${!doc.file_path ? 'onclick="return false;"' : ''}>
           <div class="document-icon ${doc.type}">
-            <i class="fas ${iconClass}"></i>
+            ${iconSvg(iconClass)}
           </div>
           <div class="document-info">
             <div class="document-title">${escapeHtml(doc.title)}</div>
             <div class="document-meta">${formatDate(doc.created_at)}</div>
           </div>
-          ${doc.file_path ? '<i class="fas fa-download document-download"></i>' : ''}
+          ${doc.file_path ? '<svg class="ic"><use href="#fa-download"></use></svg>' : ''}
         </a>
       `;
     }).join('');
   } catch (e) {
     container.innerHTML = `
       <div class="documents-empty">
-        <i class="fas fa-file-alt"></i>
+        <svg class="ic"><use href="#fa-file-alt"></use></svg>
         <p>Keine Dokumente vorhanden</p>
       </div>
     `;
@@ -641,10 +641,10 @@ function initPortalNavigation() {
 async function loadInvoices() {
   const el = document.getElementById('invoices-list');
   if (!el) return;
-  el.innerHTML = '<div class="empty-state"><i class="fas fa-spinner fa-spin"></i></div>';
+  el.innerHTML = '<div class="empty-state"><svg class="ic spin"><use href="#fa-spinner"></use></svg></div>';
   try {
     const rows = await api('/customer/invoices');
-    if (!rows.length) { el.innerHTML = '<div class="empty-state"><i class="fas fa-file-invoice"></i><h3>Keine Rechnungen</h3><p>Hier erscheinen deine Rechnungen, sobald welche erstellt wurden.</p></div>'; return; }
+    if (!rows.length) { el.innerHTML = '<div class="empty-state"><svg class="ic"><use href="#fa-file-invoice"></use></svg><h3>Keine Rechnungen</h3><p>Hier erscheinen deine Rechnungen, sobald welche erstellt wurden.</p></div>'; return; }
     const SL = { 'bezahlt': 'Bezahlt', 'offen': 'Offen', 'überfällig': 'Überfällig' };
     const SC = { 'bezahlt': 'paid', 'offen': 'open', 'überfällig': 'overdue' };
     el.innerHTML = rows.map(inv => `<div class="inv-item" onclick="openInvoice(${inv.id})">
@@ -655,7 +655,7 @@ async function loadInvoices() {
       <div class="inv-right">
         <div class="inv-total">${(inv.total || 0).toLocaleString('de-DE', { minimumFractionDigits: 2 })} €</div>
         <span class="inv-status ${SC[inv.status] || 'open'}">${SL[inv.status] || escapeHtml(inv.status || '')}</span>
-        ${inv.payment_link && inv.status !== 'bezahlt' ? `<a class="inv-pay" href="${escapeHtml(inv.payment_link)}" target="_blank" rel="noopener" onclick="event.stopPropagation()"><i class="fas fa-credit-card"></i> Bezahlen</a>` : ''}
+        ${inv.payment_link && inv.status !== 'bezahlt' ? `<a class="inv-pay" href="${escapeHtml(inv.payment_link)}" target="_blank" rel="noopener" onclick="event.stopPropagation()"><svg class="ic"><use href="#fa-credit-card"></use></svg> Bezahlen</a>` : ''}
       </div>
     </div>`).join('');
   } catch (e) { el.innerHTML = '<div class="empty-state">Rechnungen nicht abrufbar.</div>'; }
@@ -740,7 +740,7 @@ function loadFAQs() {
     <div class="faq-item" data-faq-id="${index}">
       <div class="faq-question" onclick="toggleFAQ(${index})">
         <span>${escapeHtml(faq.question)}</span>
-        <i class="fas fa-chevron-down faq-toggle"></i>
+        <svg class="ic"><use href="#fa-chevron-down"></use></svg>
       </div>
       <div class="faq-answer">
         <p>${escapeHtml(faq.answer)}</p>
@@ -772,7 +772,7 @@ async function loadMyAppointments() {
 
   container.innerHTML = `
     <div style="text-align: center; padding: 20px;">
-      <i class="fas fa-spinner fa-spin" style="color: var(--primary);"></i>
+      <svg class="ic spin" style="color: var(--primary);"><use href="#fa-spinner"></use></svg>
     </div>
   `;
 
@@ -782,7 +782,7 @@ async function loadMyAppointments() {
     if (appointments.length === 0) {
       container.innerHTML = `
         <div class="appointments-empty">
-          <i class="fas fa-calendar-times"></i>
+          <svg class="ic"><use href="#fa-calendar-times"></use></svg>
           <p>Keine Termine geplant</p>
         </div>
       `;
@@ -792,27 +792,27 @@ async function loadMyAppointments() {
     container.innerHTML = appointments.map(apt => `
       <div class="appointment-card ${apt.status}">
         <div class="appointment-date">
-          <i class="fas fa-calendar"></i>
+          <svg class="ic"><use href="#fa-calendar"></use></svg>
           <span>${formatDate(apt.date)}</span>
         </div>
         <div class="appointment-time">
-          <i class="fas fa-clock"></i>
+          <svg class="ic"><use href="#fa-clock"></use></svg>
           <span>${apt.time_slot}</span>
         </div>
         <div class="appointment-type">
-          <i class="fas fa-tag"></i>
+          <svg class="ic"><use href="#fa-tag"></use></svg>
           <span>${getAppointmentTypeLabel(apt.type)}</span>
         </div>
         <div class="appointment-status ${apt.status}">
           ${getAppointmentStatusLabel(apt.status)}
         </div>
-        ${apt.notes ? `<div class="appointment-notes"><i class="fas fa-sticky-note"></i> ${escapeHtml(apt.notes)}</div>` : ''}
+        ${apt.notes ? `<div class="appointment-notes"><svg class="ic"><use href="#fa-sticky-note"></use></svg> ${escapeHtml(apt.notes)}</div>` : ''}
       </div>
     `).join('');
   } catch (e) {
     container.innerHTML = `
       <div class="appointments-empty">
-        <i class="fas fa-exclamation-triangle"></i>
+        <svg class="ic"><use href="#fa-exclamation-triangle"></use></svg>
         <p>Fehler beim Laden der Termine</p>
       </div>
     `;
@@ -850,7 +850,7 @@ async function loadAvailableSlots() {
 
   slotsContainer.innerHTML = `
     <div style="text-align: center; padding: 10px;">
-      <i class="fas fa-spinner fa-spin"></i> Lade verfügbare Zeiten...
+      <svg class="ic spin"><use href="#fa-spinner"></use></svg> Lade verfügbare Zeiten...
     </div>
   `;
 
@@ -908,7 +908,7 @@ async function bookAppointment() {
 
   const bookBtn = document.getElementById('book-appointment-btn');
   bookBtn.disabled = true;
-  bookBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Buche...';
+  bookBtn.innerHTML = '<svg class="ic spin"><use href="#fa-spinner"></use></svg> Buche...';
 
   try {
     await api('/appointments', {
@@ -933,7 +933,7 @@ async function bookAppointment() {
     alert(e.message);
   } finally {
     bookBtn.disabled = false;
-    bookBtn.innerHTML = '<i class="fas fa-calendar-check"></i> Termin buchen';
+    bookBtn.innerHTML = '<svg class="ic"><use href="#fa-calendar-check"></use></svg> Termin buchen';
   }
 }
 
@@ -949,10 +949,10 @@ function getAppointmentTypeLabel(type) {
 
 function getAppointmentStatusLabel(status) {
   const labels = {
-    'pending': '<i class="fas fa-clock"></i> Ausstehend',
-    'confirmed': '<i class="fas fa-check"></i> Bestätigt',
-    'cancelled': '<i class="fas fa-times"></i> Abgesagt',
-    'completed': '<i class="fas fa-check-double"></i> Abgeschlossen'
+    'pending': '<svg class="ic"><use href="#fa-clock"></use></svg> Ausstehend',
+    'confirmed': '<svg class="ic"><use href="#fa-check"></use></svg> Bestätigt',
+    'cancelled': '<svg class="ic"><use href="#fa-times"></use></svg> Abgesagt',
+    'completed': '<svg class="ic"><use href="#fa-check-double"></use></svg> Abgeschlossen'
   };
   return labels[status] || status;
 }
@@ -960,3 +960,10 @@ function getAppointmentStatusLabel(status) {
 // ==================== INIT ====================
 checkAuth();
 initPortalNavigation();
+
+// SVG-Icon aus (evtl. gespeicherter Font-Awesome-)Klasse rendern – nutzt das lokale Sprite.
+function iconSvg(faClass, style) {
+  const m = String(faClass || '').match(/fa-[a-z0-9-]+/);
+  const id = m ? m[0] : 'fa-circle';
+  return `<svg class="ic"${style ? ` style="${style}"` : ''}><use href="#${id}"></use></svg>`;
+}

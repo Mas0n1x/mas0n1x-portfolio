@@ -1752,3 +1752,8 @@ h1, h2,
     font-size: 1rem;
   }
 }
+
+/* SVG-Icons (ersetzen Font-Awesome) */
+.ic{width:1em;height:1em;display:inline-block;vertical-align:-0.125em;flex-shrink:0;stroke:currentColor;fill:none}
+.ic.spin{animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
