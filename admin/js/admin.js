@@ -3866,6 +3866,14 @@ function updateTemplateStats(templates) {
   if (catEl) catEl.textContent = categories.length;
 }
 
+// Platzhalter in Vorlagen lesbar als Pills darstellen (statt {{KUNDE_NAME}})
+const TPL_VARS = { KUNDE_NAME:'Kundenname', ANFRAGE_ID:'Anfrage-ID', PROJEKT_TYP:'Projekttyp', PROJEKT_BUDGET:'Budget', PROJEKT_ZEITRAHMEN:'Zeitrahmen', PROJEKT_BESCHREIBUNG:'Beschreibung', DEADLINE:'Deadline', PROJEKT_STATUS:'Status', PROJEKT_FORTSCHRITT:'Fortschritt', DATUM:'Datum' };
+function tplLabel(n){ return TPL_VARS[n] || n.toLowerCase().replace(/_/g,' ').replace(/\b\w/g, c => c.toUpperCase()); }
+function formatTemplateText(text){
+  const s = escapeHtml((text || '').replace(/\s+/g, ' ').trim());
+  return s.replace(/\{\{\{?([A-Z_]+)\}?\}\}/g, (m, n) => `<span class="tpl-var">${tplLabel(n)}</span>`);
+}
+
 function renderTemplates(templates) {
   const container = document.getElementById('templates-list');
   if (!container) return;
@@ -3887,8 +3895,8 @@ function renderTemplates(templates) {
         <h4>${escapeHtml(template.name)}</h4>
         <span class="template-category">${escapeHtml(template.category || 'Allgemein')}</span>
       </div>
-      ${template.subject ? `<div class="template-subject"><strong>Betreff:</strong> ${escapeHtml(template.subject)}</div>` : ''}
-      <p class="template-preview">${escapeHtml(template.content.substring(0, 150))}${template.content.length > 150 ? '...' : ''}</p>
+      ${template.subject ? `<div class="template-subject"><strong>Betreff:</strong> ${formatTemplateText(template.subject)}</div>` : ''}
+      <div class="template-preview">${formatTemplateText(template.content)}</div>
       <div class="template-actions">
         <button class="btn btn-small btn-primary" onclick="copyTemplate(${template.id})">
           <svg class="ic"><use href="#fa-copy"></use></svg> Kopieren

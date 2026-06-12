@@ -4237,6 +4237,8 @@ body {
   padding: 24px;
   cursor: pointer;
   transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
 }
 
 .template-card:hover {
@@ -4269,19 +4271,30 @@ body {
 .template-preview {
   color: var(--text-secondary);
   font-size: 0.85rem;
-  line-height: 1.5;
-  max-height: 80px;
+  line-height: 1.7;
   overflow: hidden;
-  text-overflow: ellipsis;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
 }
+.tpl-var {
+  display: inline-block;
+  padding: 0 7px;
+  margin: 0 1px;
+  border-radius: 6px;
+  background: var(--accent-glow);
+  color: var(--accent);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82em;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.template-subject .tpl-var { font-size: 0.8em; }
 
 .template-actions {
   display: flex;
   gap: 8px;
-  margin-top: 16px;
+  margin-top: auto;
   padding-top: 16px;
   border-top: 1px solid var(--border);
 }
