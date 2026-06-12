@@ -1390,64 +1390,6 @@ app.get('/api/customer/documents/:requestId', requireCustomerAuth, (req, res) =>
   res.json(documents);
 });
 
-// Customer Reviews
-app.get('/api/customer/review/:requestId', requireCustomerAuth, (req, res) => {
-  const requestId = parseInt(req.params.requestId);
-
-  const review = dbGet(
-    'SELECT * FROM reviews WHERE request_id = ? AND customer_id = ?',
-    [requestId, req.session.customerId]
-  );
-
-  if (!review) {
-    return res.status(404).json({ error: 'Keine Bewertung gefunden' });
-  }
-
-  res.json(review);
-});
-
-app.post('/api/customer/review', requireCustomerAuth, (req, res) => {
-  const { request_id, rating, title, content, is_public } = req.body;
-
-  // Verify request belongs to customer and is completed
-  const request = dbGet(
-    'SELECT id, status FROM project_requests WHERE id = ? AND customer_id = ?',
-    [request_id, req.session.customerId]
-  );
-
-  if (!request) {
-    return res.status(404).json({ error: 'Anfrage nicht gefunden' });
-  }
-
-  if (request.status !== 'completed') {
-    return res.status(400).json({ error: 'Bewertungen sind nur für abgeschlossene Projekte möglich' });
-  }
-
-  // Check if review already exists
-  const existing = dbGet(
-    'SELECT id FROM reviews WHERE request_id = ? AND customer_id = ?',
-    [request_id, req.session.customerId]
-  );
-
-  if (existing) {
-    return res.status(400).json({ error: 'Sie haben dieses Projekt bereits bewertet' });
-  }
-
-  dbRun(
-    `INSERT INTO reviews (request_id, customer_id, rating, title, content, is_public, is_approved)
-     VALUES (?, ?, ?, ?, ?, ?, 0)`,
-    [request_id, req.session.customerId, rating, title, content, is_public ? 1 : 0]
-  );
-
-  adminNotify('review', {
-    subject: 'Neue Bewertung erhalten',
-    html: `<h2>Neue Bewertung (${esc(rating)}★)</h2><p><b>${esc(title)}</b></p><p>${esc(content)}</p>`,
-    discordText: `**${rating}★ — ${String(title || '').substring(0, 200)}**\n${String(content || '').substring(0, 1500)}`
-  });
-
-  res.json({ success: true });
-});
-
 // ==================== PROJECT REQUEST ROUTES ====================
 
 // ===== Benachrichtigungs-Routing (Einstellungen → Benachrichtigungen) =====
@@ -1934,75 +1876,6 @@ app.put('/api/projects/:id/progress', requireAuth, (req, res) => {
 });
 
 // ==================== REVIEWS/TESTIMONIALS API ====================
-// Customer submits a review
-app.post('/api/reviews', requireCustomerAuth, (req, res) => {
-  const { request_id, rating, title, content, is_public } = req.body;
-
-  // Check if request belongs to customer and is completed
-  const request = dbGet(
-    'SELECT * FROM project_requests WHERE id = ? AND customer_id = ? AND status = ?',
-    [request_id, req.session.customerId, 'completed']
-  );
-
-  if (!request) {
-    return res.status(400).json({ error: 'Nur abgeschlossene Projekte können bewertet werden' });
-  }
-
-  // Check if already reviewed
-  const existingReview = dbGet(
-    'SELECT id FROM reviews WHERE request_id = ? AND customer_id = ?',
-    [request_id, req.session.customerId]
-  );
-
-  if (existingReview) {
-    return res.status(400).json({ error: 'Dieses Projekt wurde bereits bewertet' });
-  }
-
-  const result = dbRun(
-    'INSERT INTO reviews (request_id, customer_id, rating, title, content, is_public) VALUES (?, ?, ?, ?, ?, ?)',
-    [request_id, req.session.customerId, rating, title || '', content || '', is_public ? 1 : 0]
-  );
-
-  res.json({ success: true, id: result.lastInsertRowid });
-});
-
-// Get customer's reviews
-app.get('/api/reviews', requireCustomerAuth, (req, res) => {
-  const reviews = dbAll(
-    'SELECT r.*, pr.project_type FROM reviews r JOIN project_requests pr ON r.request_id = pr.id WHERE r.customer_id = ?',
-    [req.session.customerId]
-  );
-  res.json(reviews);
-});
-
-// Admin: Get all reviews
-app.get('/api/admin/reviews', requireAuth, (req, res) => {
-  const reviews = dbAll(`
-    SELECT r.*, pr.project_type, c.email as customer_email
-    FROM reviews r
-    JOIN project_requests pr ON r.request_id = pr.id
-    JOIN customers c ON r.customer_id = c.id
-    ORDER BY r.created_at DESC
-  `);
-  res.json(reviews);
-});
-
-// Admin: Approve/update review
-app.put('/api/admin/reviews/:id', requireAuth, (req, res) => {
-  const { is_approved, is_public } = req.body;
-  dbRun(
-    'UPDATE reviews SET is_approved = ?, is_public = ? WHERE id = ?',
-    [is_approved ? 1 : 0, is_public ? 1 : 0, req.params.id]
-  );
-  res.json({ success: true });
-});
-
-// Admin: Delete review
-app.delete('/api/admin/reviews/:id', requireAuth, (req, res) => {
-  dbRun('DELETE FROM reviews WHERE id = ?', [req.params.id]);
-  res.json({ success: true });
-});
-
 // Admin: Fix umlauts in database
 app.post('/api/admin/fix-umlauts', requireAuth, (req, res) => {
   try {
@@ -2020,19 +1893,6 @@ app.post('/api/admin/fix-umlauts', requireAuth, (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-});
-
-// Public: Get approved testimonials (for portfolio)
-app.get('/api/testimonials', (req, res) => {
-  const testimonials = dbAll(`
-    SELECT r.rating, r.title, r.content, r.created_at, c.name as customer_name, c.company as customer_company
-    FROM reviews r
-    JOIN customers c ON r.customer_id = c.id
-    WHERE r.is_approved = 1 AND r.is_public = 1
-    ORDER BY r.created_at DESC
-    LIMIT 10
-  `);
-  res.json(testimonials);
 });
 
 // ==================== MESSAGE TEMPLATES API ====================
@@ -2155,72 +2015,6 @@ app.get('/api/admin/analytics', requireAuth, (req, res) => {
 });
 
 // ==================== FAQ API ====================
-// Public: Get all FAQs
-app.get('/api/faqs', (req, res) => {
-  const faqs = dbAll('SELECT * FROM faqs WHERE is_active = 1 ORDER BY sort_order, id');
-  res.json(faqs);
-});
-
-// Admin: Get all FAQs (including inactive)
-app.get('/api/admin/faqs', requireAuth, (req, res) => {
-  const faqs = dbAll('SELECT * FROM faqs ORDER BY sort_order, id');
-  res.json(faqs);
-});
-
-app.post('/api/admin/faqs', requireAuth, (req, res) => {
-  const { question, answer, category, sort_order } = req.body;
-  const result = dbRun(
-    'INSERT INTO faqs (question, answer, category, sort_order, is_active) VALUES (?, ?, ?, ?, 1)',
-    [question, answer, category || 'general', sort_order || 0]
-  );
-  res.json({ success: true, id: result.lastInsertRowid });
-});
-
-app.put('/api/admin/faqs/:id', requireAuth, (req, res) => {
-  const { question, answer, category, sort_order, is_active } = req.body;
-
-  // Build dynamic update query to support partial updates
-  const updates = [];
-  const values = [];
-
-  if (question !== undefined) {
-    updates.push('question = ?');
-    values.push(question);
-  }
-  if (answer !== undefined) {
-    updates.push('answer = ?');
-    values.push(answer);
-  }
-  if (category !== undefined) {
-    updates.push('category = ?');
-    values.push(category);
-  }
-  if (sort_order !== undefined) {
-    updates.push('sort_order = ?');
-    values.push(sort_order);
-  }
-  if (is_active !== undefined) {
-    updates.push('is_active = ?');
-    values.push(is_active ? 1 : 0);
-  }
-
-  if (updates.length === 0) {
-    return res.status(400).json({ error: 'No fields to update' });
-  }
-
-  values.push(req.params.id);
-  dbRun(
-    `UPDATE faqs SET ${updates.join(', ')} WHERE id = ?`,
-    values
-  );
-  res.json({ success: true });
-});
-
-app.delete('/api/admin/faqs/:id', requireAuth, (req, res) => {
-  dbRun('DELETE FROM faqs WHERE id = ?', [req.params.id]);
-  res.json({ success: true });
-});
-
 // ==================== APPOINTMENTS API ====================
 // Customer: Get available time slots
 app.get('/api/appointments/available', (req, res) => {
@@ -2611,30 +2405,6 @@ app.get('/kunde', (req, res) => {
 });
 
 // ==================== PUBLIC API ROUTES ====================
-
-// Public testimonials (approved and public reviews)
-app.get('/api/public/testimonials', (req, res) => {
-  const testimonials = dbAll(`
-    SELECT r.id, r.rating, r.title, r.content, r.created_at, c.name as customer_name, c.company as customer_company
-    FROM reviews r
-    LEFT JOIN customers c ON r.customer_id = c.id
-    WHERE r.is_approved = 1 AND r.is_public = 1
-    ORDER BY r.created_at DESC
-    LIMIT 10
-  `);
-  res.json(testimonials);
-});
-
-// Public FAQs (active FAQs)
-app.get('/api/public/faqs', (req, res) => {
-  const faqs = dbAll(`
-    SELECT id, question, answer, category
-    FROM faqs
-    WHERE is_active = 1
-    ORDER BY sort_order ASC, created_at ASC
-  `);
-  res.json(faqs);
-});
 
 // ==================== CONTRACT TEMPLATES API ====================
 // Get all contract templates
