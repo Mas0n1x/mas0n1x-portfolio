@@ -856,6 +856,7 @@ function mapGithubProject(p) {
     status: p.status || 'completed',
     stars: p.gh_stars || 0,
     language: p.gh_language || null,
+    pushed_at: p.gh_pushed_at || null,
     private: !!p.gh_private,
     repo_url: p.gh_url
   };
