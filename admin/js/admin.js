@@ -75,18 +75,37 @@ function showDashboard() {
   loadMaintenanceStatus();
 }
 
+let loginPending2fa = false;
 loginForm.addEventListener('submit', async (e) => {
   e.preventDefault();
-  const password = document.getElementById('password').value;
+  loginError.textContent = '';
 
+  // Schritt 2: 2FA-Code prüfen (direkter fetch, damit api()-401-Handling den Screen nicht resettet)
+  if (loginPending2fa) {
+    const code = document.getElementById('login-2fa-code').value;
+    try {
+      const r = await fetch('/api/login/2fa', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code }) });
+      if (!r.ok) throw new Error('bad');
+      isAuthenticated = true; loginPending2fa = false;
+      showDashboard(); showToast('Erfolgreich angemeldet!', 'success');
+    } catch (err) { loginError.textContent = 'Code ungültig!'; }
+    return;
+  }
+
+  // Schritt 1: Passwort
+  const password = document.getElementById('password').value;
   try {
-    await api('/login', {
-      method: 'POST',
-      body: { password },
-    });
+    const res = await api('/login', { method: 'POST', body: { password } });
+    if (res && res.twofa) {
+      loginPending2fa = true;
+      document.getElementById('login-pw-group').style.display = 'none';
+      document.getElementById('login-2fa-group').style.display = 'block';
+      document.getElementById('login-btn-text').textContent = 'Bestätigen';
+      document.getElementById('login-2fa-code').focus();
+      return;
+    }
     isAuthenticated = true;
-    showDashboard();
-    showToast('Erfolgreich angemeldet!', 'success');
+    showDashboard(); showToast('Erfolgreich angemeldet!', 'success');
   } catch (e) {
     loginError.textContent = 'Falsches Passwort!';
   }
@@ -3208,6 +3227,8 @@ document.querySelectorAll('.nav-item[data-section]').forEach(item => {
       loadBusinessData();
       loadIntegrations();
       loadNotifyRouting();
+      load2faStatus();
+      loadLoginHistory();
     }
   });
 });
@@ -3280,6 +3301,62 @@ document.getElementById('save-notify-btn')?.addEventListener('click', async () =
   try { await api('/settings', { method: 'POST', body }); showToast('Benachrichtigungs-Routing gespeichert', 'success'); }
   catch (e) { showToast(e.message || 'Speichern fehlgeschlagen', 'error'); }
 });
+
+// ==================== ZWEI-FAKTOR (2FA) ====================
+async function load2faStatus() {
+  try {
+    const d = await api('/2fa/status');
+    const on = !!d.enabled;
+    const badge = document.getElementById('twofa-badge');
+    if (badge) { badge.textContent = on ? 'An' : 'Aus'; badge.className = 'set-badge ' + (on ? 'on' : 'off'); }
+    const show = (id, v) => { const el = document.getElementById(id); if (el) el.style.display = v ? 'block' : 'none'; };
+    show('twofa-off', !on); show('twofa-on', on); show('twofa-setup', false); show('twofa-backup', false);
+  } catch (e) { console.error('2FA-Status:', e); }
+}
+document.getElementById('twofa-setup-btn')?.addEventListener('click', async () => {
+  try {
+    const d = await api('/2fa/setup', { method: 'POST' });
+    document.getElementById('twofa-qr-img').src = d.qr;
+    document.getElementById('twofa-secret').textContent = d.secret;
+    document.getElementById('twofa-off').style.display = 'none';
+    document.getElementById('twofa-setup').style.display = 'block';
+  } catch (e) { showToast('Setup fehlgeschlagen', 'error'); }
+});
+document.getElementById('twofa-cancel-btn')?.addEventListener('click', load2faStatus);
+document.getElementById('twofa-enable-btn')?.addEventListener('click', async () => {
+  const code = document.getElementById('twofa-code').value;
+  try {
+    const d = await api('/2fa/enable', { method: 'POST', body: { code } });
+    document.getElementById('twofa-setup').style.display = 'none';
+    document.getElementById('twofa-codes').innerHTML = (d.backupCodes || []).map(c => `<code>${escapeHtml(c)}</code>`).join('');
+    document.getElementById('twofa-backup').style.display = 'block';
+    const badge = document.getElementById('twofa-badge');
+    badge.textContent = 'An'; badge.className = 'set-badge on';
+    document.getElementById('twofa-on').style.display = 'block';
+    showToast('2FA aktiviert', 'success');
+  } catch (e) { showToast(e.message || 'Code ungültig', 'error'); }
+});
+document.getElementById('twofa-disable-btn')?.addEventListener('click', async () => {
+  const password = prompt('Zur Bestätigung dein Admin-Passwort eingeben:');
+  if (!password) return;
+  try { await api('/2fa/disable', { method: 'POST', body: { password } }); showToast('2FA deaktiviert', 'success'); load2faStatus(); }
+  catch (e) { showToast(e.message || 'Passwort falsch', 'error'); }
+});
+
+// ==================== LOGIN-HISTORIE ====================
+async function loadLoginHistory() {
+  const el = document.getElementById('login-history');
+  if (!el) return;
+  try {
+    const rows = await api('/admin/login-history');
+    if (!rows.length) { el.innerHTML = '<div class="intg-loading">Noch keine Anmeldungen.</div>'; return; }
+    el.innerHTML = rows.map(r => {
+      const cls = r.success ? 'ok' : 'bad';
+      const ua = (r.user_agent || '').slice(0, 60);
+      return `<div class="lhist-row"><span class="lhist-dot ${cls}"></span><span class="lhist-ts">${escapeHtml(r.ts || '')}</span><span class="lhist-note">${escapeHtml(r.note || '')} · <span style="color:var(--text-muted)">${escapeHtml(ua)}</span></span><span class="lhist-ip">${escapeHtml(r.ip || '')}</span></div>`;
+    }).join('');
+  } catch (e) { el.innerHTML = '<div class="intg-loading">Historie nicht abrufbar.</div>'; }
+}
 
 // ==================== EMAIL SETTINGS ====================
 async function loadEmailSettings() {

@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="css/admin.css?v=15">
+  <link rel="stylesheet" href="css/admin.css?v=16">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
@@ -26,12 +26,16 @@
       </div>
       <h1>Admin Login</h1>
       <form id="login-form">
-        <div class="form-group">
+        <div class="form-group" id="login-pw-group">
           <label for="password">Passwort</label>
-          <input type="password" id="password" name="password" placeholder="Admin Passwort eingeben" required>
+          <input type="password" id="password" name="password" placeholder="Admin Passwort eingeben">
+        </div>
+        <div class="form-group" id="login-2fa-group" style="display:none">
+          <label for="login-2fa-code">2FA-Code</label>
+          <input type="text" id="login-2fa-code" inputmode="numeric" placeholder="123456 oder Backup-Code" autocomplete="off">
         </div>
         <button type="submit" class="btn-primary">
-          <i class="fas fa-sign-in-alt"></i> Anmelden
+          <i class="fas fa-sign-in-alt"></i> <span id="login-btn-text">Anmelden</span>
         </button>
         <p id="login-error" class="error-message"></p>
       </form>
@@ -1963,6 +1967,43 @@
             </form>
           </div>
 
+          <!-- Zwei-Faktor (2FA) -->
+          <div class="set-card">
+            <div class="set-eyebrow">Sicherheit</div>
+            <div class="set-head">
+              <h3><i class="fas fa-shield-halved"></i> Zwei-Faktor (2FA)</h3>
+              <span class="set-badge off" id="twofa-badge">Aus</span>
+            </div>
+            <p class="set-desc">Schützt den Login zusätzlich mit einem Authenticator-Code (TOTP).</p>
+            <div id="twofa-off" style="display:none">
+              <div class="set-actions"><button class="btn-primary" id="twofa-setup-btn"><i class="fas fa-qrcode"></i> 2FA einrichten</button></div>
+            </div>
+            <div id="twofa-on" style="display:none">
+              <div class="set-actions"><button class="btn-danger" id="twofa-disable-btn"><i class="fas fa-shield-virus"></i> 2FA deaktivieren</button></div>
+            </div>
+            <div id="twofa-setup" style="display:none">
+              <div class="set-divider"></div>
+              <p class="set-desc">1. Scanne den Code mit deiner Authenticator-App (Google Authenticator, Aegis, …).</p>
+              <div class="twofa-qr"><img id="twofa-qr-img" alt="2FA QR-Code"></div>
+              <p class="set-desc" style="margin-top:10px">Oder Secret manuell: <code id="twofa-secret"></code></p>
+              <div class="form-group"><label for="twofa-code">2. Code aus der App eingeben</label><input type="text" id="twofa-code" inputmode="numeric" placeholder="123456" autocomplete="off"></div>
+              <div class="set-actions"><button class="btn-primary" id="twofa-enable-btn"><i class="fas fa-check"></i> Aktivieren</button><button class="btn-secondary" id="twofa-cancel-btn">Abbrechen</button></div>
+            </div>
+            <div id="twofa-backup" style="display:none">
+              <div class="set-divider"></div>
+              <p class="set-desc"><b>Backup-Codes</b> — sicher aufbewahren! Jeder Code funktioniert einmal, falls du keinen App-Zugriff hast.</p>
+              <div class="twofa-codes" id="twofa-codes"></div>
+            </div>
+          </div>
+
+          <!-- Login-Historie -->
+          <div class="set-card wide">
+            <div class="set-eyebrow">Sicherheit</div>
+            <div class="set-head"><h3><i class="fas fa-clock-rotate-left"></i> Login-Historie</h3></div>
+            <p class="set-desc">Die letzten 20 Anmeldeversuche am Admin-Panel.</p>
+            <div id="login-history" class="lhist"><div class="intg-loading">Lade …</div></div>
+          </div>
+
           <div class="set-card">
             <div class="set-eyebrow">Daten</div>
             <div class="set-head"><h3><i class="fas fa-database"></i> Daten importieren</h3></div>
@@ -2307,6 +2348,6 @@
     </div>
   </div>
 
-  <script src="js/admin.js?v=15"></script>
+  <script src="js/admin.js?v=16"></script>
 </body>
 </html>

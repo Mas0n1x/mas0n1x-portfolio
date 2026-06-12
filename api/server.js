@@ -12,6 +12,8 @@ const bcrypt = require('bcryptjs');
 const multer = require('multer');
 const fs = require('fs');
 const crypto = require('crypto');
+const { authenticator } = require('otplib');
+const QRCode = require('qrcode');
 const DiscordBot = require('./discord-bot');
 
 const app = express();
@@ -83,6 +85,18 @@ async function initDatabase() {
     CREATE TABLE IF NOT EXISTS admin (
       id INTEGER PRIMARY KEY,
       password_hash TEXT NOT NULL
+    )
+  `);
+
+  // Login-Historie (Sicherheit)
+  db.run(`
+    CREATE TABLE IF NOT EXISTS login_log (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      ts TEXT DEFAULT (datetime('now')),
+      ip TEXT,
+      user_agent TEXT,
+      success INTEGER,
+      note TEXT
     )
   `);
 
@@ -582,16 +596,91 @@ const requestUpload = multer({
 
 // ==================== AUTH ROUTES ====================
 
+// ===== 2FA / Login-Historie (Sicherheit) =====
+function twofaEnabled() { return dbGet("SELECT value FROM settings WHERE key = 'twofa_enabled'")?.value === 'true'; }
+function logLogin(req, success, note) {
+  try {
+    dbRun('INSERT INTO login_log (ip, user_agent, success, note) VALUES (?, ?, ?, ?)',
+      [clientIp(req), (req.headers['user-agent'] || '').slice(0, 200), success ? 1 : 0, note || '']);
+  } catch (e) { /* logging darf den Login nie blockieren */ }
+}
+function verify2faCode(code) {
+  if (!code) return false;
+  const secret = dbGet("SELECT value FROM settings WHERE key = 'twofa_secret'")?.value;
+  if (secret && authenticator.check(String(code).replace(/\s/g, ''), secret)) return true;
+  // Einmal-Backup-Code (gehasht gespeichert)
+  const raw = dbGet("SELECT value FROM settings WHERE key = 'twofa_backup'")?.value;
+  if (raw) {
+    let codes = []; try { codes = JSON.parse(raw); } catch (e) {}
+    const h = crypto.createHash('sha256').update(String(code).trim().toLowerCase()).digest('hex');
+    const idx = codes.indexOf(h);
+    if (idx >= 0) { codes.splice(idx, 1); dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('twofa_backup', ?)", [JSON.stringify(codes)]); return true; }
+  }
+  return false;
+}
+
 app.post('/api/login', (req, res) => {
   const { password } = req.body;
   const admin = dbGet('SELECT password_hash FROM admin WHERE id = 1');
-
-  if (admin && bcrypt.compareSync(password, admin.password_hash)) {
-    req.session.authenticated = true;
-    res.json({ success: true });
-  } else {
-    res.status(401).json({ error: 'Invalid password' });
+  if (!admin || !bcrypt.compareSync(password || '', admin.password_hash)) {
+    logLogin(req, false, 'Falsches Passwort');
+    return res.status(401).json({ error: 'Invalid password' });
   }
+  if (twofaEnabled()) {
+    req.session.pending2fa = true;
+    return res.json({ success: false, twofa: true });
+  }
+  req.session.authenticated = true;
+  logLogin(req, true, 'Passwort');
+  res.json({ success: true });
+});
+
+app.post('/api/login/2fa', (req, res) => {
+  if (!req.session.pending2fa) return res.status(401).json({ error: 'Keine 2FA-Anmeldung ausstehend' });
+  if (verify2faCode(req.body.code)) {
+    req.session.authenticated = true;
+    delete req.session.pending2fa;
+    logLogin(req, true, '2FA');
+    return res.json({ success: true });
+  }
+  logLogin(req, false, '2FA-Code falsch');
+  res.status(401).json({ error: 'Code ungültig' });
+});
+
+app.get('/api/2fa/status', requireAuth, (req, res) => { res.json({ enabled: twofaEnabled() }); });
+
+app.post('/api/2fa/setup', requireAuth, async (req, res) => {
+  try {
+    const secret = authenticator.generateSecret();
+    dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('twofa_temp_secret', ?)", [secret]);
+    const label = dbGet("SELECT value FROM settings WHERE key = 'impressum_email'")?.value || 'admin';
+    const qr = await QRCode.toDataURL(authenticator.keyuri(label, 'Mas0n1x Admin', secret));
+    res.json({ qr, secret });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/2fa/enable', requireAuth, (req, res) => {
+  const temp = dbGet("SELECT value FROM settings WHERE key = 'twofa_temp_secret'")?.value;
+  if (!temp) return res.status(400).json({ error: 'Kein Setup gestartet' });
+  if (!authenticator.check(String(req.body.code || '').replace(/\s/g, ''), temp)) return res.status(400).json({ error: 'Code ungültig' });
+  const plain = Array.from({ length: 8 }, () => crypto.randomBytes(4).toString('hex'));
+  const hashes = plain.map(c => crypto.createHash('sha256').update(c).digest('hex'));
+  dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('twofa_secret', ?)", [temp]);
+  dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('twofa_enabled', ?)", ['true']);
+  dbRun("INSERT OR REPLACE INTO settings (key, value) VALUES ('twofa_backup', ?)", [JSON.stringify(hashes)]);
+  dbRun("DELETE FROM settings WHERE key = 'twofa_temp_secret'");
+  res.json({ success: true, backupCodes: plain });
+});
+
+app.post('/api/2fa/disable', requireAuth, (req, res) => {
+  const admin = dbGet('SELECT password_hash FROM admin WHERE id = 1');
+  if (!admin || !bcrypt.compareSync(req.body.password || '', admin.password_hash)) return res.status(401).json({ error: 'Passwort falsch' });
+  dbRun("DELETE FROM settings WHERE key IN ('twofa_secret','twofa_enabled','twofa_backup','twofa_temp_secret')");
+  res.json({ success: true });
+});
+
+app.get('/api/admin/login-history', requireAuth, (req, res) => {
+  res.json(dbAll("SELECT ts, ip, user_agent, success, note FROM login_log ORDER BY id DESC LIMIT 20"));
 });
 
 app.post('/api/logout', (req, res) => {

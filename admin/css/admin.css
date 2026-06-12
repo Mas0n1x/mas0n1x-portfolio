@@ -803,6 +803,19 @@ body {
 .ntf-chk{display:inline-flex;justify-self:center;cursor:pointer}
 .ntf-chk input{width:18px;height:18px;accent-color:var(--accent);cursor:pointer}
 .ntf-na{color:var(--text-muted);justify-self:center}
+.twofa-qr{background:#fff;padding:12px;border-radius:10px;display:inline-block}
+.twofa-qr img{display:block;width:160px;height:160px}
+.twofa-codes{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;max-width:360px}
+.twofa-codes code{font-family:'JetBrains Mono',monospace;font-size:.9rem;color:var(--accent);background:var(--bg-hover);border:1px solid var(--border);padding:8px 12px;border-radius:7px;text-align:center;letter-spacing:.05em}
+.lhist{display:flex;flex-direction:column;gap:1px}
+.lhist-row{display:grid;grid-template-columns:18px 160px 1fr 130px;align-items:center;gap:12px;padding:10px 12px;border-radius:8px;font-size:.84rem}
+.lhist-row:hover{background:var(--bg-hover)}
+.lhist-dot{width:8px;height:8px;border-radius:50%;justify-self:center}
+.lhist-dot.ok{background:var(--accent)}.lhist-dot.bad{background:var(--danger)}
+.lhist-ts{font-family:'JetBrains Mono',monospace;font-size:.76rem;color:var(--text-secondary)}
+.lhist-note{color:var(--text-primary)}
+.lhist-ip{font-family:'JetBrains Mono',monospace;font-size:.74rem;color:var(--text-muted);text-align:right;word-break:break-all}
+@media(max-width:700px){.lhist-row{grid-template-columns:14px 1fr}.lhist-ip,.lhist-ts{display:none}}
 @media(max-width:860px){.set-grid{grid-template-columns:1fr}}
 
 .settings-card h3 {
