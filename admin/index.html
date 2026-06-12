@@ -88,9 +88,6 @@
         <a href="#" class="nav-item" data-section="templates">
           <i class="fas fa-file-alt"></i> Vorlagen
         </a>
-        <a href="#" class="nav-item" data-section="backups">
-          <i class="fas fa-database"></i> Backups
-        </a>
 
         <div class="nav-category">System</div>
         <a href="#" class="nav-item" data-section="legal">
@@ -546,6 +543,12 @@
 
             <h4>Empfänger (Kunde)</h4>
             <div class="form-group">
+              <label>Portal-Kunde verknüpfen <span style="opacity:.6">(optional — Rechnung erscheint dann im Kundenportal)</span></label>
+              <select id="invoice-to-customer">
+                <option value="">— Kein Portal-Zugang —</option>
+              </select>
+            </div>
+            <div class="form-group">
               <label>Name / Firma</label>
               <input type="text" id="invoice-to-name" placeholder="Kunde GmbH">
             </div>
@@ -958,64 +961,6 @@
           </div>
           <div id="contracts-list" class="contracts-list">
             <!-- Contracts loaded dynamically -->
-          </div>
-        </div>
-      </section>
-
-      <!-- Backups Section -->
-      <section id="section-backups" class="content-section">
-        <div class="section-header">
-          <h1><i class="fas fa-database"></i> Backup-Verwaltung</h1>
-          <button id="create-backup-btn" class="btn-primary">
-            <i class="fas fa-plus"></i> Backup erstellen
-          </button>
-        </div>
-        <div class="info-box">
-          <i class="fas fa-info-circle"></i>
-          <span>Verwalte manuelle und automatische Backups deiner Datenbank. Automatische Backups werden täglich erstellt wenn aktiviert.</span>
-        </div>
-
-        <!-- Zahlungserinnerungen (Backup-Automatik liegt unter Einstellungen → Daten & Backup) -->
-        <div class="settings-card" style="margin-bottom: 24px;">
-          <h3><i class="fas fa-bell"></i> Zahlungserinnerungen</h3>
-          <div class="form-group">
-            <label class="checkbox-label">
-              <input type="checkbox" id="auto-payment-reminders">
-              <span>Automatische Zahlungserinnerungen bei überfälligen Rechnungen</span>
-            </label>
-          </div>
-          <button id="save-backup-settings-btn" class="btn-primary" style="margin-top: 10px;">
-            <i class="fas fa-save"></i> Speichern
-          </button>
-        </div>
-
-        <!-- Backup Stats -->
-        <div class="dashboard-stats" style="margin-bottom: 24px;">
-          <div class="stat-card primary">
-            <div class="stat-icon"><i class="fas fa-database"></i></div>
-            <div class="stat-info">
-              <span class="stat-value" id="total-backups">0</span>
-              <span class="stat-label">Backups</span>
-            </div>
-          </div>
-          <div class="stat-card info">
-            <div class="stat-icon"><i class="fas fa-clock"></i></div>
-            <div class="stat-info">
-              <span class="stat-value" id="last-backup">-</span>
-              <span class="stat-label">Letztes Backup</span>
-            </div>
-          </div>
-        </div>
-
-        <div id="backups-list" class="backups-list">
-          <!-- Backups loaded dynamically -->
-        </div>
-
-        <!-- Email Logs -->
-        <div class="settings-card" style="margin-top: 24px;">
-          <h3><i class="fas fa-envelope"></i> E-Mail-Protokoll</h3>
-          <div id="email-logs-list" class="email-logs-list">
-            <!-- Email logs loaded dynamically -->
           </div>
         </div>
       </section>
@@ -1960,6 +1905,41 @@
             <div class="set-actions"><button class="btn-primary" id="save-backup-auto-btn"><i class="fas fa-save"></i> Speichern</button></div>
           </div>
 
+          <!-- Backup-Verwaltung (manuell + Liste) -->
+          <div class="set-card">
+            <div class="set-eyebrow">Daten</div>
+            <div class="set-head">
+              <h3><i class="fas fa-database"></i> Backup-Verwaltung</h3>
+              <button id="create-backup-btn" class="btn-secondary"><i class="fas fa-plus"></i> Backup erstellen</button>
+            </div>
+            <p class="set-desc">Erstelle manuelle Backups der Datenbank und lade sie herunter. Die Automatik konfigurierst du oben.</p>
+            <div class="set-hint">Backups gesamt: <code id="total-backups">0</code> · Letztes: <code id="last-backup">—</code></div>
+            <div id="backups-list" class="backups-list"></div>
+          </div>
+
+          <!-- Zahlungserinnerungen -->
+          <div class="set-card">
+            <div class="set-eyebrow">Daten</div>
+            <div class="set-head"><h3><i class="fas fa-bell"></i> Zahlungserinnerungen</h3></div>
+            <p class="set-desc">Versendet automatisch Erinnerungen bei überfälligen Rechnungen.</p>
+            <div class="form-group">
+              <label class="toggle-switch">
+                <input type="checkbox" id="auto-payment-reminders">
+                <span class="toggle-slider"></span>
+                <span class="toggle-label">Automatische Zahlungserinnerungen</span>
+              </label>
+            </div>
+            <div class="set-actions"><button id="save-backup-settings-btn" class="btn-primary"><i class="fas fa-save"></i> Speichern</button></div>
+          </div>
+
+          <!-- E-Mail-Protokoll -->
+          <div class="set-card">
+            <div class="set-eyebrow">Daten</div>
+            <div class="set-head"><h3><i class="fas fa-envelope"></i> E-Mail-Protokoll</h3></div>
+            <p class="set-desc">Zuletzt versendete System-E-Mails.</p>
+            <div id="email-logs-list" class="email-logs-list"></div>
+          </div>
+
           <!-- Integrationen-Health-Check -->
           <div class="set-card">
             <div class="set-eyebrow">Integrationen</div>
@@ -2297,6 +2277,6 @@
     </div>
   </div>
 
-  <script src="js/admin.js?v=25"></script>
+  <script src="js/admin.js?v=26"></script>
 </body>
 </html>

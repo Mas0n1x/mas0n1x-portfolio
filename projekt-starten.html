@@ -8,409 +8,316 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Projekt Starten - Mas0n1x</title>
+  <title>Projekt starten – Mas0n1x</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-primary: #0a0a0a;
-      --bg-secondary: #111111;
-      --bg-card: #161616;
-      --text-primary: #ffffff;
-      --text-secondary: #a0a0a0;
-      --text-muted: #666666;
-      --accent: #ff3366;
-      --accent-secondary: #00d4ff;
-      --border-color: #222222;
-      --border-accent: rgba(0, 212, 255, 0.3);
+      --bg:#04060a;
+      --panel:rgba(0,255,170,0.02);
+      --card:rgba(0,255,170,0.035);
+      --line:rgba(0,255,170,0.16);
+      --line2:rgba(0,255,170,0.34);
+      --mint:#00ffaa;
+      --cyan:#22d3ee;
+      --amber:#ffb020;
+      --danger:#ff5170;
+      --text:#dffaf0;
+      --text2:#8aa39b;
+      --text3:#62807a;
+      --glow:rgba(0,255,170,0.5);
+      --mono:'JetBrains Mono',monospace;
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin:0; padding:0; box-sizing:border-box; }
 
     body {
-      font-family: 'Inter', sans-serif;
-      background: var(--bg-primary);
-      color: var(--text-primary);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
+      font-family:'Inter',sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+      position:relative;
+      overflow-x:hidden;
+    }
+
+    /* HUD-Hintergrundraster */
+    body::before {
+      content:'';
+      position:fixed;
+      inset:0;
+      background-image:
+        linear-gradient(var(--line) 1px,transparent 1px),
+        linear-gradient(90deg,var(--line) 1px,transparent 1px);
+      background-size:46px 46px;
+      opacity:.35;
+      mask-image:radial-gradient(ellipse 80% 70% at 50% 40%,#000 30%,transparent 75%);
+      pointer-events:none;
+      z-index:0;
     }
 
     .wizard-container {
-      width: 100%;
-      max-width: 700px;
-      background: var(--bg-card);
-      border-radius: 24px;
-      border: 1px solid var(--border-color);
-      overflow: hidden;
-      position: relative;
+      width:100%;
+      max-width:720px;
+      background:linear-gradient(180deg,rgba(0,255,170,0.04),rgba(0,0,0,0));
+      border:1px solid var(--line);
+      position:relative;
+      z-index:1;
+      clip-path:polygon(0 0,calc(100% - 18px) 0,100% 18px,100% 100%,18px 100%,0 calc(100% - 18px));
+      backdrop-filter:blur(4px);
     }
+    /* HUD-Eckmarken */
+    .wizard-container::before,
+    .wizard-container::after {
+      content:'';
+      position:absolute;
+      width:22px; height:22px;
+      border:1px solid var(--mint);
+      opacity:.7;
+      pointer-events:none;
+    }
+    .wizard-container::before { top:-1px; left:-1px; border-right:none; border-bottom:none; }
+    .wizard-container::after  { bottom:-1px; right:-1px; border-left:none; border-top:none; }
 
     .wizard-header {
-      padding: 24px 32px;
-      border-bottom: 1px solid var(--border-color);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      padding:22px 30px;
+      border-bottom:1px solid var(--line);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
     }
 
+    .head-brand {
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .head-eyebrow {
+      font-family:var(--mono);
+      font-size:.7rem;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      color:var(--mint);
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+    }
+    .head-eyebrow::before { content:'▸'; }
     .step-indicator {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 1px;
+      font-family:var(--mono);
+      font-size:.78rem;
+      color:var(--text3);
+      text-transform:uppercase;
+      letter-spacing:.08em;
     }
-
-    .progress-bar {
-      height: 3px;
-      background: var(--border-color);
-      position: relative;
-    }
-
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--accent), var(--accent-secondary));
-      transition: width 0.4s ease;
-    }
+    .step-indicator b { color:var(--text); font-weight:600; }
 
     .close-btn {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      border: none;
-      background: transparent;
-      color: var(--text-muted);
-      cursor: pointer;
-      font-size: 1.2rem;
-      transition: all 0.3s ease;
+      width:36px; height:36px;
+      border:1px solid var(--line);
+      background:transparent;
+      color:var(--text2);
+      cursor:pointer;
+      font-size:1.3rem;
+      line-height:1;
+      transition:.25s;
+      clip-path:polygon(7px 0,100% 0,100% calc(100% - 7px),calc(100% - 7px) 100%,0 100%,0 7px);
+    }
+    .close-btn:hover { border-color:var(--line2); color:var(--mint); background:var(--panel); }
+
+    .progress-bar { height:2px; background:var(--line); position:relative; }
+    .progress-fill {
+      height:100%;
+      background:linear-gradient(90deg,var(--mint),var(--cyan));
+      box-shadow:0 0 12px var(--glow);
+      transition:width .4s cubic-bezier(.4,0,.2,1);
     }
 
-    .close-btn:hover {
-      background: var(--bg-secondary);
-      color: var(--text-primary);
-    }
+    .wizard-content { padding:42px 30px; min-height:400px; }
 
-    .wizard-content {
-      padding: 40px 32px;
-      min-height: 400px;
-    }
-
-    .step {
-      display: none;
-      animation: fadeIn 0.4s ease;
-    }
-
-    .step.active {
-      display: block;
-    }
-
+    .step { display:none; animation:fadeIn .4s ease; }
+    .step.active { display:block; }
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+      from { opacity:0; transform:translateY(12px); }
+      to   { opacity:1; transform:translateY(0); }
     }
 
     .step-title {
-      font-size: 1.8rem;
-      font-weight: 800;
-      margin-bottom: 8px;
-      text-transform: uppercase;
-      letter-spacing: -0.5px;
+      font-family:'Space Grotesk',sans-serif;
+      font-size:clamp(1.5rem,3.4vw,2rem);
+      font-weight:600;
+      letter-spacing:-.02em;
+      margin-bottom:8px;
     }
+    .step-subtitle { color:var(--text2); margin-bottom:30px; font-size:.95rem; }
 
-    .step-subtitle {
-      color: var(--text-secondary);
-      margin-bottom: 32px;
-      font-size: 0.95rem;
-    }
+    .options-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; }
 
-    .options-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
-    }
-
-    .option-card {
-      background: var(--bg-secondary);
-      border: 2px solid var(--border-color);
-      border-radius: 16px;
-      padding: 24px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .option-card:hover {
-      border-color: var(--border-accent);
-      transform: translateY(-2px);
-    }
-
-    .option-card.selected {
-      border-color: var(--accent-secondary);
-      background: rgba(0, 212, 255, 0.05);
-    }
-
-    .option-icon {
-      font-size: 2rem;
-      margin-bottom: 12px;
-    }
-
-    .option-title {
-      font-weight: 700;
-      font-size: 1rem;
-      margin-bottom: 4px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .option-desc {
-      font-size: 0.85rem;
-      color: var(--text-secondary);
-    }
-
-    .options-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
+    .option-card,
     .option-item {
-      background: var(--bg-secondary);
-      border: 2px solid var(--border-color);
-      border-radius: 12px;
-      padding: 20px 24px;
-      cursor: pointer;
-      transition: all 0.3s ease;
+      position:relative;
+      background:var(--panel);
+      border:1px solid var(--line);
+      cursor:pointer;
+      transition:.25s;
+      clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,12px 100%,0 calc(100% - 12px));
     }
+    .option-card { padding:24px; }
+    .option-item { padding:18px 22px; }
 
+    .option-card:hover,
     .option-item:hover {
-      border-color: var(--border-accent);
+      border-color:var(--line2);
+      background:var(--card);
+      transform:translateY(-2px);
     }
-
+    .option-card.selected,
     .option-item.selected {
-      border-color: var(--accent-secondary);
-      background: rgba(0, 212, 255, 0.05);
+      border-color:var(--mint);
+      background:rgba(0,255,170,0.06);
+      box-shadow:0 0 0 1px var(--mint),0 0 22px -6px var(--glow);
     }
 
+    .option-icon { font-size:1.9rem; margin-bottom:12px; line-height:1; }
+    .option-title {
+      font-family:'Space Grotesk',sans-serif;
+      font-weight:600; font-size:1rem; margin-bottom:4px;
+    }
+    .option-desc { font-size:.84rem; color:var(--text2); }
+
+    .options-list { display:flex; flex-direction:column; gap:12px; }
     .option-item-title {
-      font-weight: 700;
-      font-size: 1.1rem;
-      margin-bottom: 4px;
+      font-family:'Space Grotesk',sans-serif;
+      font-weight:600; font-size:1.08rem; margin-bottom:4px;
     }
+    .option-item-desc { font-size:.84rem; color:var(--text2); }
 
-    .option-item-desc {
-      font-size: 0.85rem;
-      color: var(--text-secondary);
+    .textarea-container { position:relative; }
+    .wizard-textarea,
+    .form-input {
+      width:100%;
+      background:var(--panel);
+      border:1px solid var(--line);
+      padding:18px;
+      color:var(--text);
+      font-family:'Inter',sans-serif;
+      font-size:1rem;
+      transition:.25s;
+      clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));
     }
-
-    .textarea-container {
-      position: relative;
+    .wizard-textarea { min-height:200px; resize:vertical; }
+    .wizard-textarea:focus,
+    .form-input:focus {
+      outline:none;
+      border-color:var(--mint);
+      background:rgba(0,255,170,0.05);
     }
-
-    .wizard-textarea {
-      width: 100%;
-      min-height: 200px;
-      background: var(--bg-secondary);
-      border: 2px solid var(--border-color);
-      border-radius: 12px;
-      padding: 20px;
-      color: var(--text-primary);
-      font-family: 'Inter', sans-serif;
-      font-size: 1rem;
-      resize: vertical;
-      transition: border-color 0.3s ease;
-    }
-
-    .wizard-textarea:focus {
-      outline: none;
-      border-color: var(--accent-secondary);
-    }
-
-    .wizard-textarea::placeholder {
-      color: var(--text-muted);
-    }
+    .wizard-textarea::placeholder,
+    .form-input::placeholder { color:var(--text3); }
 
     .char-count {
-      position: absolute;
-      bottom: 12px;
-      left: 20px;
-      font-size: 0.8rem;
-      color: var(--text-muted);
+      position:absolute; bottom:14px; right:16px;
+      font-family:var(--mono); font-size:.74rem; color:var(--text3);
     }
 
-    .form-group {
-      margin-bottom: 20px;
-    }
-
+    .form-group { margin-bottom:18px; }
     .form-label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: 600;
-      color: var(--text-secondary);
-    }
-
-    .form-input {
-      width: 100%;
-      padding: 16px 20px;
-      background: var(--bg-secondary);
-      border: 2px solid var(--border-color);
-      border-radius: 12px;
-      color: var(--text-primary);
-      font-family: 'Inter', sans-serif;
-      font-size: 1rem;
-      transition: border-color 0.3s ease;
-    }
-
-    .form-input:focus {
-      outline: none;
-      border-color: var(--accent-secondary);
-    }
-
-    .form-input::placeholder {
-      color: var(--text-muted);
+      display:block; margin-bottom:8px;
+      font-family:var(--mono); font-size:.74rem;
+      text-transform:uppercase; letter-spacing:.1em; color:var(--text2);
     }
 
     .wizard-footer {
-      padding: 24px 32px;
-      border-top: 1px solid var(--border-color);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      padding:22px 30px;
+      border-top:1px solid var(--line);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
     }
 
     .btn {
-      padding: 14px 28px;
-      border-radius: 12px;
-      font-weight: 600;
-      font-size: 0.95rem;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+      display:inline-flex; align-items:center; gap:10px;
+      padding:13px 26px;
+      font-family:'Inter',sans-serif;
+      font-weight:600; font-size:.92rem;
+      cursor:pointer; border:none; transition:.25s;
+      clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);
     }
+    .btn-icon { font-family:var(--mono); font-size:1.05rem; line-height:1; }
 
     .btn-back {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      color: var(--text-secondary);
+      background:transparent;
+      border:1px solid var(--line);
+      color:var(--text2);
     }
-
-    .btn-back:hover {
-      border-color: var(--border-accent);
-      color: var(--text-primary);
-    }
+    .btn-back:hover { border-color:var(--line2); color:var(--text); }
 
     .btn-next {
-      background: linear-gradient(135deg, var(--accent-secondary), #0099cc);
-      border: none;
-      color: white;
+      background:var(--mint);
+      color:#021109;
+      box-shadow:0 0 0 1px var(--mint);
     }
-
-    .btn-next:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(0, 212, 255, 0.3);
-    }
-
-    .btn-next:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
-    }
+    .btn-next:hover { box-shadow:0 0 22px -4px var(--glow); transform:translateY(-1px); }
+    .btn-next:disabled { opacity:.4; cursor:not-allowed; transform:none; box-shadow:none; background:var(--line2); color:var(--text3); }
 
     .btn-submit {
-      background: linear-gradient(135deg, var(--accent), #cc2952);
-      border: none;
-      color: white;
+      background:linear-gradient(135deg,var(--mint),var(--cyan));
+      color:#021109;
     }
+    .btn-submit:hover { box-shadow:0 0 26px -4px var(--glow); transform:translateY(-1px); }
 
-    .btn-submit:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(255, 51, 102, 0.3);
+    .spinner {
+      width:15px; height:15px;
+      border:2px solid rgba(2,17,9,.3);
+      border-top-color:#021109;
+      border-radius:50%;
+      animation:spin .7s linear infinite;
+      display:inline-block;
     }
+    @keyframes spin { to { transform:rotate(360deg); } }
 
-    .success-container {
-      text-align: center;
-      padding: 40px 0;
-    }
-
+    .success-container { text-align:center; padding:30px 0; }
     .success-icon {
-      width: 80px;
-      height: 80px;
-      background: linear-gradient(135deg, var(--accent-secondary), #0099cc);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 24px;
-      font-size: 2.5rem;
+      width:84px; height:84px;
+      border:1px solid var(--mint);
+      display:flex; align-items:center; justify-content:center;
+      margin:0 auto 26px;
+      color:var(--mint);
+      box-shadow:0 0 30px -6px var(--glow);
+      clip-path:polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px);
     }
-
     .success-title {
-      font-size: 1.8rem;
-      font-weight: 800;
-      margin-bottom: 12px;
+      font-family:'Space Grotesk',sans-serif;
+      font-size:1.7rem; font-weight:600; margin-bottom:12px;
     }
-
-    .success-desc {
-      color: var(--text-secondary);
-      margin-bottom: 32px;
-      line-height: 1.7;
-    }
+    .success-desc { color:var(--text2); margin-bottom:30px; line-height:1.7; }
 
     .login-toggle {
-      text-align: center;
-      margin-top: 20px;
-      padding-top: 20px;
-      border-top: 1px solid var(--border-color);
+      text-align:center; margin-top:18px; padding-top:18px;
+      border-top:1px solid var(--line);
+      font-size:.9rem; color:var(--text2);
     }
-
-    .login-toggle a {
-      color: var(--accent-secondary);
-      text-decoration: none;
-      cursor: pointer;
-    }
-
-    .login-toggle a:hover {
-      text-decoration: underline;
-    }
+    .login-toggle a { color:var(--mint); text-decoration:none; cursor:pointer; }
+    .login-toggle a:hover { text-decoration:underline; }
 
     .error-message {
-      background: rgba(255, 51, 102, 0.1);
-      border: 1px solid rgba(255, 51, 102, 0.3);
-      color: var(--accent);
-      padding: 12px 16px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      font-size: 0.9rem;
+      background:rgba(255,81,112,0.08);
+      border:1px solid rgba(255,81,112,0.35);
+      color:var(--danger);
+      padding:12px 16px;
+      margin-bottom:18px;
+      font-size:.9rem;
+      clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);
     }
 
-    @media (max-width: 600px) {
-      .options-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .wizard-content {
-        padding: 24px 20px;
-      }
-
-      .wizard-footer {
-        padding: 20px;
-      }
-
-      .step-title {
-        font-size: 1.4rem;
-      }
+    @media (max-width:600px) {
+      .options-grid { grid-template-columns:1fr; }
+      .wizard-content { padding:28px 20px; }
+      .wizard-header,.wizard-footer { padding:20px; }
     }
   </style>
 </head>
@@ -435,8 +342,11 @@
   </script>
   <div class="wizard-container">
     <div class="wizard-header">
-      <span class="step-indicator">Schritt <span id="current-step">1</span> von 5</span>
-      <button class="close-btn" onclick="window.location.href='/'">&times;</button>
+      <div class="head-brand">
+        <span class="head-eyebrow">Projektanfrage</span>
+        <span class="step-indicator">Schritt <b id="current-step">1</b> / 5</span>
+      </div>
+      <button class="close-btn" onclick="window.location.href='/'" aria-label="Schließen">&times;</button>
     </div>
     <div class="progress-bar">
       <div class="progress-fill" id="progress-fill" style="width: 20%"></div>
@@ -446,7 +356,7 @@
       <!-- Step 1: Project Type -->
       <div class="step active" data-step="1">
         <h2 class="step-title">Welche Art von Projekt?</h2>
-        <p class="step-subtitle">Wählen Sie die Kategorie, die am besten passt</p>
+        <p class="step-subtitle">Wähle die Kategorie, die am besten passt</p>
         <div class="options-grid">
           <div class="option-card" data-value="webdesign">
             <div class="option-icon">💻</div>
@@ -465,31 +375,31 @@
           </div>
           <div class="option-card" data-value="linux-setup">
             <div class="option-icon">🐧</div>
-            <div class="option-title">Linux-Setup</div>
-            <div class="option-desc">Server & System-Konfiguration</div>
+            <div class="option-title">Server & Selfhosting</div>
+            <div class="option-desc">Linux, Docker & Konfiguration</div>
           </div>
         </div>
       </div>
 
       <!-- Step 2: Budget -->
       <div class="step" data-step="2">
-        <h2 class="step-title">Was ist Ihr Budget?</h2>
-        <p class="step-subtitle">Wählen Sie eine Preisspanne</p>
+        <h2 class="step-title">Was ist dein Budget?</h2>
+        <p class="step-subtitle">Wähle eine Preisspanne</p>
         <div class="options-list">
           <div class="option-item" data-value="unter-500">
-            <div class="option-item-title">Unter 500€</div>
+            <div class="option-item-title">Unter 500&nbsp;€</div>
             <div class="option-item-desc">Kleinere Projekte</div>
           </div>
           <div class="option-item" data-value="500-1000">
-            <div class="option-item-title">500€ - 1.000€</div>
+            <div class="option-item-title">500&nbsp;€ – 1.000&nbsp;€</div>
             <div class="option-item-desc">Standard-Projekte</div>
           </div>
           <div class="option-item" data-value="1000-2500">
-            <div class="option-item-title">1.000€ - 2.500€</div>
+            <div class="option-item-title">1.000&nbsp;€ – 2.500&nbsp;€</div>
             <div class="option-item-desc">Mittlere Projekte</div>
           </div>
           <div class="option-item" data-value="ueber-2500">
-            <div class="option-item-title">Über 2.500€</div>
+            <div class="option-item-title">Über 2.500&nbsp;€</div>
             <div class="option-item-desc">Größere Projekte</div>
           </div>
         </div>
@@ -498,14 +408,14 @@
       <!-- Step 3: Timeline -->
       <div class="step" data-step="3">
         <h2 class="step-title">Wann soll es fertig sein?</h2>
-        <p class="step-subtitle">Wählen Sie Ihren gewünschten Zeitrahmen</p>
+        <p class="step-subtitle">Wähle deinen gewünschten Zeitrahmen</p>
         <div class="options-list">
           <div class="option-item" data-value="asap">
             <div class="option-item-title">So schnell wie möglich</div>
             <div class="option-item-desc">Dringend</div>
           </div>
           <div class="option-item" data-value="1-2-wochen">
-            <div class="option-item-title">1-2 Wochen</div>
+            <div class="option-item-title">1–2 Wochen</div>
             <div class="option-item-desc">Zeitnah</div>
           </div>
           <div class="option-item" data-value="1-monat">
@@ -521,23 +431,23 @@
 
       <!-- Step 4: Description -->
       <div class="step" data-step="4">
-        <h2 class="step-title">Erzählen Sie uns mehr</h2>
-        <p class="step-subtitle">Beschreiben Sie Ihr Projekt im Detail</p>
+        <h2 class="step-title">Erzähl uns mehr</h2>
+        <p class="step-subtitle">Beschreibe dein Projekt im Detail</p>
         <div class="textarea-container">
-          <textarea class="wizard-textarea" id="project-description" placeholder="Beschreiben Sie Ihre Vision, Ziele und spezifischen Anforderungen..."></textarea>
+          <textarea class="wizard-textarea" id="project-description" placeholder="Beschreibe deine Vision, Ziele und spezifischen Anforderungen…"></textarea>
           <span class="char-count"><span id="char-count">0</span> Zeichen</span>
         </div>
       </div>
 
       <!-- Step 5: Registration -->
       <div class="step" data-step="5">
-        <h2 class="step-title">Erstellen Sie Ihr Konto</h2>
-        <p class="step-subtitle">Damit wir Sie kontaktieren können</p>
+        <h2 class="step-title">Erstelle dein Konto</h2>
+        <p class="step-subtitle">Damit wir dich kontaktieren können</p>
         <div id="error-container"></div>
         <div id="register-form">
           <div class="form-group">
-            <label class="form-label">E-Mail Adresse *</label>
-            <input type="email" class="form-input" id="reg-email" placeholder="ihre@email.de" required>
+            <label class="form-label">E-Mail-Adresse *</label>
+            <input type="email" class="form-input" id="reg-email" placeholder="deine@email.de" required>
           </div>
           <div class="form-group">
             <label class="form-label">Telefonnummer</label>
@@ -557,12 +467,12 @@
         </div>
         <div id="login-form" style="display: none;">
           <div class="form-group">
-            <label class="form-label">E-Mail Adresse</label>
-            <input type="email" class="form-input" id="login-email" placeholder="ihre@email.de" required>
+            <label class="form-label">E-Mail-Adresse</label>
+            <input type="email" class="form-input" id="login-email" placeholder="deine@email.de" required>
           </div>
           <div class="form-group">
             <label class="form-label">Passwort</label>
-            <input type="password" class="form-input" id="login-password" placeholder="Ihr Passwort" required>
+            <input type="password" class="form-input" id="login-password" placeholder="Dein Passwort" required>
           </div>
           <div class="login-toggle">
             Noch kein Konto? <a onclick="toggleLoginForm()">Jetzt registrieren</a>
@@ -574,13 +484,13 @@
       <div class="step" data-step="success">
         <div class="success-container">
           <div class="success-icon">
-            <i class="fas fa-check"></i>
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
           </div>
           <h2 class="success-title">Anfrage gesendet!</h2>
           <p class="success-desc">
-            Vielen Dank für Ihre Projektanfrage.<br>
-            Sie erhalten in Kürze eine Bestätigung per E-Mail.<br>
-            Sie können den Status Ihrer Anfrage jederzeit im Kundenportal einsehen.
+            Vielen Dank für deine Projektanfrage.<br>
+            Du erhältst in Kürze eine Bestätigung per E-Mail.<br>
+            Den Status deiner Anfrage siehst du jederzeit im Kundenportal.
           </p>
           <a href="/kunde" class="btn btn-next">Zum Kundenportal</a>
         </div>
@@ -589,10 +499,10 @@
 
     <div class="wizard-footer" id="wizard-footer">
       <button class="btn btn-back" id="btn-back" style="visibility: hidden;">
-        <i class="fas fa-chevron-left"></i> Zurück
+        <span class="btn-icon">◂</span> Zurück
       </button>
       <button class="btn btn-next" id="btn-next" disabled>
-        Weiter <i class="fas fa-chevron-right"></i>
+        Weiter <span class="btn-icon">▸</span>
       </button>
     </div>
   </div>
@@ -705,11 +615,11 @@
 
       // Change button text/style on last step
       if (currentStep === 5) {
-        btnNext.innerHTML = 'Absenden <i class="fas fa-paper-plane"></i>';
+        btnNext.innerHTML = 'Absenden <span class="btn-icon">▸</span>';
         btnNext.classList.remove('btn-next');
         btnNext.classList.add('btn-submit');
       } else {
-        btnNext.innerHTML = 'Weiter <i class="fas fa-chevron-right"></i>';
+        btnNext.innerHTML = 'Weiter <span class="btn-icon">▸</span>';
         btnNext.classList.add('btn-next');
         btnNext.classList.remove('btn-submit');
       }
@@ -750,7 +660,7 @@
     async function submitForm() {
       clearError();
       btnNext.disabled = true;
-      btnNext.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Wird gesendet...';
+      btnNext.innerHTML = '<span class="spinner"></span> Wird gesendet…';
 
       try {
         let customerId;
@@ -761,7 +671,7 @@
           const password = document.getElementById('login-password').value;
 
           if (!email || !password) {
-            showError('Bitte füllen Sie alle Felder aus.');
+            showError('Bitte fülle alle Felder aus.');
             updateButtons();
             return;
           }
@@ -789,7 +699,7 @@
           const passwordConfirm = document.getElementById('reg-password-confirm').value;
 
           if (!email || !password) {
-            showError('Bitte füllen Sie alle Pflichtfelder aus.');
+            showError('Bitte fülle alle Pflichtfelder aus.');
             updateButtons();
             return;
           }
@@ -847,7 +757,7 @@
         showStep('success');
 
       } catch (error) {
-        showError('Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.');
+        showError('Ein Fehler ist aufgetreten. Bitte versuche es erneut.');
         updateButtons();
       }
     }

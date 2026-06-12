@@ -1791,6 +1791,7 @@ function initInvoice() {
     invoiceInitialized = true;
   }
 
+  loadInvoiceCustomers();
   updateInvoicePreview();
 }
 
@@ -1863,7 +1864,8 @@ function getInvoiceData() {
     },
     to: {
       name: document.getElementById('invoice-to-name').value,
-      address: document.getElementById('invoice-to-address').value
+      address: document.getElementById('invoice-to-address').value,
+      customerId: document.getElementById('invoice-to-customer')?.value || ''
     },
     items,
     subtotal,
@@ -2771,6 +2773,21 @@ function getInvoiceStatusLabel(status) {
 }
 
 // Save invoice to archive
+// Lädt registrierte Portal-Kunden ins Verknüpfungs-Dropdown des Rechnungs-Generators.
+async function loadInvoiceCustomers() {
+  const sel = document.getElementById('invoice-to-customer');
+  if (!sel) return;
+  try {
+    const customers = await api('/customers');
+    const current = sel.value;
+    sel.innerHTML = '<option value="">— Kein Portal-Zugang —</option>' +
+      customers.map(c => `<option value="${c.id}">${c.email}${c.phone ? ' · ' + c.phone : ''}</option>`).join('');
+    if (current) sel.value = current;
+  } catch (e) {
+    console.error('Kundenliste konnte nicht geladen werden:', e);
+  }
+}
+
 async function saveInvoiceToArchive() {
   const data = getInvoiceData();
 
@@ -2784,6 +2801,7 @@ async function saveInvoiceToArchive() {
       method: 'POST',
       body: {
         invoice_number: data.number,
+        customer_id: data.to.customerId || null,
         customer_name: data.to.name,
         customer_address: data.to.address,
         amount: data.subtotal,
@@ -3238,6 +3256,9 @@ document.querySelectorAll('.nav-item[data-section]').forEach(item => {
       load2faStatus();
       loadLoginHistory();
       loadBackupAuto();
+      loadBackups();
+      loadBackupSettings();
+      loadEmailLogs();
       initSettingsGroups();
     }
   });
@@ -3985,11 +4006,6 @@ document.querySelectorAll('.nav-item[data-section]').forEach(item => {
     }
     if (item.dataset.section === 'skills') {
       loadSkills();
-    }
-    if (item.dataset.section === 'backups') {
-      loadBackups();
-      loadBackupSettings();
-      loadEmailLogs();
     }
   });
 });

@@ -533,8 +533,19 @@ const projectUpload = upload.fields([
 ]);
 
 // Middleware
+// CORS nur für eigene Domains (same-origin Requests aus Admin/Kunde/Website).
+// Server-zu-Server / curl (kein Origin-Header) bleibt erlaubt.
+const allowedOrigins = [
+  'https://mas0n1x.online',
+  'https://www.mas0n1x.online',
+  'http://localhost:8101',
+  'http://localhost:3000'
+];
 app.use(cors({
-  origin: true,
+  origin: (origin, cb) => {
+    if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+    cb(new Error('Nicht durch CORS erlaubt'));
+  },
   credentials: true
 }));
 app.use(express.json({
@@ -561,7 +572,9 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: false, // Set to true in production with HTTPS
+    // 'auto': secure-Cookie nur wenn die Verbindung als HTTPS erkannt wird
+    // (via trust proxy + X-Forwarded-Proto aus nginx). Lokal (HTTP) bleibt es funktionsfähig.
+    secure: 'auto',
     httpOnly: true,
     sameSite: 'lax',
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
@@ -607,8 +620,50 @@ const requestFileStorage = multer.diskStorage({
 });
 const requestUpload = multer({
   storage: requestFileStorage,
+  // Nur unbedenkliche Dokument-/Bildtypen zulassen; ausführbare/aktive Inhalte (exe, html, svg, js …) blocken.
+  fileFilter: (req, file, cb) => {
+    const allowed = /\.(jpe?g|png|gif|webp|bmp|pdf|docx?|xlsx?|pptx?|txt|csv|zip|rar|7z)$/i;
+    if (allowed.test(file.originalname)) return cb(null, true);
+    cb(new Error('Dieser Dateityp ist nicht erlaubt. Erlaubt sind Bilder, PDF, Office-Dokumente, Text und Archive.'));
+  },
   limits: { fileSize: 25 * 1024 * 1024 } // 25MB limit
 });
+
+// ==================== BRUTE-FORCE-SCHUTZ ====================
+// In-Memory Rate-Limit pro IP für Login-Endpoints (kein npm-Paket → keine ESM-Falle).
+const loginAttempts = new Map(); // ip -> { count, first, blockedUntil }
+const LOGIN_WINDOW = 15 * 60 * 1000; // 15 Min Beobachtungsfenster
+const LOGIN_MAX = 8;                 // erlaubte Fehlversuche im Fenster
+const LOGIN_BLOCK = 15 * 60 * 1000;  // Sperrdauer nach Überschreitung
+function loginRateLimit(req, res, next) {
+  const ip = clientIp(req) || 'unknown';
+  const rec = loginAttempts.get(ip);
+  const now = Date.now();
+  if (rec && rec.blockedUntil > now) {
+    const mins = Math.ceil((rec.blockedUntil - now) / 60000);
+    return res.status(429).json({ error: `Zu viele Fehlversuche. Bitte in ${mins} Minute(n) erneut versuchen.` });
+  }
+  next();
+}
+function registerLoginFail(req) {
+  const ip = clientIp(req) || 'unknown';
+  const now = Date.now();
+  let rec = loginAttempts.get(ip);
+  if (!rec || now - rec.first > LOGIN_WINDOW) rec = { count: 0, first: now, blockedUntil: 0 };
+  rec.count++;
+  if (rec.count >= LOGIN_MAX) rec.blockedUntil = now + LOGIN_BLOCK;
+  loginAttempts.set(ip, rec);
+}
+function registerLoginSuccess(req) {
+  loginAttempts.delete(clientIp(req) || 'unknown');
+}
+// Aufräumen: alte Einträge stündlich entfernen
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, rec] of loginAttempts) {
+    if (rec.blockedUntil < now && now - rec.first > LOGIN_WINDOW) loginAttempts.delete(ip);
+  }
+}, 60 * 60 * 1000);
 
 // ==================== AUTH ROUTES ====================
 
@@ -635,13 +690,15 @@ function verify2faCode(code) {
   return false;
 }
 
-app.post('/api/login', (req, res) => {
+app.post('/api/login', loginRateLimit, (req, res) => {
   const { password } = req.body;
   const admin = dbGet('SELECT password_hash FROM admin WHERE id = 1');
   if (!admin || !bcrypt.compareSync(password || '', admin.password_hash)) {
+    registerLoginFail(req);
     logLogin(req, false, 'Falsches Passwort');
     return res.status(401).json({ error: 'Invalid password' });
   }
+  registerLoginSuccess(req);
   if (twofaEnabled()) {
     req.session.pending2fa = true;
     return res.json({ success: false, twofa: true });
@@ -1339,16 +1396,18 @@ app.post('/api/customer/register', async (req, res) => {
   res.json({ success: true, customerId: result.lastInsertRowid });
 });
 
-app.post('/api/customer/login', (req, res) => {
+app.post('/api/customer/login', loginRateLimit, (req, res) => {
   const { email, password } = req.body;
 
-  const customer = dbGet('SELECT * FROM customers WHERE email = ?', [email.toLowerCase()]);
+  const customer = dbGet('SELECT * FROM customers WHERE email = ?', [(email || '').toLowerCase()]);
 
-  if (customer && bcrypt.compareSync(password, customer.password_hash)) {
+  if (customer && bcrypt.compareSync(password || '', customer.password_hash)) {
+    registerLoginSuccess(req);
     req.session.customerId = customer.id;
     req.session.customerEmail = customer.email;
     res.json({ success: true, customerId: customer.id });
   } else {
+    registerLoginFail(req);
     res.status(401).json({ error: 'Ungültige E-Mail oder Passwort' });
   }
 });
@@ -1817,12 +1876,20 @@ app.get('/api/invoices', requireAuth, (req, res) => {
 
 // Create invoice
 app.post('/api/invoices', requireAuth, (req, res) => {
-  const { invoice_number, customer_id, customer_name, customer_address, amount, tax, total, status, due_date, notes, items, payment_link } = req.body;
+  const { invoice_number, customer_id, customer_email, customer_name, customer_address, amount, tax, total, status, due_date, notes, items, payment_link } = req.body;
+
+  // Kunden-Zuordnung: explizite customer_id bevorzugt, sonst per E-Mail einem registrierten
+  // Kunden zuordnen — sonst erscheint die Rechnung nicht im Kundenportal.
+  let cid = customer_id || null;
+  if (!cid && customer_email) {
+    const match = dbGet('SELECT id FROM customers WHERE LOWER(email) = LOWER(?)', [String(customer_email).trim()]);
+    if (match) cid = match.id;
+  }
 
   const result = dbRun(
     `INSERT INTO invoices (invoice_number, customer_id, customer_name, customer_address, amount, tax, total, status, due_date, notes, items, payment_link)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [invoice_number, customer_id || null, customer_name, customer_address, amount, tax, total, status || 'offen', due_date, notes, JSON.stringify(items), payment_link || null]
+    [invoice_number, cid, customer_name, customer_address, amount, tax, total, status || 'offen', due_date, notes, JSON.stringify(items), payment_link || null]
   );
 
   // Log activity
