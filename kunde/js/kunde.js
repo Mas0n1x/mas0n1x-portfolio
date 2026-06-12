@@ -748,6 +748,28 @@ function initPortalNavigation() {
   });
 }
 
+async function loadInvoices() {
+  const el = document.getElementById('invoices-list');
+  if (!el) return;
+  el.innerHTML = '<div class="empty-state"><i class="fas fa-spinner fa-spin"></i></div>';
+  try {
+    const rows = await api('/customer/invoices');
+    if (!rows.length) { el.innerHTML = '<div class="empty-state"><i class="fas fa-file-invoice"></i><h3>Keine Rechnungen</h3><p>Hier erscheinen deine Rechnungen, sobald welche erstellt wurden.</p></div>'; return; }
+    const SL = { 'bezahlt': 'Bezahlt', 'offen': 'Offen', 'überfällig': 'Überfällig' };
+    const SC = { 'bezahlt': 'paid', 'offen': 'open', 'überfällig': 'overdue' };
+    el.innerHTML = rows.map(inv => `<div class="inv-item">
+      <div class="inv-main">
+        <div class="inv-num">${escapeHtml(inv.invoice_number)}</div>
+        <div class="inv-meta">${inv.due_date ? 'Fällig: ' + escapeHtml(inv.due_date) : ''}${inv.paid_date ? ' · Bezahlt: ' + escapeHtml(inv.paid_date) : ''}</div>
+      </div>
+      <div class="inv-right">
+        <div class="inv-total">${(inv.total || 0).toLocaleString('de-DE', { minimumFractionDigits: 2 })} €</div>
+        <span class="inv-status ${SC[inv.status] || 'open'}">${SL[inv.status] || escapeHtml(inv.status || '')}</span>
+      </div>
+    </div>`).join('');
+  } catch (e) { el.innerHTML = '<div class="empty-state">Rechnungen nicht abrufbar.</div>'; }
+}
+
 function switchView(view) {
   currentView = view;
 
@@ -772,6 +794,8 @@ function switchView(view) {
   } else if (view === 'appointments') {
     loadMyAppointments();
     initAppointmentDatePicker();
+  } else if (view === 'invoices') {
+    loadInvoices();
   } else if (view === 'faq') {
     loadFAQs();
   }

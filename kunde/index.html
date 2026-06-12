@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="css/kunde.css?v=2">
+  <link rel="stylesheet" href="css/kunde.css?v=3">
 </head>
 <body>
   <!-- Login Screen -->
@@ -65,6 +65,9 @@
       </button>
       <button class="portal-tab" data-view="appointments">
         <i class="fas fa-calendar-alt"></i> Termine
+      </button>
+      <button class="portal-tab" data-view="invoices">
+        <i class="fas fa-file-invoice"></i> Rechnungen
       </button>
       <button class="portal-tab" data-view="faq">
         <i class="fas fa-question-circle"></i> FAQ
@@ -132,6 +135,14 @@
             </div>
           </div>
         </div>
+      </div>
+
+      <!-- Rechnungen View -->
+      <div id="invoices-view" class="portal-view hidden">
+        <div class="page-header">
+          <h1><i class="fas fa-file-invoice"></i> Meine Rechnungen</h1>
+        </div>
+        <div id="invoices-list" class="inv-list"></div>
       </div>
 
       <!-- FAQ View -->
@@ -226,6 +237,6 @@
     </main>
   </div>
 
-  <script src="js/kunde.js?v=2"></script>
+  <script src="js/kunde.js?v=3"></script>
 </body>
 </html>

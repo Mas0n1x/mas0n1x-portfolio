@@ -2362,6 +2362,14 @@ app.get('/api/customer/appointments', requireCustomerAuth, (req, res) => {
   res.json(appointments);
 });
 
+// Rechnungen des eingeloggten Kunden (Self-Service)
+app.get('/api/customer/invoices', requireCustomerAuth, (req, res) => {
+  res.json(dbAll(
+    'SELECT id, invoice_number, amount, tax, total, status, due_date, paid_date, created_at FROM invoices WHERE customer_id = ? ORDER BY id DESC',
+    [req.session.customerId]
+  ));
+});
+
 // Admin: Get all appointments
 app.get('/api/admin/appointments', requireAuth, (req, res) => {
   const appointments = dbAll(`
