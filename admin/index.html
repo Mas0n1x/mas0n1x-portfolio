@@ -10,10 +10,11 @@
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Panel - Mas0n1x Portfolio</title>
+  <link rel="icon" href="/logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/admin.css?v=26">
+  <link rel="stylesheet" href="css/admin.css?v=27">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
@@ -1680,118 +1681,7 @@
         </div>
       </section>
 
-      <!-- Legal Section -->
       
-
-      <!-- Analytics Section -->
-      <section id="section-analytics" class="content-section">
-        <div class="section-header">
-          <h1><svg class="ic"><use href="#fa-chart-bar"></use></svg> Analytics Dashboard</h1>
-          <div class="header-actions">
-            <select id="analytics-period">
-              <option value="30">Letzte 30 Tage</option>
-              <option value="90">Letzte 90 Tage</option>
-              <option value="365">Letztes Jahr</option>
-              <option value="all">Gesamt</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Analytics Stats -->
-        <div class="dashboard-stats analytics-stats">
-          <div class="stat-card primary">
-            <div class="stat-icon"><svg class="ic"><use href="#fa-percentage"></use></svg></div>
-            <div class="stat-info">
-              <span class="stat-value" id="analytics-conversion">0%</span>
-              <span class="stat-label">Conversion Rate</span>
-            </div>
-          </div>
-          <div class="stat-card success">
-            <div class="stat-icon"><svg class="ic"><use href="#fa-clock"></use></svg></div>
-            <div class="stat-info">
-              <span class="stat-value" id="analytics-response-time">0h</span>
-              <span class="stat-label">Ø Reaktionszeit</span>
-            </div>
-          </div>
-          <div class="stat-card warning">
-            <div class="stat-icon"><svg class="ic"><use href="#fa-inbox"></use></svg></div>
-            <div class="stat-info">
-              <span class="stat-value" id="analytics-total-requests">0</span>
-              <span class="stat-label">Anfragen</span>
-            </div>
-          </div>
-          <div class="stat-card info">
-            <div class="stat-icon"><svg class="ic"><use href="#fa-euro-sign"></use></svg></div>
-            <div class="stat-info">
-              <span class="stat-value" id="analytics-total-revenue">0€</span>
-              <span class="stat-label">Umsatz</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Analytics Charts -->
-        <div class="analytics-grid">
-          <!-- Project Types -->
-          <div class="analytics-card">
-            <div class="card-header">
-              <h3><svg class="ic"><use href="#fa-chart-pie"></use></svg> Projekttypen</h3>
-            </div>
-            <div class="card-body">
-              <div id="project-types-chart" class="chart-container">
-                <!-- Chart rendered dynamically -->
-              </div>
-            </div>
-          </div>
-
-          <!-- Status Distribution -->
-          <div class="analytics-card">
-            <div class="card-header">
-              <h3><svg class="ic"><use href="#fa-tasks"></use></svg> Status-Verteilung</h3>
-            </div>
-            <div class="card-body">
-              <div id="status-chart" class="chart-container">
-                <!-- Chart rendered dynamically -->
-              </div>
-            </div>
-          </div>
-
-          <!-- Requests per Month -->
-          <div class="analytics-card wide">
-            <div class="card-header">
-              <h3><svg class="ic"><use href="#fa-chart-line"></use></svg> Anfragen pro Monat</h3>
-            </div>
-            <div class="card-body">
-              <div id="requests-per-month-chart" class="chart-container">
-                <!-- Chart rendered dynamically -->
-              </div>
-            </div>
-          </div>
-
-          <!-- Top Customers -->
-          <div class="analytics-card">
-            <div class="card-header">
-              <h3><svg class="ic"><use href="#fa-trophy"></use></svg> Top Kunden</h3>
-            </div>
-            <div class="card-body">
-              <div id="top-customers-list" class="top-list">
-                <!-- List rendered dynamically -->
-              </div>
-            </div>
-          </div>
-
-          <!-- Revenue per Month -->
-          <div class="analytics-card">
-            <div class="card-header">
-              <h3><svg class="ic"><use href="#fa-euro-sign"></use></svg> Umsatz pro Monat</h3>
-            </div>
-            <div class="card-body">
-              <div id="revenue-per-month-chart" class="chart-container">
-                <!-- Chart rendered dynamically -->
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
 
 
@@ -2558,6 +2448,6 @@
     </div>
   </div>
 
-  <script src="js/admin.js?v=29"></script>
+  <script src="js/admin.js?v=30"></script>
 </body>
 </html>
