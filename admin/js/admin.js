@@ -1141,6 +1141,8 @@ async function loadRequests() {
       badge.classList.add('hidden');
     }
 
+    renderRequestsBoard(requests);
+
     if (requests.length === 0) {
       container.innerHTML = `
         <div class="empty-state">
@@ -3412,6 +3414,66 @@ async function loadAnalytics() {
     }
   } catch (e) { console.error('Analytics laden:', e); }
 }
+
+// ==================== SALES-KANBAN ====================
+const KB_COLS = [
+  { status: 'new', label: 'Neu' },
+  { status: 'in_progress', label: 'In Bearbeitung' },
+  { status: 'waiting', label: 'Warte auf Kunde' },
+  { status: 'completed', label: 'Abgeschlossen' }
+];
+const KB_TYPE = { 'webdesign': 'Webdesign', 'custom-app': 'Custom App', 'discord-bot': 'Discord-Bot', 'linux-setup': 'Linux-Setup' };
+let _kbRequests = [];
+function renderRequestsBoard(requests) {
+  _kbRequests = requests || [];
+  const board = document.getElementById('requests-board');
+  if (!board) return;
+  board.innerHTML = KB_COLS.map(col => {
+    const items = _kbRequests.filter(r => (r.status || 'new') === col.status);
+    return `<div class="kb-col" data-status="${col.status}">
+      <div class="kb-col-head"><span>${col.label}</span><span class="kb-count">${items.length}</span></div>
+      ${items.length ? items.map(r => `<div class="kb-card" draggable="true" data-id="${r.id}" onclick="openRequestDetail(${r.id})">
+        <div class="kb-card-type">${escapeHtml(KB_TYPE[r.project_type] || r.project_type || 'Projekt')}</div>
+        <div class="kb-card-name">${escapeHtml(r.customer_name || r.name || ('Anfrage #' + r.id))}</div>
+        <div class="kb-card-meta">${escapeHtml(r.budget || '')}${r.created_at ? ' · ' + new Date(r.created_at).toLocaleDateString('de-DE') : ''}</div>
+      </div>`).join('') : '<div class="kb-empty">–</div>'}
+    </div>`;
+  }).join('');
+  bindKanbanDnD();
+}
+let _kbDragId = null;
+function bindKanbanDnD() {
+  document.querySelectorAll('.kb-card').forEach(card => {
+    card.addEventListener('dragstart', e => { _kbDragId = card.dataset.id; card.classList.add('dragging'); });
+    card.addEventListener('dragend', () => card.classList.remove('dragging'));
+  });
+  document.querySelectorAll('.kb-col').forEach(col => {
+    col.addEventListener('dragover', e => { e.preventDefault(); col.classList.add('drag-over'); });
+    col.addEventListener('dragleave', () => col.classList.remove('drag-over'));
+    col.addEventListener('drop', async e => {
+      e.preventDefault(); col.classList.remove('drag-over');
+      const newStatus = col.dataset.status;
+      const id = _kbDragId; _kbDragId = null;
+      const req = _kbRequests.find(r => String(r.id) === String(id));
+      if (!req || req.status === newStatus) return;
+      const old = req.status; req.status = newStatus;
+      renderRequestsBoard(_kbRequests);
+      try { await api('/admin/requests/' + id, { method: 'PUT', body: { status: newStatus } }); showToast('Status aktualisiert', 'success'); }
+      catch (err) { req.status = old; renderRequestsBoard(_kbRequests); showToast('Update fehlgeschlagen', 'error'); }
+    });
+  });
+}
+document.querySelectorAll('#section-requests .vt-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#section-requests .vt-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const board = document.getElementById('requests-board');
+    const list = document.getElementById('requests-list');
+    const isBoard = btn.dataset.view === 'board';
+    if (board) board.style.display = isBoard ? 'grid' : 'none';
+    if (list) list.style.display = isBoard ? 'none' : 'flex';
+  });
+});
 
 // ==================== LOGIN-HISTORIE ====================
 async function loadLoginHistory() {
