@@ -3240,6 +3240,7 @@ document.querySelectorAll('.nav-item[data-section]').forEach(item => {
       load2faStatus();
       loadLoginHistory();
       loadBackupAuto();
+      initSettingsGroups();
     }
   });
 });
@@ -3376,6 +3377,27 @@ document.getElementById('save-backup-auto-btn')?.addEventListener('click', async
   try { await api('/settings', { method: 'POST', body }); showToast('Backup-Automatik gespeichert', 'success'); loadBackupAuto(); }
   catch (e) { showToast(e.message || 'Speichern fehlgeschlagen', 'error'); }
 });
+
+// ==================== SETTINGS-GRUPPEN (Sub-Navigation) ====================
+const SET_GROUP = { 'System': 'allgemein', 'Stammdaten': 'stammdaten', 'Sicherheit': 'sicherheit', 'Benachrichtigungen': 'benachrichtigungen', 'Kommunikation': 'benachrichtigungen', 'Integrationen': 'integrationen', 'Daten': 'daten' };
+let settingsGroupsInit = false;
+function initSettingsGroups() {
+  document.querySelectorAll('#section-settings .set-card').forEach(card => {
+    const eb = card.querySelector('.set-eyebrow');
+    const g = eb ? SET_GROUP[eb.textContent.trim()] : null;
+    if (g) card.setAttribute('data-group', g);
+  });
+  if (!settingsGroupsInit) {
+    document.querySelectorAll('#section-settings .set-nav-btn').forEach(b => b.addEventListener('click', () => showSettingsGroup(b.dataset.group)));
+    settingsGroupsInit = true;
+  }
+  const active = document.querySelector('#section-settings .set-nav-btn.active');
+  showSettingsGroup(active ? active.dataset.group : 'allgemein');
+}
+function showSettingsGroup(group) {
+  document.querySelectorAll('#section-settings .set-nav-btn').forEach(b => b.classList.toggle('active', b.dataset.group === group));
+  document.querySelectorAll('#section-settings .set-card[data-group]').forEach(c => c.classList.toggle('show', c.dataset.group === group));
+}
 
 // ==================== ANALYTICS ====================
 let anCharts = {};

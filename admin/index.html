@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="css/admin.css?v=22">
+  <link rel="stylesheet" href="css/admin.css?v=23">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
@@ -1944,6 +1944,15 @@
           <h1><i class="fas fa-sliders-h"></i> Einstellungen</h1>
         </div>
 
+        <div class="set-nav">
+          <button class="set-nav-btn active" data-group="allgemein"><i class="fas fa-sliders-h"></i> Allgemein</button>
+          <button class="set-nav-btn" data-group="stammdaten"><i class="fas fa-building"></i> Stammdaten</button>
+          <button class="set-nav-btn" data-group="sicherheit"><i class="fas fa-shield-halved"></i> Sicherheit</button>
+          <button class="set-nav-btn" data-group="benachrichtigungen"><i class="fas fa-bell"></i> Benachrichtigungen</button>
+          <button class="set-nav-btn" data-group="integrationen"><i class="fas fa-plug"></i> Integrationen</button>
+          <button class="set-nav-btn" data-group="daten"><i class="fas fa-database"></i> Daten &amp; Backup</button>
+        </div>
+
         <div class="set-grid">
           <div class="set-card wide">
             <div class="set-eyebrow">System</div>
@@ -2407,6 +2416,6 @@
     </div>
   </div>
 
-  <script src="js/admin.js?v=22"></script>
+  <script src="js/admin.js?v=23"></script>
 </body>
 </html>

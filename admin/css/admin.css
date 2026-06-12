@@ -752,6 +752,13 @@ body {
 }
 
 /* ===== Settings FUI-Redesign ===== */
+.set-nav{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:22px;border-bottom:1px solid var(--border)}
+.set-nav-btn{background:none;border:none;border-bottom:2px solid transparent;color:var(--text-secondary);font-family:inherit;font-size:.88rem;padding:11px 15px;cursor:pointer;transition:.2s;margin-bottom:-1px;display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.set-nav-btn i{font-size:.82rem;opacity:.8}
+.set-nav-btn:hover{color:var(--text-primary)}
+.set-nav-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+.set-card[data-group]{display:none}
+.set-card[data-group].show{display:block}
 .set-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;align-items:start}
 .set-card{position:relative;background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:26px 26px 24px;transition:border-color .25s}
 .set-card:hover{border-color:rgba(0,255,170,.28)}
