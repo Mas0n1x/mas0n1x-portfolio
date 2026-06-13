@@ -546,6 +546,14 @@ function dbRun(sql, params = []) {
   return { lastInsertRowid: lastId };
 }
 
+// Aktivität fürs Admin-Dashboard protokollieren ("Letzte Aktivitäten").
+function logActivity(type, description, entityType = null, entityId = null) {
+  try {
+    dbRun('INSERT INTO activities (type, description, entity_type, entity_id) VALUES (?, ?, ?, ?)',
+      [type, description, entityType, entityId]);
+  } catch (e) { console.error('logActivity:', e.message); }
+}
+
 // Discord Bot instance (initialized after DB)
 let discordBot = null;
 
@@ -1077,6 +1085,7 @@ app.post('/api/projects', requireAuth, projectUpload, (req, res) => {
     'INSERT INTO projects (title, description, image, images, logo, tags, link, status, sort_order, progress) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
     [title, description, image, imagesJson, logo, tagsJson, link, status || 'completed', parseInt(sort_order) || 0, parseInt(progress) || 0]
   );
+  logActivity('project_created', `Projekt erstellt: ${title}`, 'project', result.lastInsertRowid);
 
   res.json({ id: result.lastInsertRowid, success: true });
 });
@@ -1497,6 +1506,7 @@ app.post('/api/customer/register', async (req, res) => {
     'INSERT INTO customers (email, password_hash, phone, name, company) VALUES (?, ?, ?, ?, ?)',
     [email.toLowerCase(), passwordHash, phone || null, name || null, company || null]
   );
+  logActivity('customer_registered', `Neuer Kunde: ${name || email.toLowerCase()}`, 'customer', result.lastInsertRowid);
 
   // Send welcome email (async, don't wait)
   const customer = { id: result.lastInsertRowid, email: email.toLowerCase(), name };
@@ -1601,12 +1611,14 @@ app.post('/api/requests/public', (req, res) => {
     const r = dbRun('INSERT INTO customers (email, password_hash, phone, name, company) VALUES (?, ?, ?, ?, ?)',
       [mail, pw, phone || null, name || null, company || null]);
     customerId = r.lastInsertRowid;
+    logActivity('customer_registered', `Neuer Kunde: ${name || mail}`, 'customer', customerId);
   }
 
   const reqResult = dbRun(
     'INSERT INTO project_requests (customer_id, project_type, budget, timeline, description) VALUES (?, ?, ?, ?, ?)',
     [customerId, projectType, budget || null, timeline || null, description]
   );
+  logActivity('request_received', `Neue Anfrage von ${name || mail} (${projectType})`, 'request', reqResult.lastInsertRowid);
 
   // Magic-Link an den Kunden mailen.
   const token = createMagicLink(customerId);
@@ -1683,6 +1695,10 @@ app.post('/api/requests', requireCustomerAuth, (req, res) => {
     'INSERT INTO project_requests (customer_id, project_type, budget, timeline, description) VALUES (?, ?, ?, ?, ?)',
     [req.session.customerId, projectType, budget, timeline, description]
   );
+  {
+    const c = dbGet('SELECT name, email FROM customers WHERE id = ?', [req.session.customerId]);
+    logActivity('request_received', `Neue Anfrage von ${c?.name || c?.email || 'Kunde'} (${projectType})`, 'request', result.lastInsertRowid);
+  }
 
   // Discord-Benachrichtigung (Routing: default an), async, nicht blockierend
   if (discordBot && notifyAllowed('request', 'discord', true)) {
@@ -1777,6 +1793,11 @@ app.put('/api/admin/requests/:id', requireAuth, async (req, res) => {
       requestId
     ]
   );
+
+  if (oldStatus !== newStatus) {
+    const lbl = ({ new: 'Neu', in_progress: 'In Bearbeitung', waiting: 'Antwort erforderlich', completed: 'Abgeschlossen', cancelled: 'Abgebrochen' })[newStatus] || newStatus;
+    logActivity('status_changed', `Anfrage #${requestId} (${request.customer_name || request.email}) → ${lbl}`, 'request', requestId);
+  }
 
   // Send notification email on status change
   if (oldStatus !== newStatus && request.email) {
@@ -2163,6 +2184,10 @@ app.put('/api/invoices/:id', requireAuth, (req, res) => {
       req.params.id
     ]
   );
+
+  if (newStatus === 'bezahlt' && inv.status !== 'bezahlt') {
+    logActivity('invoice_created', `Rechnung ${inv.invoice_number} als bezahlt markiert`, 'invoice', inv.id);
+  }
 
   // Wechsel auf "bezahlt" → Zahlungsbestätigung an den Kunden (fire-and-forget).
   if (newStatus === 'bezahlt' && inv.status !== 'bezahlt' && inv.customer_id) {
