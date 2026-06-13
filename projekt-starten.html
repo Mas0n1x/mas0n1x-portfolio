@@ -439,10 +439,10 @@
         </div>
       </div>
 
-      <!-- Step 5: Registration -->
+      <!-- Step 5: Kontaktdaten -->
       <div class="step" data-step="5">
-        <h2 class="step-title">Erstelle dein Konto</h2>
-        <p class="step-subtitle">Damit wir dich kontaktieren können</p>
+        <h2 class="step-title">Deine Kontaktdaten</h2>
+        <p class="step-subtitle">Damit wir uns bei dir melden können — kein Passwort nötig</p>
         <div id="error-container"></div>
         <div id="register-form">
           <div class="form-group">
@@ -450,17 +450,18 @@
             <input type="email" class="form-input" id="reg-email" placeholder="deine@email.de" required>
           </div>
           <div class="form-group">
-            <label class="form-label">Telefonnummer</label>
+            <label class="form-label">Name</label>
+            <input type="text" class="form-input" id="reg-name" placeholder="Vor- und Nachname">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Firma <span style="opacity:.6">(optional)</span></label>
+            <input type="text" class="form-input" id="reg-company" placeholder="Firmenname">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Telefonnummer <span style="opacity:.6">(optional)</span></label>
             <input type="tel" class="form-input" id="reg-phone" placeholder="+49 123 456789">
           </div>
-          <div class="form-group">
-            <label class="form-label">Passwort *</label>
-            <input type="password" class="form-input" id="reg-password" placeholder="Min. 6 Zeichen" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Passwort bestätigen *</label>
-            <input type="password" class="form-input" id="reg-password-confirm" placeholder="Passwort wiederholen" required>
-          </div>
+          <p class="step-subtitle" style="margin-top:8px;">Nach dem Absenden bekommst du per E-Mail einen Zugangslink zu deinem Kundenportal — ganz ohne Passwort.</p>
           <div class="login-toggle">
             Bereits ein Konto? <a onclick="toggleLoginForm()">Hier einloggen</a>
           </div>
@@ -489,8 +490,10 @@
           <h2 class="success-title">Anfrage gesendet!</h2>
           <p class="success-desc">
             Vielen Dank für deine Projektanfrage.<br>
-            Du erhältst in Kürze eine Bestätigung per E-Mail.<br>
             Den Status deiner Anfrage siehst du jederzeit im Kundenportal.
+          </p>
+          <p class="success-desc" id="success-magic-hint" style="display:none; color:#00ff88;">
+            Wir haben dir einen <strong>Zugangslink per E-Mail</strong> geschickt — damit kommst du ohne Passwort ins Kundenportal.
           </p>
           <a href="/kunde" class="btn btn-next">Zum Kundenportal</a>
         </div>
@@ -663,97 +666,56 @@
       btnNext.innerHTML = '<span class="spinner"></span> Wird gesendet…';
 
       try {
-        let customerId;
+        const projectPayload = {
+          projectType: formData.projectType,
+          budget: formData.budget,
+          timeline: formData.timeline,
+          description: formData.description
+        };
 
         if (isLoginMode) {
-          // Login
+          // Bestehendes Konto: einloggen und Anfrage als angemeldeter Kunde senden.
           const email = document.getElementById('login-email').value;
           const password = document.getElementById('login-password').value;
-
           if (!email || !password) {
             showError('Bitte fülle alle Felder aus.');
             updateButtons();
             return;
           }
-
           const loginRes = await fetch('/api/customer/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
             body: JSON.stringify({ email, password })
           });
-
           const loginData = await loginRes.json();
-          if (!loginRes.ok) {
-            showError(loginData.error || 'Login fehlgeschlagen');
-            updateButtons();
-            return;
-          }
+          if (!loginRes.ok) { showError(loginData.error || 'Login fehlgeschlagen'); updateButtons(); return; }
 
-          customerId = loginData.customerId;
-        } else {
-          // Register
-          const email = document.getElementById('reg-email').value;
-          const phone = document.getElementById('reg-phone').value;
-          const password = document.getElementById('reg-password').value;
-          const passwordConfirm = document.getElementById('reg-password-confirm').value;
-
-          if (!email || !password) {
-            showError('Bitte fülle alle Pflichtfelder aus.');
-            updateButtons();
-            return;
-          }
-
-          if (password.length < 6) {
-            showError('Das Passwort muss mindestens 6 Zeichen lang sein.');
-            updateButtons();
-            return;
-          }
-
-          if (password !== passwordConfirm) {
-            showError('Die Passwörter stimmen nicht überein.');
-            updateButtons();
-            return;
-          }
-
-          const registerRes = await fetch('/api/customer/register', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({ email, password, phone })
+          const requestRes = await fetch('/api/requests', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+            body: JSON.stringify(projectPayload)
           });
+          const requestData = await requestRes.json();
+          if (!requestRes.ok) { showError(requestData.error || 'Anfrage konnte nicht gesendet werden'); updateButtons(); return; }
+          window.magicLinkSent = false;
+        } else {
+          // Ohne Konto: öffentliche Anfrage absenden, Zugang kommt per Magic-Link-Mail.
+          const email = document.getElementById('reg-email').value;
+          const name = document.getElementById('reg-name').value;
+          const company = document.getElementById('reg-company').value;
+          const phone = document.getElementById('reg-phone').value;
+          if (!email) { showError('Bitte gib deine E-Mail-Adresse an.'); updateButtons(); return; }
 
-          const registerData = await registerRes.json();
-          if (!registerRes.ok) {
-            showError(registerData.error || 'Registrierung fehlgeschlagen');
-            updateButtons();
-            return;
-          }
-
-          customerId = registerData.customerId;
-        }
-
-        // Submit project request
-        const requestRes = await fetch('/api/requests', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({
-            projectType: formData.projectType,
-            budget: formData.budget,
-            timeline: formData.timeline,
-            description: formData.description
-          })
-        });
-
-        const requestData = await requestRes.json();
-        if (!requestRes.ok) {
-          showError(requestData.error || 'Anfrage konnte nicht gesendet werden');
-          updateButtons();
-          return;
+          const reqRes = await fetch('/api/requests/public', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+            body: JSON.stringify({ email, name, company, phone, ...projectPayload })
+          });
+          const reqData = await reqRes.json();
+          if (!reqRes.ok) { showError(reqData.error || 'Anfrage konnte nicht gesendet werden'); updateButtons(); return; }
+          window.magicLinkSent = true;
         }
 
         // Success!
+        const hint = document.getElementById('success-magic-hint');
+        if (hint) hint.style.display = window.magicLinkSent ? 'block' : 'none';
         showStep('success');
 
       } catch (error) {

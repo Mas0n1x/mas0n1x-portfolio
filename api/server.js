@@ -485,6 +485,17 @@ async function initDatabase() {
     )
   `);
 
+  // Magic-Links für passwortlosen Zugang zum Kundenportal (öffentliche Anfrage).
+  db.run(`
+    CREATE TABLE IF NOT EXISTS magic_links (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      token TEXT NOT NULL UNIQUE,
+      customer_id INTEGER NOT NULL,
+      expires_at TEXT NOT NULL,
+      created_at TEXT DEFAULT (datetime('now'))
+    )
+  `);
+
   // Check if admin exists
   const adminCheck = db.exec("SELECT * FROM admin WHERE id = 1");
   if (adminCheck.length === 0 || adminCheck[0].values.length === 0) {
@@ -1533,6 +1544,95 @@ app.get('/api/customer/check', (req, res) => {
   }
 });
 
+// ==================== MAGIC-LINK (passwortloser Zugang) ====================
+const MAGIC_TTL_MS = 14 * 24 * 60 * 60 * 1000; // 14 Tage gültig, wiederverwendbar bis Ablauf
+
+function createMagicLink(customerId) {
+  const token = crypto.randomBytes(32).toString('hex');
+  const expires = new Date(Date.now() + MAGIC_TTL_MS).toISOString();
+  dbRun('INSERT INTO magic_links (token, customer_id, expires_at) VALUES (?, ?, ?)', [token, customerId, expires]);
+  return token;
+}
+
+function siteBase(req) {
+  const fromSettings = dbGet("SELECT value FROM settings WHERE key='site_url'")?.value;
+  if (fromSettings) return fromSettings.replace(/\/$/, '');
+  return `${req.protocol}://${req.get('host')}`;
+}
+
+// Magic-Link einlösen → Kunde anmelden und ins Portal weiterleiten.
+app.get('/api/customer/magic/:token', (req, res) => {
+  const ml = dbGet('SELECT * FROM magic_links WHERE token = ?', [req.params.token]);
+  if (!ml || new Date(ml.expires_at) < new Date()) {
+    return res.redirect('/kunde/?magic=invalid');
+  }
+  req.session.regenerate((err) => {
+    if (err) return res.redirect('/kunde/?magic=error');
+    req.session.customerId = ml.customer_id;
+    const c = dbGet('SELECT email FROM customers WHERE id = ?', [ml.customer_id]);
+    if (c) req.session.customerEmail = c.email;
+    res.redirect('/kunde/');
+  });
+});
+
+// Öffentliche Projektanfrage OHNE Pflicht-Registrierung. Legt bei Bedarf einen
+// Kunden an und schickt einen Magic-Link für den Portal-Zugang.
+app.post('/api/requests/public', (req, res) => {
+  const { email, name, phone, company, projectType, budget, timeline, description } = req.body;
+
+  if (!email || !EMAIL_RE.test(String(email))) {
+    return res.status(400).json({ error: 'Bitte eine gültige E-Mail-Adresse angeben.' });
+  }
+  if (!projectType || !description || !String(description).trim()) {
+    return res.status(400).json({ error: 'Bitte Projektart und Beschreibung ausfüllen.' });
+  }
+
+  const mail = String(email).toLowerCase();
+  let customer = dbGet('SELECT * FROM customers WHERE email = ?', [mail]);
+  let customerId;
+  if (customer) {
+    customerId = customer.id;
+    // Fehlende Stammdaten ergänzen (überschreibt nichts Vorhandenes).
+    dbRun('UPDATE customers SET name = COALESCE(name, ?), phone = COALESCE(phone, ?), company = COALESCE(company, ?) WHERE id = ?',
+      [name || null, phone || null, company || null, customerId]);
+  } else {
+    // Zufallspasswort — Login läuft über den Magic-Link, kann später im Portal gesetzt werden.
+    const pw = bcrypt.hashSync(crypto.randomBytes(24).toString('hex'), 10);
+    const r = dbRun('INSERT INTO customers (email, password_hash, phone, name, company) VALUES (?, ?, ?, ?, ?)',
+      [mail, pw, phone || null, name || null, company || null]);
+    customerId = r.lastInsertRowid;
+  }
+
+  const reqResult = dbRun(
+    'INSERT INTO project_requests (customer_id, project_type, budget, timeline, description) VALUES (?, ?, ?, ?, ?)',
+    [customerId, projectType, budget || null, timeline || null, description]
+  );
+
+  // Magic-Link an den Kunden mailen.
+  const token = createMagicLink(customerId);
+  const link = `${siteBase(req)}/api/customer/magic/${token}`;
+  sendNotificationEmail(mail, 'Deine Projektanfrage ist eingegangen',
+    `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#111;color:#fff;">
+       <h2 style="color:#00ff88;">Danke für deine Anfrage!</h2>
+       <p>Hallo${name ? ` ${esc(name)}` : ''},</p>
+       <p>wir haben deine Projektanfrage erhalten und melden uns zeitnah. Über den folgenden Link kommst du jederzeit in dein Kundenportal – ganz ohne Passwort:</p>
+       <p><a href="${link}" style="display:inline-block;background:#00ff88;color:#000;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:bold;">Zum Kundenportal →</a></p>
+       <p style="color:#888;font-size:12px;">Der Link ist 14 Tage gültig. Im Portal kannst du auch ein eigenes Passwort festlegen.</p>
+     </div>`
+  ).catch(e => console.error('Magic-Link-Mail:', e.message));
+
+  // Admin benachrichtigen (E-Mail + Discord, Default an).
+  adminNotify('request', {
+    subject: `Neue Projektanfrage #${reqResult.lastInsertRowid}`,
+    html: `<h2>Neue Projektanfrage</h2><p><strong>Von:</strong> ${esc(name || '')} &lt;${esc(mail)}&gt;</p>
+           <p><strong>Art:</strong> ${esc(projectType)} · <strong>Budget:</strong> ${esc(budget || '–')} · <strong>Zeitrahmen:</strong> ${esc(timeline || '–')}</p>
+           <p>${esc(description)}</p>`,
+    discordText: `Neue Anfrage von ${name || mail} (${esc(projectType)}):\n${String(description).substring(0, 1500)}`
+  }, { email: true, discord: true });
+
+  res.json({ success: true });
+});
+
 // Customer Documents
 app.get('/api/customer/documents/:requestId', requireCustomerAuth, (req, res) => {
   const requestId = parseInt(req.params.requestId);
@@ -1797,6 +1897,21 @@ app.post('/api/requests/:id/messages', requestUpload.single('file'), (req, res) 
       html: `<h2>Neue Nachricht zu Anfrage #${requestId}</h2><p>${esc(content)}</p>`,
       discordText: `Anfrage #${requestId}:\n${String(content || '').substring(0, 1500)}`
     });
+  } else if (senderType === 'admin') {
+    // Antwort des Admins → Kunde per E-Mail benachrichtigen.
+    const r = dbGet('SELECT c.email, c.name FROM project_requests pr LEFT JOIN customers c ON c.id = pr.customer_id WHERE pr.id = ?', [requestId]);
+    if (r?.email) {
+      const base = (dbGet("SELECT value FROM settings WHERE key='site_url'")?.value || 'https://mas0n1x.online').replace(/\/$/, '');
+      sendNotificationEmail(r.email, 'Neue Antwort zu deiner Projektanfrage',
+        `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#111;color:#fff;">
+           <h2 style="color:#00ff88;">Neue Nachricht</h2>
+           <p>Hallo${r.name ? ` ${esc(r.name)}` : ''},</p>
+           <p>es gibt eine neue Antwort zu deiner Projektanfrage:</p>
+           <blockquote style="border-left:3px solid #00ff88;padding-left:12px;color:#ccc;">${esc(content)}</blockquote>
+           <p><a href="${base}/kunde" style="color:#00ff88;">Im Kundenportal antworten →</a></p>
+         </div>`
+      ).catch(e => console.error('Kunden-Antwort-Mail:', e.message));
+    }
   }
 
   // Handle file upload
@@ -2003,6 +2118,32 @@ app.post('/api/invoices', requireAuth, (req, res) => {
     'INSERT INTO activities (type, description, entity_type, entity_id) VALUES (?, ?, ?, ?)',
     ['invoice_created', `Rechnung ${invoice_number} erstellt`, 'invoice', result.lastInsertRowid]
   );
+
+  // Neuen Rechnungseingang dem verknüpften Portal-Kunden per E-Mail melden.
+  if (cid) {
+    const cust = dbGet('SELECT email, name FROM customers WHERE id = ?', [cid]);
+    if (cust?.email) {
+      const base = (dbGet("SELECT value FROM settings WHERE key='site_url'")?.value || 'https://mas0n1x.online').replace(/\/$/, '');
+      const totalStr = Number(total || 0).toLocaleString('de-DE', { minimumFractionDigits: 2 });
+      const payBtn = payment_link
+        ? `<p><a href="${esc(payment_link)}" style="display:inline-block;background:#00ff88;color:#000;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:bold;">Jetzt bezahlen →</a></p>`
+        : '';
+      sendNotificationEmail(cust.email, `Neue Rechnung ${invoice_number}`,
+        `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#111;color:#fff;">
+           <h2 style="color:#00ff88;">Neue Rechnung</h2>
+           <p>Hallo${cust.name ? ` ${esc(cust.name)}` : ''},</p>
+           <p>du hast eine neue Rechnung erhalten:</p>
+           <div style="background:#1a1a1a;padding:16px;border-radius:8px;margin:16px 0;">
+             <p><strong>Rechnungsnummer:</strong> ${esc(invoice_number)}</p>
+             <p><strong>Betrag:</strong> ${totalStr} EUR</p>
+             ${due_date ? `<p><strong>Fällig:</strong> ${esc(due_date)}</p>` : ''}
+           </div>
+           ${payBtn}
+           <p><a href="${base}/kunde" style="color:#00ff88;">Rechnung im Kundenportal ansehen →</a></p>
+         </div>`
+      ).catch(e => console.error('Rechnungs-Mail:', e.message));
+    }
+  }
 
   res.json({ success: true, id: result.lastInsertRowid });
 });

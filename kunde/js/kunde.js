@@ -39,8 +39,58 @@ async function api(endpoint, options = {}) {
   return data;
 }
 
+// ==================== TOASTS ====================
+(function injectToastStyles() {
+  const css = `
+    #toast-wrap{position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:10px;max-width:340px}
+    .toast{padding:14px 16px;border-radius:12px;background:#1a1a1a;border:1px solid rgba(255,255,255,.1);color:#fff;font-size:.9rem;box-shadow:0 8px 24px rgba(0,0,0,.4);animation:toastIn .25s ease;display:flex;gap:10px;align-items:flex-start}
+    .toast.success{border-left:3px solid #00ff88}.toast.error{border-left:3px solid #ff5b5b}.toast.info{border-left:3px solid #4aa3ff}
+    @keyframes toastIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
+    .status-timeline{display:flex;align-items:center;gap:6px;margin:0 0 18px;padding:16px;border-radius:14px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06)}
+    .status-timeline.cancelled{color:#ff5b5b;font-weight:600;justify-content:center;gap:8px}
+    .st-step{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:84px}
+    .st-dot{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;background:#222;color:#888;border:2px solid #333}
+    .st-step.active .st-dot{background:#00ff88;color:#000;border-color:#00ff88;box-shadow:0 0 0 4px rgba(0,255,136,.15)}
+    .st-step.done .st-dot{background:rgba(0,255,136,.2);color:#00ff88;border-color:#00ff88}
+    .st-label{font-size:.78rem;color:#999;text-align:center}
+    .st-step.active .st-label,.st-step.done .st-label{color:#fff}
+    .st-line{flex:1;height:2px;background:#333;min-width:20px}
+    .st-line.done{background:#00ff88}
+    .st-note{display:flex;align-items:center;gap:8px;margin:-8px 0 18px;padding:10px 14px;border-radius:10px;background:rgba(255,180,0,.08);border:1px solid rgba(255,180,0,.25);color:#ffb400;font-size:.85rem}`;
+  const s = document.createElement('style'); s.textContent = css; document.head.appendChild(s);
+})();
+function showToast(message, type = 'info', timeout = 3500) {
+  let wrap = document.getElementById('toast-wrap');
+  if (!wrap) { wrap = document.createElement('div'); wrap.id = 'toast-wrap'; document.body.appendChild(wrap); }
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.textContent = message;
+  wrap.appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateX(20px)'; t.style.transition = 'all .25s'; setTimeout(() => t.remove(), 250); }, timeout);
+}
+
+// Chat-Auto-Refresh (Near-Realtime): lädt offene Konversationen periodisch nach.
+let chatRefreshTimer = null;
+function startChatRefresh(requestId) {
+  stopChatRefresh();
+  chatRefreshTimer = setInterval(() => {
+    if (document.visibilityState === 'visible' && currentRequestId === requestId) {
+      loadMessages(requestId, true);
+    }
+  }, 6000);
+}
+function stopChatRefresh() {
+  if (chatRefreshTimer) { clearInterval(chatRefreshTimer); chatRefreshTimer = null; }
+}
+
 // ==================== AUTH ====================
 async function checkAuth() {
+  // Hinweis nach Magic-Link-Weiterleitung
+  const mp = new URLSearchParams(location.search).get('magic');
+  if (mp === 'invalid') showToast('Dieser Zugangslink ist ungültig oder abgelaufen. Bitte logge dich ein oder fordere einen neuen an.', 'error', 6000);
+  else if (mp === 'error') showToast('Anmeldung über den Link fehlgeschlagen. Bitte erneut versuchen.', 'error', 6000);
+  if (mp) history.replaceState(null, '', location.pathname);
+
   try {
     const data = await api('/customer/check');
     if (data.authenticated) {
@@ -103,7 +153,7 @@ async function loadRequests() {
         <div class="empty-state">
           <svg class="ic"><use href="#fa-folder-open"></use></svg>
           <h3>Keine Anfragen vorhanden</h3>
-          <p>Starten Sie Ihr erstes Projekt!</p>
+          <p>Starte dein erstes Projekt!</p>
           <a href="/projekt-starten.html" class="btn-primary">
             <svg class="ic"><use href="#fa-plus"></use></svg> Projekt starten
           </a>
@@ -163,6 +213,7 @@ async function openRequest(id) {
 
     // Fill info
     document.getElementById('request-info').innerHTML = `
+      ${renderStatusTimeline(request.status)}
       ${(request.progress > 0 || request.status === 'in_progress') ? `
         <div class="progress-card">
           <div class="progress-card-header">
@@ -224,24 +275,31 @@ async function openRequest(id) {
       </div>
     `;
 
+    lastMessageCount = -1;
     loadMessages(id);
     loadDocuments(id);
+    startChatRefresh(id);
   } catch (e) {
-    alert(e.message);
+    showToast(e.message, 'error');
   }
 }
 
-async function loadMessages(requestId) {
+let lastMessageCount = -1;
+async function loadMessages(requestId, silent = false) {
   const container = document.getElementById('chat-messages');
 
   try {
     const messages = await api(`/requests/${requestId}/messages`);
 
+    // Beim Auto-Refresh nichts neu rendern, wenn sich nichts geändert hat (kein Flackern).
+    if (silent && messages.length === lastMessageCount) return;
+    lastMessageCount = messages.length;
+
     if (messages.length === 0) {
       container.innerHTML = `
         <div style="text-align: center; color: var(--text-muted); padding: 40px;">
           <svg class="ic" style="font-size: 2.5rem; margin-bottom: 12px; display: block;"><use href="#fa-comments"></use></svg>
-          Noch keine Nachrichten.<br>Schreiben Sie uns!
+          Noch keine Nachrichten.<br>Schreib uns!
         </div>
       `;
       return;
@@ -271,6 +329,7 @@ document.getElementById('back-btn').addEventListener('click', () => {
   detailView.classList.add('hidden');
   requestsView.classList.remove('hidden');
   currentRequestId = null;
+  stopChatRefresh();
   loadRequests();
 });
 
@@ -284,7 +343,7 @@ document.getElementById('send-btn').addEventListener('click', async () => {
   const file = fileInput.files[0];
 
   if (!content && !file) {
-    alert('Bitte Nachricht eingeben oder Datei auswählen');
+    showToast('Bitte Nachricht eingeben oder Datei auswählen', 'error');
     return;
   }
 
@@ -303,9 +362,10 @@ document.getElementById('send-btn').addEventListener('click', async () => {
     input.value = '';
     fileInput.value = '';
     document.getElementById('file-name').textContent = '';
+    lastMessageCount = -1;
     loadMessages(currentRequestId);
   } catch (e) {
-    alert(e.message);
+    showToast(e.message, 'error');
   }
 });
 
@@ -506,6 +566,30 @@ function getStatusLabel(status) {
     'cancelled': 'Abgebrochen'
   };
   return labels[status] || status;
+}
+
+// Status-Timeline (Meilensteine) für die Detailansicht.
+function renderStatusTimeline(status) {
+  if (status === 'cancelled') {
+    return `<div class="status-timeline cancelled"><svg class="ic"><use href="#fa-times"></use></svg> Anfrage abgebrochen</div>`;
+  }
+  const steps = [
+    { key: 'new', label: 'Eingegangen' },
+    { key: 'in_progress', label: 'In Bearbeitung' },
+    { key: 'completed', label: 'Abgeschlossen' }
+  ];
+  const norm = status === 'waiting' ? 'in_progress' : status;
+  let curIdx = steps.findIndex(s => s.key === norm);
+  if (curIdx < 0) curIdx = 0;
+  return `<div class="status-timeline">
+    ${steps.map((s, i) => `
+      <div class="st-step ${i < curIdx ? 'done' : i === curIdx ? 'active' : ''}">
+        <div class="st-dot">${i < curIdx ? '✓' : i + 1}</div>
+        <div class="st-label">${s.label}</div>
+      </div>
+      ${i < steps.length - 1 ? `<div class="st-line ${i < curIdx ? 'done' : ''}"></div>` : ''}
+    `).join('')}
+  </div>${status === 'waiting' ? `<div class="st-note"><svg class="ic"><use href="#fa-exclamation-circle"></use></svg> Es wird eine Antwort von dir benötigt.</div>` : ''}`;
 }
 
 function formatDate(dateStr) {
@@ -897,12 +981,12 @@ async function bookAppointment() {
   const selectedSlot = document.querySelector('.time-slot.selected');
 
   if (!dateInput?.value) {
-    alert('Bitte wählen Sie ein Datum');
+    showToast('Bitte wähle ein Datum', 'error');
     return;
   }
 
   if (!selectedSlot) {
-    alert('Bitte wählen Sie eine Uhrzeit');
+    showToast('Bitte wähle eine Uhrzeit', 'error');
     return;
   }
 
@@ -927,10 +1011,10 @@ async function bookAppointment() {
     document.getElementById('time-slots').innerHTML = '';
 
     // Show success and reload
-    alert('Termin erfolgreich gebucht!');
+    showToast('Termin erfolgreich gebucht!', 'success');
     loadMyAppointments();
   } catch (e) {
-    alert(e.message);
+    showToast(e.message, 'error');
   } finally {
     bookBtn.disabled = false;
     bookBtn.innerHTML = '<svg class="ic"><use href="#fa-calendar-check"></use></svg> Termin buchen';
