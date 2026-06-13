@@ -29,6 +29,45 @@ if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true });
 }
 
+// ── Persistente Geheimnisse (Session-Secret + Verschlüsselungs-Key) ──
+// Liegen im data-Volume und überleben Container-Rebuilds. KEIN hartkodierter
+// Fallback mehr — sonst könnte jeder mit dem öffentlich im Code stehenden Secret
+// gültige Admin-Session-Cookies fälschen. Bevorzugt ENV, sonst zufällig erzeugt.
+function loadOrCreateSecret(file, bytes) {
+  const p = path.join(dataDir, file);
+  try {
+    const v = fs.readFileSync(p, 'utf8').trim();
+    if (v) return v;
+  } catch (e) { /* neu erzeugen */ }
+  const secret = crypto.randomBytes(bytes).toString('hex');
+  try { fs.writeFileSync(p, secret, { mode: 0o600 }); } catch (e) { fs.writeFileSync(p, secret); }
+  return secret;
+}
+const SESSION_SECRET = process.env.SESSION_SECRET || loadOrCreateSecret('.session_secret', 48);
+const ENC_KEY = crypto.createHash('sha256')
+  .update(process.env.SECRETS_KEY || loadOrCreateSecret('.secrets_key', 32))
+  .digest(); // 32 Byte für AES-256-GCM
+
+// Verschlüsselung für Secrets in der DB (Format: enc:v1:<iv>:<tag>:<cipher>).
+// Selbst-migrierend: Klartext-Altwerte werden beim Lesen unverändert zurückgegeben.
+function encryptSecret(plain) {
+  if (plain == null || plain === '') return plain;
+  const iv = crypto.randomBytes(12);
+  const cipher = crypto.createCipheriv('aes-256-gcm', ENC_KEY, iv);
+  const enc = Buffer.concat([cipher.update(String(plain), 'utf8'), cipher.final()]);
+  const tag = cipher.getAuthTag();
+  return `enc:v1:${iv.toString('hex')}:${tag.toString('hex')}:${enc.toString('hex')}`;
+}
+function decryptSecret(value) {
+  if (typeof value !== 'string' || !value.startsWith('enc:v1:')) return value; // Klartext (alt)
+  try {
+    const [, , ivH, tagH, dataH] = value.split(':');
+    const decipher = crypto.createDecipheriv('aes-256-gcm', ENC_KEY, Buffer.from(ivH, 'hex'));
+    decipher.setAuthTag(Buffer.from(tagH, 'hex'));
+    return Buffer.concat([decipher.update(Buffer.from(dataH, 'hex')), decipher.final()]).toString('utf8');
+  } catch (e) { return value; }
+}
+
 // Initialize Database
 async function initDatabase() {
   const SQL = await initSqlJs();
@@ -568,7 +607,7 @@ app.use('/api', (req, res, next) => {
 app.set('trust proxy', 1);
 
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'mas0n1x-portfolio-secret-change-me',
+  secret: SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   cookie: {
@@ -582,7 +621,23 @@ app.use(session({
 }));
 
 // Static files
-app.use(express.static(path.join(__dirname, '..')));
+// Schutz-Guard VOR dem Root-Static: verhindert, dass sensible Dateien aus dem
+// Projekt-Root per HTTP abrufbar sind (Cookie-Jars, DB, Configs, Quellcode).
+// Echte /api-Routen (von den Routern weiter unten bedient) werden NICHT blockiert.
+const BLOCKED_STATIC = /(^|\/)(node_modules\/|backups\/)|\.(db|sqlite|env|conf|cnf|ya?ml|log|lock|md|gitignore)$|(^|\/)(cookies|customer\d*|package(-lock)?)/i;
+app.use((req, res, next) => {
+  if (req.method !== 'GET' && req.method !== 'HEAD') return next();
+  // Quelldateien unter /api/ nie als Datei ausliefern, echte API-Pfade aber durchlassen.
+  if (/^\/api\//i.test(req.path)) {
+    if (/\.(c|m)?js$/i.test(req.path)) return res.status(404).end();
+    return next();
+  }
+  if (/^\/(data|\.git)(\/|$)/i.test(req.path) || BLOCKED_STATIC.test(req.path)) {
+    return res.status(404).end();
+  }
+  next();
+});
+app.use(express.static(path.join(__dirname, '..'), { dotfiles: 'deny' }));
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 app.use('/admin', express.static(path.join(__dirname, '..', 'admin')));
 
@@ -699,22 +754,44 @@ app.post('/api/login', loginRateLimit, (req, res) => {
     return res.status(401).json({ error: 'Invalid password' });
   }
   registerLoginSuccess(req);
+  // Noch das Standard-Passwort "admin"? → Frontend zum Wechsel zwingen.
+  const mustChange = bcrypt.compareSync('admin', admin.password_hash);
   if (twofaEnabled()) {
     req.session.pending2fa = true;
+    req.session.mustChange2fa = mustChange;
     return res.json({ success: false, twofa: true });
   }
-  req.session.authenticated = true;
-  logLogin(req, true, 'Passwort');
-  res.json({ success: true });
+  // Session-ID nach erfolgreichem Login neu erzeugen (Schutz vor Session-Fixation).
+  req.session.regenerate((err) => {
+    if (err) return res.status(500).json({ error: 'Session-Fehler' });
+    req.session.authenticated = true;
+    logLogin(req, true, 'Passwort');
+    res.json({ success: true, mustChangePassword: mustChange });
+  });
 });
 
-app.post('/api/login/2fa', (req, res) => {
+app.post('/api/login/2fa', loginRateLimit, (req, res) => {
   if (!req.session.pending2fa) return res.status(401).json({ error: 'Keine 2FA-Anmeldung ausstehend' });
   if (verify2faCode(req.body.code)) {
-    req.session.authenticated = true;
+    registerLoginSuccess(req);
+    const mustChange = !!req.session.mustChange2fa;
+    req.session.regenerate((err) => {
+      if (err) return res.status(500).json({ error: 'Session-Fehler' });
+      req.session.authenticated = true;
+      logLogin(req, true, '2FA');
+      res.json({ success: true, mustChangePassword: mustChange });
+    });
+    return;
+  }
+  // Fehlversuch zählt ins IP-Rate-Limit; nach 5 Fehlversuchen 2FA-Sitzung verwerfen.
+  registerLoginFail(req);
+  req.session.twofaFails = (req.session.twofaFails || 0) + 1;
+  if (req.session.twofaFails >= 5) {
     delete req.session.pending2fa;
-    logLogin(req, true, '2FA');
-    return res.json({ success: true });
+    delete req.session.mustChange2fa;
+    delete req.session.twofaFails;
+    logLogin(req, false, '2FA zu viele Fehlversuche — abgebrochen');
+    return res.status(429).json({ error: 'Zu viele Fehlversuche. Bitte erneut anmelden.' });
   }
   logLogin(req, false, '2FA-Code falsch');
   res.status(401).json({ error: 'Code ungültig' });
@@ -771,6 +848,12 @@ app.post('/api/change-password', requireAuth, (req, res) => {
 
   if (!bcrypt.compareSync(currentPassword, admin.password_hash)) {
     return res.status(401).json({ error: 'Current password is incorrect' });
+  }
+  if (!newPassword || String(newPassword).length < 12) {
+    return res.status(400).json({ error: 'Das neue Passwort muss mindestens 12 Zeichen lang sein.' });
+  }
+  if (String(newPassword) === 'admin') {
+    return res.status(400).json({ error: 'Bitte ein eigenes, sicheres Passwort wählen.' });
   }
 
   const newHash = bcrypt.hashSync(newPassword, 10);
@@ -1221,11 +1304,16 @@ app.get('/api/settings', (req, res) => {
   res.json(pub);
 });
 
+// Settings-Keys, die als Secret verschlüsselt in der DB liegen.
+const SECRET_SETTING_KEYS = new Set(['smtp_pass']);
 app.post('/api/settings', requireAuth, (req, res) => {
-  const settings = req.body;
+  const settings = req.body || {};
 
   Object.entries(settings).forEach(([key, value]) => {
-    dbRun('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)', [key, value]);
+    // Leeres Passwort-Feld nicht überschreiben (Admin lässt es beim Speichern oft leer).
+    if (key === 'smtp_pass' && (value === '' || value == null)) return;
+    const v = SECRET_SETTING_KEYS.has(key) ? encryptSecret(value) : value;
+    dbRun('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)', [key, v]);
   });
 
   res.json({ success: true });
@@ -1279,7 +1367,7 @@ app.post('/api/email/test', requireAuth, async (req, res) => {
   const smtpHost = dbGet('SELECT value FROM settings WHERE key = ?', ['smtp_host'])?.value;
   const smtpPort = dbGet('SELECT value FROM settings WHERE key = ?', ['smtp_port'])?.value;
   const smtpUser = dbGet('SELECT value FROM settings WHERE key = ?', ['smtp_user'])?.value;
-  const smtpPass = dbGet('SELECT value FROM settings WHERE key = ?', ['smtp_pass'])?.value;
+  const smtpPass = decryptSecret(dbGet('SELECT value FROM settings WHERE key = ?', ['smtp_pass'])?.value);
   const fromName = dbGet('SELECT value FROM settings WHERE key = ?', ['smtp_from_name'])?.value || 'Mas0n1x Portfolio';
   // Absenderadresse separat vom SMTP-User (z.B. Brevo-Relay: User = Login-ID, Absender = echte Adresse)
   const fromAddr = dbGet('SELECT value FROM settings WHERE key = ?', ['smtp_from'])?.value || smtpUser;
@@ -1334,12 +1422,12 @@ app.post('/api/email/test', requireAuth, async (req, res) => {
 // Helper function to send notification emails (used internally)
 async function sendNotificationEmail(to, subject, htmlContent) {
   const emailEnabled = dbGet('SELECT value FROM settings WHERE key = ?', ['email_enabled'])?.value;
-  if (emailEnabled !== 'true') return false;
+  if (emailEnabled === 'false') return false; // nur explizit deaktiviert blockt; sonst senden sobald SMTP gesetzt
 
   const smtpHost = dbGet('SELECT value FROM settings WHERE key = ?', ['smtp_host'])?.value;
   const smtpPort = dbGet('SELECT value FROM settings WHERE key = ?', ['smtp_port'])?.value;
   const smtpUser = dbGet('SELECT value FROM settings WHERE key = ?', ['smtp_user'])?.value;
-  const smtpPass = dbGet('SELECT value FROM settings WHERE key = ?', ['smtp_pass'])?.value;
+  const smtpPass = decryptSecret(dbGet('SELECT value FROM settings WHERE key = ?', ['smtp_pass'])?.value);
   const fromName = dbGet('SELECT value FROM settings WHERE key = ?', ['smtp_from_name'])?.value || 'Mas0n1x Portfolio';
   // Absenderadresse separat vom SMTP-User (z.B. Brevo-Relay: User = Login-ID, Absender = echte Adresse)
   const fromAddr = dbGet('SELECT value FROM settings WHERE key = ?', ['smtp_from'])?.value || smtpUser;
@@ -1371,11 +1459,20 @@ async function sendNotificationEmail(to, subject, htmlContent) {
 
 // ==================== CUSTOMER AUTH ROUTES ====================
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 app.post('/api/customer/register', async (req, res) => {
   const { email, password, phone, name, company } = req.body;
 
   if (!email || !password) {
     return res.status(400).json({ error: 'E-Mail und Passwort sind erforderlich' });
+  }
+  // Serverseitige Validierung (Frontend-Checks sind umgehbar).
+  if (!EMAIL_RE.test(String(email))) {
+    return res.status(400).json({ error: 'Bitte eine gültige E-Mail-Adresse angeben.' });
+  }
+  if (String(password).length < 8) {
+    return res.status(400).json({ error: 'Das Passwort muss mindestens 8 Zeichen lang sein.' });
   }
 
   // Check if email already exists
@@ -1390,14 +1487,16 @@ app.post('/api/customer/register', async (req, res) => {
     [email.toLowerCase(), passwordHash, phone || null, name || null, company || null]
   );
 
-  req.session.customerId = result.lastInsertRowid;
-  req.session.customerEmail = email.toLowerCase();
-
   // Send welcome email (async, don't wait)
   const customer = { id: result.lastInsertRowid, email: email.toLowerCase(), name };
   sendWelcomeEmail(customer).catch(e => console.error('Welcome email error:', e));
 
-  res.json({ success: true, customerId: result.lastInsertRowid });
+  req.session.regenerate((err) => {
+    if (err) return res.status(500).json({ error: 'Session-Fehler' });
+    req.session.customerId = result.lastInsertRowid;
+    req.session.customerEmail = email.toLowerCase();
+    res.json({ success: true, customerId: result.lastInsertRowid });
+  });
 });
 
 app.post('/api/customer/login', loginRateLimit, (req, res) => {
@@ -1407,9 +1506,12 @@ app.post('/api/customer/login', loginRateLimit, (req, res) => {
 
   if (customer && bcrypt.compareSync(password || '', customer.password_hash)) {
     registerLoginSuccess(req);
-    req.session.customerId = customer.id;
-    req.session.customerEmail = customer.email;
-    res.json({ success: true, customerId: customer.id });
+    req.session.regenerate((err) => {
+      if (err) return res.status(500).json({ error: 'Session-Fehler' });
+      req.session.customerId = customer.id;
+      req.session.customerEmail = customer.email;
+      res.json({ success: true, customerId: customer.id });
+    });
   } else {
     registerLoginFail(req);
     res.status(401).json({ error: 'Ungültige E-Mail oder Passwort' });
@@ -1417,9 +1519,9 @@ app.post('/api/customer/login', loginRateLimit, (req, res) => {
 });
 
 app.post('/api/customer/logout', (req, res) => {
-  req.session.customerId = null;
-  req.session.customerEmail = null;
-  res.json({ success: true });
+  // Session vollständig zerstören (nicht nur Felder nullen) — sonst bleibt die
+  // Session-ID gültig und wiederverwendbar.
+  req.session.destroy(() => res.json({ success: true }));
 });
 
 app.get('/api/customer/check', (req, res) => {
@@ -1910,15 +2012,39 @@ app.put('/api/invoices/:id', requireAuth, (req, res) => {
   const { status, paid_date, payment_link } = req.body;
   const inv = dbGet('SELECT * FROM invoices WHERE id = ?', [req.params.id]);
   if (!inv) return res.status(404).json({ error: 'Rechnung nicht gefunden' });
+  const newStatus = status !== undefined ? status : inv.status;
   dbRun(
     'UPDATE invoices SET status = ?, paid_date = ?, payment_link = ? WHERE id = ?',
     [
-      status !== undefined ? status : inv.status,
+      newStatus,
       paid_date !== undefined ? paid_date : inv.paid_date,
       payment_link !== undefined ? payment_link : inv.payment_link,
       req.params.id
     ]
   );
+
+  // Wechsel auf "bezahlt" → Zahlungsbestätigung an den Kunden (fire-and-forget).
+  if (newStatus === 'bezahlt' && inv.status !== 'bezahlt' && inv.customer_id) {
+    const customer = dbGet('SELECT email, name FROM customers WHERE id = ?', [inv.customer_id]);
+    if (customer?.email) {
+      const settings = {};
+      dbAll('SELECT * FROM settings').forEach(s => { settings[s.key] = s.value; });
+      const total = Number(inv.total || 0).toLocaleString('de-DE', { minimumFractionDigits: 2 });
+      const html = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #111; color: #fff;">
+          <div style="text-align:center; margin-bottom:30px;"><h1 style="color:#00ff88;">Zahlung erhalten</h1></div>
+          <p>Hallo${customer.name ? ` ${customer.name}` : ''},</p>
+          <p>vielen Dank! Wir haben deine Zahlung zur Rechnung <strong>${esc(inv.invoice_number)}</strong> über <strong>${total} EUR</strong> erhalten.</p>
+          <p>Die Rechnung ist damit vollständig beglichen.</p>
+          <hr style="border:1px solid #333; margin:30px 0;">
+          <p style="color:#888; font-size:12px;">Mit freundlichen Grüßen<br>${esc(settings.impressum_name || settings.smtp_from_name || 'Mas0n1x')}</p>
+        </div>`;
+      sendNotificationEmail(customer.email, `Zahlungsbestätigung – Rechnung ${inv.invoice_number}`, html)
+        .then(ok => { if (ok) dbRun('INSERT INTO email_logs (type, recipient, subject, entity_type, entity_id) VALUES (?,?,?,?,?)', ['payment_confirmation', customer.email, `Zahlungsbestätigung ${inv.invoice_number}`, 'invoice', inv.id]); })
+        .catch(e => console.error('Payment-Confirmation-Mail:', e.message));
+    }
+  }
+
   res.json({ success: true });
 });
 
@@ -2674,7 +2800,7 @@ app.get('/api/public/skills', (req, res) => {
 // Send welcome email to new customer
 async function sendWelcomeEmail(customer) {
   const emailEnabled = dbGet('SELECT value FROM settings WHERE key = ?', ['email_enabled'])?.value;
-  if (emailEnabled !== 'true') return false;
+  if (emailEnabled === 'false') return false; // nur explizit deaktiviert blockt; sonst senden sobald SMTP gesetzt
 
   const settings = {};
   dbAll('SELECT * FROM settings').forEach(s => { settings[s.key] = s.value; });
@@ -2708,7 +2834,7 @@ async function sendWelcomeEmail(customer) {
 // Send payment reminder for overdue invoices
 async function sendPaymentReminder(invoice) {
   const emailEnabled = dbGet('SELECT value FROM settings WHERE key = ?', ['email_enabled'])?.value;
-  if (emailEnabled !== 'true') return false;
+  if (emailEnabled === 'false') return false; // nur explizit deaktiviert blockt; sonst senden sobald SMTP gesetzt
 
   // Get customer email
   let recipientEmail = null;
@@ -2862,7 +2988,9 @@ app.get('/api/admin/backups', requireAuth, (req, res) => {
 // Download specific backup
 app.get('/api/admin/backups/:filename', requireAuth, (req, res) => {
   const backupDir = path.join(__dirname, '..', 'backups');
-  const backupPath = path.join(backupDir, req.params.filename);
+  // path.basename verhindert Path-Traversal (z.B. ../../data/portfolio.db) über den Routenparameter.
+  const safeName = path.basename(req.params.filename || '');
+  const backupPath = path.join(backupDir, safeName);
 
   if (!fs.existsSync(backupPath)) {
     return res.status(404).json({ error: 'Backup nicht gefunden' });
@@ -2874,7 +3002,9 @@ app.get('/api/admin/backups/:filename', requireAuth, (req, res) => {
 // Delete backup
 app.delete('/api/admin/backups/:filename', requireAuth, (req, res) => {
   const backupDir = path.join(__dirname, '..', 'backups');
-  const backupPath = path.join(backupDir, req.params.filename);
+  // path.basename verhindert Path-Traversal (z.B. ../../data/portfolio.db) über den Routenparameter.
+  const safeName = path.basename(req.params.filename || '');
+  const backupPath = path.join(backupDir, safeName);
 
   if (fs.existsSync(backupPath)) {
     fs.unlinkSync(backupPath);
@@ -2886,7 +3016,9 @@ app.delete('/api/admin/backups/:filename', requireAuth, (req, res) => {
 // Restore from backup
 app.post('/api/admin/restore/:filename', requireAuth, (req, res) => {
   const backupDir = path.join(__dirname, '..', 'backups');
-  const backupPath = path.join(backupDir, req.params.filename);
+  // path.basename verhindert Path-Traversal (z.B. ../../data/portfolio.db) über den Routenparameter.
+  const safeName = path.basename(req.params.filename || '');
+  const backupPath = path.join(backupDir, safeName);
 
   if (!fs.existsSync(backupPath)) {
     return res.status(404).json({ error: 'Backup nicht gefunden' });
@@ -3419,17 +3551,23 @@ app.post('/api/webhook/github', (req, res) => {
   try {
     const secret = discordBot.getConfig('github_webhook_secret') || process.env.GITHUB_WEBHOOK_SECRET;
 
-    if (secret && req.rawBody) {
-      const signature = req.headers['x-hub-signature-256'];
-      if (!signature) return res.status(401).json({ error: 'Missing signature' });
+    // Secret ist PFLICHT: ohne wäre der Endpoint offen und jeder könnte gefälschte
+    // GitHub-Events posten, die der Bot als echte Repo-Aktivität in Discord spiegelt.
+    if (!secret || !req.rawBody) {
+      return res.status(401).json({ error: 'Webhook nicht konfiguriert' });
+    }
+    const signature = req.headers['x-hub-signature-256'];
+    if (!signature) return res.status(401).json({ error: 'Missing signature' });
 
-      const hmac = crypto.createHmac('sha256', secret);
-      hmac.update(req.rawBody);
-      const expected = 'sha256=' + hmac.digest('hex');
+    const hmac = crypto.createHmac('sha256', secret);
+    hmac.update(req.rawBody);
+    const expected = 'sha256=' + hmac.digest('hex');
 
-      if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected))) {
-        return res.status(401).json({ error: 'Invalid signature' });
-      }
+    const sigBuf = Buffer.from(signature);
+    const expBuf = Buffer.from(expected);
+    // Längen-Check VOR timingSafeEqual — sonst wirft es bei ungleicher Länge eine Exception (500).
+    if (sigBuf.length !== expBuf.length || !crypto.timingSafeEqual(sigBuf, expBuf)) {
+      return res.status(401).json({ error: 'Invalid signature' });
     }
 
     const event = req.headers['x-github-event'];

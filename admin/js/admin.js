@@ -86,8 +86,14 @@ loginForm.addEventListener('submit', async (e) => {
     try {
       const r = await fetch('/api/login/2fa', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code }) });
       if (!r.ok) throw new Error('bad');
+      const res2 = await r.json().catch(() => ({}));
       isAuthenticated = true; loginPending2fa = false;
-      showDashboard(); showToast('Erfolgreich angemeldet!', 'success');
+      showDashboard();
+      if (res2 && res2.mustChangePassword) {
+        showToast('Sicherheit: Bitte ändere das Standard-Passwort "admin" umgehend in den Einstellungen!', 'warning');
+      } else {
+        showToast('Erfolgreich angemeldet!', 'success');
+      }
     } catch (err) { loginError.textContent = 'Code ungültig!'; }
     return;
   }
@@ -105,7 +111,12 @@ loginForm.addEventListener('submit', async (e) => {
       return;
     }
     isAuthenticated = true;
-    showDashboard(); showToast('Erfolgreich angemeldet!', 'success');
+    showDashboard();
+    if (res && res.mustChangePassword) {
+      showToast('Sicherheit: Bitte ändere das Standard-Passwort "admin" umgehend in den Einstellungen!', 'warning');
+    } else {
+      showToast('Erfolgreich angemeldet!', 'success');
+    }
   } catch (e) {
     loginError.textContent = 'Falsches Passwort!';
   }
@@ -1002,8 +1013,8 @@ document.getElementById('change-password-form').addEventListener('submit', async
     return;
   }
 
-  if (newPassword.length < 4) {
-    showToast('Passwort muss mindestens 4 Zeichen lang sein!', 'error');
+  if (newPassword.length < 12) {
+    showToast('Passwort muss mindestens 12 Zeichen lang sein!', 'error');
     return;
   }
 
@@ -1864,6 +1875,7 @@ function getInvoiceData() {
     },
     to: {
       name: document.getElementById('invoice-to-name').value,
+      email: document.getElementById('invoice-to-email')?.value || '',
       address: document.getElementById('invoice-to-address').value,
       customerId: document.getElementById('invoice-to-customer')?.value || ''
     },
@@ -2802,6 +2814,7 @@ async function saveInvoiceToArchive() {
       body: {
         invoice_number: data.number,
         customer_id: data.to.customerId || null,
+        customer_email: data.to.email || null,
         customer_name: data.to.name,
         customer_address: data.to.address,
         amount: data.subtotal,
