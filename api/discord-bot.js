@@ -13,6 +13,19 @@ const crypto = require('crypto');
 // ── Components V2 Flag ──────────────────────────────────────────
 const CV2_FLAGS = MessageFlags.IsComponentsV2 || (1 << 15);
 
+// Kuratierte Projektliste fuer die "Projekte"-Nachricht (eine Nachricht, alle Projekte).
+// status: 'live' (gruen), 'dev' (gelb), 'building' (blau). since: Freitext. url: optional.
+const CURATED_PROJECTS = [
+  { name: 'LawNet', status: 'live', since: '2024', url: 'https://lawnet.sale',
+    desc: 'CAD/MDT-Plattform für FiveM-Roleplay — modulares „…Net"-Ökosystem.' },
+  { name: 'Jarvis', status: 'dev', since: '2025', url: null,
+    desc: 'Lokaler KI-Sprachassistent (Iron-Man-Stil) — niedrige Latenz, offline.' },
+  { name: 'Homelab Dashboard', status: 'live', since: 'Dez 2025', url: 'https://github.com/Mas0n1x/homelab-dashboard',
+    desc: 'Multi-Server „Fleet Command Center" fürs Homelab.' },
+  { name: 'Aurora', status: 'building', since: 'Juli 2026', url: null,
+    desc: 'Meine eigene Cloud — gerade im Aufbau.' },
+];
+
 // ── Default Content ─────────────────────────────────────────────
 
 const DEFAULT_RULES_SECTIONS = [
@@ -1247,96 +1260,48 @@ class DiscordBot {
     const channel = await this.client.channels.fetch(channelId);
     if (!channel) throw new Error('Channel nicht gefunden');
 
-    const repos = await this.fetchRecentRepos(5);
-
-    const sentMessages = [];
-
-    // Header
-    const headerContainer = new ContainerBuilder()
-      .setAccentColor(0x00ff88);
-    headerContainer.addTextDisplayComponents(
-      new TextDisplayBuilder().setContent(
-        '# 🚀 Letzte GitHub-Aktivität\n' +
-        'Die Repositories, an denen ich zuletzt gearbeitet habe.'
-      )
-    );
-    const headerMsg = await channel.send({
-      components: [headerContainer],
-      flags: CV2_FLAGS,
-    });
-    sentMessages.push(headerMsg.id);
-
-    if (!repos || repos.length === 0) {
-      const emptyContainer = new ContainerBuilder()
-        .setAccentColor(0xffaa00);
-      emptyContainer.addTextDisplayComponents(
-        new TextDisplayBuilder().setContent('_Aktuell keine GitHub-Aktivität abrufbar._')
-      );
-      const emptyMsg = await channel.send({
-        components: [emptyContainer],
-        flags: CV2_FLAGS,
-      });
-      sentMessages.push(emptyMsg.id);
-      this.log('projects', channelId, null, null, { count: 0 });
-      return sentMessages;
+    // Vorherige Projekt-Nachricht(en) loeschen -> immer genau eine saubere Nachricht
+    const prev = this._parseJSON(this.getConfig('projects_message_ids'), []);
+    if (Array.isArray(prev)) {
+      for (const id of prev) {
+        try { const m = await channel.messages.fetch(id); await m.delete(); } catch { /* schon weg */ }
+      }
     }
 
-    // Jedes Repo als eigener Container
-    for (const repo of repos) {
-      const container = new ContainerBuilder()
-        .setAccentColor(0x00ff88);
+    const STATUS = {
+      live:     { dot: '🟢', label: 'Live' },
+      dev:      { dot: '🟡', label: 'In Entwicklung' },
+      building: { dot: '🔵', label: 'Im Aufbau' },
+    };
 
-      const privTag = repo.private ? ' 🔒' : '';
-      container.addTextDisplayComponents(
-        new TextDisplayBuilder().setContent(`## ${repo.name}${privTag}`)
-      );
+    // Alles in EINEM Container = eine Nachricht
+    const container = new ContainerBuilder().setAccentColor(0x00ff88);
+    container.addTextDisplayComponents(
+      new TextDisplayBuilder().setContent(
+        '# 🚀 Meine Projekte\n' +
+        'Woran ich gerade arbeite — Status & Start.'
+      )
+    );
 
-      if (repo.description) {
-        container.addTextDisplayComponents(
-          new TextDisplayBuilder().setContent(repo.description)
-        );
-      }
-
+    for (const p of CURATED_PROJECTS) {
+      const s = STATUS[p.status] || STATUS.dev;
       container.addSeparatorComponents(new SeparatorBuilder().setDivider(true));
-
-      const meta = [];
-      if (repo.language) meta.push(`💻 ${repo.language}`);
-      if (repo.stargazers_count) meta.push(`⭐ ${repo.stargazers_count}`);
-      if (repo.pushed_at) meta.push(`🕒 aktiv ${this._relTime(repo.pushed_at)}`);
-      container.addTextDisplayComponents(
-        new TextDisplayBuilder().setContent(meta.join('  ·  ') || '–')
-      );
-
-      if (!repo.private && repo.html_url) {
-        container.addTextDisplayComponents(
-          new TextDisplayBuilder().setContent(`🔗 [Repository ansehen](${repo.html_url})`)
-        );
-      }
-
-      const sent = await channel.send({
-        components: [container],
-        flags: CV2_FLAGS,
-      });
-      sentMessages.push(sent.id);
+      let block = `## ${s.dot} ${p.name}\n${p.desc}\n**${s.label}**  ·  seit ${p.since}`;
+      if (p.url) block += `  ·  🔗 [Öffnen](${p.url})`;
+      container.addTextDisplayComponents(new TextDisplayBuilder().setContent(block));
     }
 
-    // Abschluss-CTA
-    const ctaContainer = new ContainerBuilder()
-      .setAccentColor(0x00d4ff);
-    ctaContainer.addTextDisplayComponents(
+    container.addSeparatorComponents(new SeparatorBuilder().setDivider(true));
+    container.addTextDisplayComponents(
       new TextDisplayBuilder().setContent(
-        '### 💡 Interesse an einer Zusammenarbeit?\n' +
-        'Erstelle ein **Ticket** oder besuche das **[Portfolio](https://mas0n1x.dev)**.'
+        '💡 Interesse an einer Zusammenarbeit? Öffne ein **Ticket** oder besuche das **[Portfolio](https://mas0n1x.dev)**.'
       )
     );
-    const ctaMsg = await channel.send({
-      components: [ctaContainer],
-      flags: CV2_FLAGS,
-    });
-    sentMessages.push(ctaMsg.id);
 
-    this.log('projects', channelId, null, null, { count: repos.length });
-    return sentMessages;
+    const sent = await channel.send({ components: [container], flags: CV2_FLAGS });
+    this.setConfig('projects_message_ids', JSON.stringify([sent.id]));
+    this.log('projects', channelId, sent.id, null, { count: CURATED_PROJECTS.length });
+    return [sent.id];
   }
 
   // ── Social Links (Components V2) ──────────────────────────────
