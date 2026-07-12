@@ -1325,6 +1325,7 @@
           <button class="discord-tab" data-discord-tab="rules"><svg class="ic"><use href="#fa-scroll"></use></svg> Regeln</button>
           <button class="discord-tab" data-discord-tab="products"><svg class="ic"><use href="#fa-box"></use></svg> Produkte</button>
           <button class="discord-tab" data-discord-tab="projects"><svg class="ic"><use href="#fa-rocket"></use></svg> Projekte</button>
+          <button class="discord-tab" data-discord-tab="servers"><svg class="ic"><use href="#fa-server"></use></svg> Meine Server</button>
           <button class="discord-tab" data-discord-tab="social"><svg class="ic"><use href="#fa-share-alt"></use></svg> Social</button>
           <button class="discord-tab" data-discord-tab="github"><svg class="ic"><use href="#fa-github"></use></svg> GitHub</button>
           <button class="discord-tab" data-discord-tab="tickets"><svg class="ic"><use href="#fa-ticket-alt"></use></svg> Tickets</button>
@@ -1510,6 +1511,59 @@
             </div>
             <div class="discord-actions">
               <button class="btn-primary" onclick="sendDiscordProjects()"><svg class="ic"><use href="#fa-paper-plane"></use></svg> Aktive Projekte posten</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ Tab: Meine Server ═══ -->
+        <div id="discord-tab-servers" class="discord-tab-content">
+          <div class="discord-config-card">
+            <h3><svg class="ic"><use href="#fa-server"></use></svg> Meine Server posten</h3>
+            <div class="discord-info-box">
+              <svg class="ic"><use href="#fa-info-circle"></use></svg> Postet eine <strong>Live-Übersicht</strong> deiner Server aus dem Homelab-Dashboard — Specs (vCPU/RAM/Disk), Auslastung (CPU/RAM/Disk/Temperatur) und Online/Offline-Status. Die Nachricht <strong>aktualisiert sich automatisch</strong> im eingestellten Intervall.
+            </div>
+            <div class="form-group">
+              <label>Server Channel ID</label>
+              <input type="text" id="discord-channel-servers" placeholder="Channel-ID">
+            </div>
+
+            <h4 style="margin:18px 0 8px;">Homelab-Anbindung</h4>
+            <div class="form-group">
+              <label>Dashboard API-URL</label>
+              <input type="text" id="discord-homelab-url" placeholder="z. B. http://host.docker.internal oder https://dashboard.deine-domain.de">
+            </div>
+            <div class="form-row" style="display:flex;gap:16px;flex-wrap:wrap;">
+              <div class="form-group" style="flex:1;min-width:200px;">
+                <label>Benutzer</label>
+                <input type="text" id="discord-homelab-user" placeholder="Dashboard-Benutzer" autocomplete="off">
+              </div>
+              <div class="form-group" style="flex:1;min-width:200px;">
+                <label>Passwort <span id="discord-homelab-pw-hint" style="color:var(--text-muted);font-size:0.8rem;"></span></label>
+                <input type="password" id="discord-homelab-password" placeholder="Passwort" autocomplete="new-password">
+              </div>
+            </div>
+            <div class="discord-info-box" style="font-size:0.82rem;">
+              <svg class="ic"><use href="#fa-info-circle"></use></svg> Zugangsdaten können auch per <code>HOMELAB_API_URL</code>, <code>HOMELAB_USER</code> und <code>HOMELAB_PASSWORD</code> in der <code>.env</code> gesetzt werden (haben Vorrang). Das Passwort wird sicher gespeichert und nie zurück ins Panel geladen.
+            </div>
+
+            <h4 style="margin:18px 0 8px;">Auto-Refresh</h4>
+            <div class="form-row" style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end;">
+              <div class="form-group" style="flex:1;min-width:200px;">
+                <label>Aktualisierungs-Intervall (Sekunden)</label>
+                <input type="number" id="discord-servers-interval" min="60" step="30" value="300" placeholder="300">
+              </div>
+              <div class="form-group" style="flex:1;min-width:200px;">
+                <label class="toggle-label" style="display:flex;align-items:center;gap:8px;">
+                  <input type="checkbox" id="discord-servers-autorefresh" checked>
+                  Automatisch aktualisieren
+                </label>
+              </div>
+            </div>
+
+            <div class="discord-actions">
+              <button class="btn-primary" onclick="sendDiscordServers()"><svg class="ic"><use href="#fa-paper-plane"></use></svg> Posten / Aktualisieren</button>
+              <button class="btn-secondary" onclick="saveDiscordServers()"><svg class="ic"><use href="#fa-save"></use></svg> Speichern</button>
+              <button class="btn-secondary" onclick="testDiscordHomelab()"><svg class="ic"><use href="#fa-plug"></use></svg> Verbindung testen</button>
             </div>
           </div>
         </div>

@@ -3228,9 +3228,11 @@ app.post('/api/admin/restore/:filename', requireAuth, (req, res) => {
 app.get('/api/admin/discord/config', requireAuth, (req, res) => {
   try {
     const config = discordBot.getAllConfig();
-    // Never send the token to frontend
+    // Never send secrets to frontend
     delete config.bot_token;
+    delete config.homelab_password;
     config.has_token = !!(process.env.DISCORD_BOT_TOKEN || discordBot.getConfig('bot_token'));
+    config.has_homelab_password = !!(process.env.HOMELAB_PASSWORD || discordBot.getConfig('homelab_password'));
     res.json(config);
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -3371,7 +3373,25 @@ app.post('/api/admin/discord/config', requireAuth, (req, res) => {
       discordBot.setConfig('bot_token', config.bot_token);
       delete config.bot_token;
     }
+    // Homelab-Passwort nur überschreiben, wenn ein neuer Wert gesetzt wird
+    if (config.homelab_password === '' || config.homelab_password === undefined) {
+      delete config.homelab_password;
+    }
     discordBot.saveAllConfig(config);
+
+    // Auto-Refresh neu starten, wenn serverbezogene Einstellungen geändert wurden
+    const serversKeys = ['channel_servers', 'servers_refresh_seconds', 'servers_autorefresh_enabled', 'homelab_api_url', 'homelab_user', 'homelab_password'];
+    if (serversKeys.some(k => k in config) && discordBot.isConnected) {
+      discordBot._homelabToken = null; // ggf. neue Zugangsdaten
+      discordBot._startServersRefresh();
+    }
+
+    // Minecraft-Refresh neu starten, wenn MC-Einstellungen geändert wurden
+    const mcKeys = ['mc_server_ip', 'mc_map_url', 'mc_refresh_seconds', 'mc_autorefresh_enabled'];
+    if (mcKeys.some(k => k in config) && discordBot.isConnected) {
+      discordBot._startMinecraftRefresh();
+    }
+
     res.json({ success: true });
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -3440,6 +3460,28 @@ app.post('/api/admin/discord/send-active-projects', requireAuth, async (req, res
     res.json({ success: true, messageIds });
   } catch (e) {
     res.status(500).json({ error: e.message });
+  }
+});
+
+// Meine Server posten (Live-Status aus dem Homelab-Dashboard, mit Auto-Refresh)
+app.post('/api/admin/discord/send-servers', requireAuth, async (req, res) => {
+  try {
+    const channelId = req.body.channelId || discordBot.getConfig('channel_servers');
+    if (!channelId) return res.status(400).json({ error: 'Kein Channel konfiguriert' });
+    const messageIds = await discordBot.sendServersEmbed(channelId);
+    res.json({ success: true, messageIds });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Homelab-Anbindung testen (ohne zu posten)
+app.get('/api/admin/discord/servers-test', requireAuth, async (req, res) => {
+  try {
+    const servers = await discordBot.fetchHomelabServers();
+    res.json({ success: true, count: servers.length, servers });
+  } catch (e) {
+    res.status(502).json({ success: false, error: e.message });
   }
 });
 

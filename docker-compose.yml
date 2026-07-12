@@ -12,11 +12,19 @@ services:
     environment:
       - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
       - GITHUB_TOKEN=${GITHUB_TOKEN}
+      # Homelab-Dashboard (Live-Serverstatus für den Discord-Channel "Meine Server")
+      # Alternativ im Admin-Panel unter Discord -> Meine Server konfigurierbar.
+      - HOMELAB_API_URL=${HOMELAB_API_URL:-http://host.docker.internal}
+      - HOMELAB_USER=${HOMELAB_USER:-}
+      - HOMELAB_PASSWORD=${HOMELAB_PASSWORD:-}
     volumes:
       - ./data:/app/data
       - ./uploads:/app/uploads
     networks:
       - portfolio-network
+    extra_hosts:
+      # Ermöglicht dem Backend, das Homelab-Dashboard über den Host zu erreichen
+      - "host.docker.internal:host-gateway"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/maintenance-check"]
       interval: 30s

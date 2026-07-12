@@ -207,6 +207,9 @@ class DiscordBot {
     this.dbRun = dbHelpers.dbRun;
     this.isConnected = false;
     this.startTime = null;
+    this._serversInterval = null;
+    this._homelabToken = null;
+    this._minecraftInterval = null;
   }
 
   // ── Config Helpers ──────────────────────────────────────────────
@@ -295,6 +298,8 @@ class DiscordBot {
 
   async stop() {
     if (this.client) {
+      this._stopServersRefresh();
+      this._stopMinecraftRefresh();
       this.log('system', null, null, null, { action: 'bot_stopped' });
       await this.client.destroy();
       this.client = null;
@@ -348,6 +353,10 @@ class DiscordBot {
   _registerEvents() {
     this.client.once(Events.ClientReady, () => {
       console.log(`Discord Bot ready as ${this.client.user.tag}`);
+      // Slash-Commands registrieren + Auto-Refresh fortsetzen, falls konfiguriert
+      this._registerSlashCommands();
+      this._startServersRefresh();
+      this._startMinecraftRefresh();
     });
 
     this.client.on(Events.GuildMemberAdd, (member) => this._onMemberJoin(member));
@@ -609,6 +618,14 @@ class DiscordBot {
   // ── Ticket System ───────────────────────────────────────────────
 
   async _onInteraction(interaction) {
+    // Slash-Commands
+    if (interaction.isChatInputCommand?.()) {
+      if (interaction.commandName === 'minecraft') {
+        await this._handleMinecraftCommand(interaction);
+      }
+      return;
+    }
+
     if (!interaction.isButton()) return;
 
     if (interaction.customId.startsWith('ticket_create_')) {
@@ -1607,6 +1624,424 @@ class DiscordBot {
     } catch (e) {
       console.error('Request notification error:', e.message);
     }
+  }
+
+  // ══════════════════════════════════════════════════════════════════
+  //  MEINE SERVER — Live-Status aus dem Homelab-Dashboard (Components V2)
+  // ══════════════════════════════════════════════════════════════════
+
+  // ── Homelab-Dashboard-Anbindung ───────────────────────────────
+  // URL/Zugangsdaten kommen bevorzugt aus der .env, sonst aus der Bot-Config.
+  _homelabConfig() {
+    return {
+      url: (process.env.HOMELAB_API_URL || this.getConfig('homelab_api_url') || '').replace(/\/+$/, ''),
+      user: process.env.HOMELAB_USER || this.getConfig('homelab_user') || '',
+      password: process.env.HOMELAB_PASSWORD || this.getConfig('homelab_password') || '',
+    };
+  }
+
+  async _homelabLogin() {
+    const { url, user, password } = this._homelabConfig();
+    if (!url || !user || !password) {
+      throw new Error('Homelab-Anbindung nicht konfiguriert (URL, Benutzer oder Passwort fehlen)');
+    }
+    const r = await fetch(`${url}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: user, password }),
+    });
+    if (!r.ok) throw new Error(`Homelab-Login fehlgeschlagen: ${r.status}`);
+    const data = await r.json();
+    this._homelabToken = data.accessToken;
+    if (!this._homelabToken) throw new Error('Homelab-Login lieferte kein Token');
+    return this._homelabToken;
+  }
+
+  async _homelabFetch(endpoint) {
+    const { url } = this._homelabConfig();
+    if (!this._homelabToken) await this._homelabLogin();
+
+    const doFetch = () => fetch(`${url}${endpoint}`, {
+      headers: { Accept: 'application/json', Authorization: `Bearer ${this._homelabToken}` },
+    });
+
+    let r = await doFetch();
+    if (r.status === 401) {
+      // Token abgelaufen -> neu anmelden und einmal wiederholen
+      await this._homelabLogin();
+      r = await doFetch();
+    }
+    if (!r.ok) throw new Error(`Homelab-API-Fehler: ${r.status}`);
+    return r.json();
+  }
+
+  async fetchHomelabServers() {
+    const data = await this._homelabFetch('/api/servers/status-summary');
+    return Array.isArray(data?.servers) ? data.servers : [];
+  }
+
+  // ── Specs-Cache: hält Hardware-Specs, damit sie auch offline sichtbar bleiben ──
+  _serverSpecsCache() {
+    return this._parseJSON(this.getConfig('servers_specs_cache'), {}) || {};
+  }
+
+  _updateSpecsCache(servers) {
+    const cache = this._serverSpecsCache();
+    for (const s of servers) {
+      if (s.online) {
+        cache[s.id] = { name: s.name, host: s.host, cores: s.cores, memTotal: s.memTotal, diskTotal: s.diskTotal };
+      }
+    }
+    this.setConfig('servers_specs_cache', JSON.stringify(cache));
+    return cache;
+  }
+
+  // ── Formatierung ──────────────────────────────────────────────
+  _fmtBytes(bytes) {
+    if (!bytes || bytes <= 0) return '—';
+    const gb = bytes / (1024 ** 3);
+    if (gb >= 1024) return `${(gb / 1024).toFixed(1)} TB`;
+    if (gb >= 10) return `${Math.round(gb)} GB`;
+    return `${gb.toFixed(1)} GB`;
+  }
+
+  _bar(percent) {
+    const p = Math.max(0, Math.min(100, Math.round(percent || 0)));
+    const filled = Math.round(p / 10);
+    return `${'█'.repeat(filled)}${'░'.repeat(10 - filled)} ${p}%`;
+  }
+
+  // ── Nachricht bauen ───────────────────────────────────────────
+  _buildServersComponents(servers, updatedUnix) {
+    const cache = this._serverSpecsCache();
+    const anyOnline = servers.some(s => s.online);
+
+    const container = new ContainerBuilder().setAccentColor(anyOnline ? 0x00ff88 : 0xff4444);
+    container.addTextDisplayComponents(
+      new TextDisplayBuilder().setContent(
+        '# 🖥️ Meine Server\n' +
+        'Live-Status & Specs meiner Infrastruktur — aktualisiert sich automatisch.'
+      )
+    );
+
+    if (!servers.length) {
+      container.addSeparatorComponents(new SeparatorBuilder().setDivider(true));
+      container.addTextDisplayComponents(
+        new TextDisplayBuilder().setContent('*Aktuell sind keine Server konfiguriert.*')
+      );
+    }
+
+    for (const s of servers) {
+      const spec = cache[s.id] || {};
+      const cores = s.cores ?? spec.cores ?? null;
+      const memTotal = s.memTotal ?? spec.memTotal ?? null;
+      const diskTotal = s.diskTotal ?? spec.diskTotal ?? null;
+
+      container.addSeparatorComponents(new SeparatorBuilder().setDivider(true));
+
+      const dot = s.online ? '🟢' : '🔴';
+      let block = `## ${dot} ${s.name}\n${s.online ? '**Online**' : '**Offline**'}`;
+      if (s.online && typeof s.uptime === 'string' && s.uptime !== 'N/A') {
+        block += `  ·  ⏱️ Uptime: ${s.uptime}`;
+      }
+      block += '\n';
+
+      // Hardware-Specs
+      const specs = [];
+      if (cores) specs.push(`🔧 ${cores} vCPU`);
+      if (memTotal) specs.push(`🧠 ${this._fmtBytes(memTotal)} RAM`);
+      if (diskTotal) specs.push(`💾 ${this._fmtBytes(diskTotal)} Disk`);
+      if (specs.length) block += `**Specs:** ${specs.join('  ·  ')}\n`;
+
+      // Live-Auslastung (nur online)
+      if (s.online) {
+        block += `**CPU:** \`${this._bar(s.cpuPercent)}\`\n`;
+        block += `**RAM:** \`${this._bar(s.memPercent)}\``;
+        if (memTotal && s.memUsed) block += `  (${this._fmtBytes(s.memUsed)} / ${this._fmtBytes(memTotal)})`;
+        block += '\n';
+        if (s.diskPercent != null) block += `**Disk:** \`${this._bar(s.diskPercent)}\`\n`;
+        if (s.maxTemp != null && s.maxTemp > 0) block += `**Temperatur:** ${Math.round(s.maxTemp)}°C\n`;
+      } else {
+        block += '-# ⚠️ Server nicht erreichbar — Live-Werte pausiert.\n';
+        const seen = s.lastSeen ? Date.parse(s.lastSeen) : NaN;
+        if (!isNaN(seen)) block += `-# Zuletzt gesehen: <t:${Math.floor(seen / 1000)}:R>\n`;
+      }
+
+      container.addTextDisplayComponents(new TextDisplayBuilder().setContent(block.trim()));
+    }
+
+    container.addSeparatorComponents(new SeparatorBuilder().setDivider(true));
+    const onlineCount = servers.filter(s => s.online).length;
+    container.addTextDisplayComponents(
+      new TextDisplayBuilder().setContent(
+        `-# ${onlineCount}/${servers.length} online  ·  🔄 Zuletzt aktualisiert <t:${updatedUnix}:R>`
+      )
+    );
+
+    return [container];
+  }
+
+  // ── Posten (löscht vorherige Nachricht, startet Auto-Refresh) ──
+  async sendServersEmbed(channelId) {
+    if (!this.client || !this.isConnected) throw new Error('Bot nicht verbunden');
+
+    const channel = await this.client.channels.fetch(channelId);
+    if (!channel) throw new Error('Channel nicht gefunden');
+
+    // Vorherige Nachricht(en) löschen -> immer genau eine saubere Nachricht
+    const prev = this._parseJSON(this.getConfig('servers_message_ids'), []);
+    if (Array.isArray(prev)) {
+      for (const id of prev) {
+        try { const m = await channel.messages.fetch(id); await m.delete(); } catch { /* schon weg */ }
+      }
+    }
+
+    const servers = await this.fetchHomelabServers();
+    this._updateSpecsCache(servers);
+    const components = this._buildServersComponents(servers, Math.floor(Date.now() / 1000));
+    const sent = await channel.send({ components, flags: CV2_FLAGS });
+
+    this.setConfig('channel_servers', channelId);
+    this.setConfig('servers_message_ids', JSON.stringify([sent.id]));
+    this.log('servers', channelId, sent.id, null, { count: servers.length, online: servers.filter(s => s.online).length });
+
+    this._startServersRefresh();
+    return [sent.id];
+  }
+
+  // ── Auto-Refresh ──────────────────────────────────────────────
+  _serversRefreshMs() {
+    const sec = parseInt(this.getConfig('servers_refresh_seconds'), 10);
+    return (Number.isFinite(sec) && sec >= 60 ? sec : 300) * 1000; // Minimum 60s
+  }
+
+  _startServersRefresh() {
+    this._stopServersRefresh();
+    if (this.getConfig('servers_autorefresh_enabled') === 'false') return;
+    const channelId = this.getConfig('channel_servers');
+    const ids = this._parseJSON(this.getConfig('servers_message_ids'), []);
+    if (!channelId || !Array.isArray(ids) || !ids.length) return;
+
+    this._serversInterval = setInterval(() => {
+      this._refreshServersMessage().catch(e => console.error('Servers-Refresh:', e.message));
+    }, this._serversRefreshMs());
+    console.log(`Server-Status Auto-Refresh aktiv (alle ${this._serversRefreshMs() / 1000}s)`);
+  }
+
+  _stopServersRefresh() {
+    if (this._serversInterval) {
+      clearInterval(this._serversInterval);
+      this._serversInterval = null;
+    }
+  }
+
+  async _refreshServersMessage() {
+    if (!this.client || !this.isConnected) return;
+    const channelId = this.getConfig('channel_servers');
+    const ids = this._parseJSON(this.getConfig('servers_message_ids'), []);
+    if (!channelId || !Array.isArray(ids) || !ids.length) return;
+
+    let channel;
+    try { channel = await this.client.channels.fetch(channelId); } catch { return; }
+    if (!channel) return;
+
+    let msg;
+    try {
+      msg = await channel.messages.fetch(ids[0]);
+    } catch {
+      // Nachricht wurde gelöscht -> Refresh stoppen
+      this._stopServersRefresh();
+      return;
+    }
+
+    let servers;
+    try {
+      servers = await this.fetchHomelabServers();
+    } catch (e) {
+      console.error('Homelab-Fetch:', e.message);
+      return; // Nachricht unverändert lassen, beim nächsten Tick erneut versuchen
+    }
+
+    this._updateSpecsCache(servers);
+    const components = this._buildServersComponents(servers, Math.floor(Date.now() / 1000));
+    await msg.edit({ components, flags: CV2_FLAGS });
+  }
+
+  // ══════════════════════════════════════════════════════════════════
+  //  MINECRAFT — /minecraft Slash-Command (Live-Status, Auto-Refresh)
+  // ══════════════════════════════════════════════════════════════════
+
+  async _registerSlashCommands() {
+    if (!this.client) return;
+    try {
+      const commands = [
+        { name: 'minecraft', description: 'Postet den Live-Status des Minecraft-Servers' },
+      ];
+      const guildId = this.getConfig('guild_id');
+      const guild = guildId ? this.client.guilds.cache.get(guildId) : null;
+      if (guild) {
+        await guild.commands.set(commands); // Guild-Commands sind sofort verfügbar
+        console.log(`Slash-Commands registriert (Guild ${guild.name})`);
+      } else {
+        await this.client.application.commands.set(commands); // global (bis zu 1h Verzögerung)
+        console.log('Slash-Commands global registriert');
+      }
+    } catch (e) {
+      console.error('Slash-Command-Registrierung:', e.message);
+    }
+  }
+
+  // Konfiguration
+  _mcServerIp() {
+    return this.getConfig('mc_server_ip') || process.env.MC_SERVER_IP || 'mas0n1x.online';
+  }
+  _mcMapUrl() {
+    return this.getConfig('mc_map_url') || process.env.MC_MAP_URL || '';
+  }
+
+  // Live-Status über die öffentliche mcstatus.io-API
+  async fetchMinecraftStatus() {
+    const ip = this._mcServerIp();
+    const r = await fetch(`https://api.mcstatus.io/v2/status/java/${encodeURIComponent(ip)}`, {
+      headers: { Accept: 'application/json', 'User-Agent': 'mas0n1x-portfolio' },
+    });
+    if (!r.ok) throw new Error(`mcstatus.io-Fehler: ${r.status}`);
+    return r.json();
+  }
+
+  _buildMinecraftComponents(status, updatedUnix) {
+    const ip = this._mcServerIp();
+    const mapUrl = this._mcMapUrl();
+    const online = !!status?.online;
+
+    const container = new ContainerBuilder().setAccentColor(online ? 0x00ff88 : 0xff4444);
+    container.addTextDisplayComponents(
+      new TextDisplayBuilder().setContent(
+        '# ⛏️ Minecraft Server\n' +
+        (online ? 'Der Server ist **online** — komm vorbei!' : 'Der Server ist aktuell **offline**.')
+      )
+    );
+
+    container.addSeparatorComponents(new SeparatorBuilder().setDivider(true));
+
+    let info = `${online ? '🟢 **Online**' : '🔴 **Offline**'}\n`;
+    info += `🌐 **Server-IP:** \`${ip}\`\n`;
+    if (online) {
+      const p = status.players || {};
+      info += `👥 **Spieler:** ${p.online ?? 0} / ${p.max ?? '?'}\n`;
+      if (status.version?.name_clean) info += `📦 **Version:** ${status.version.name_clean}\n`;
+      const names = Array.isArray(p.list) ? p.list.map(x => x.name_clean).filter(Boolean) : [];
+      if (names.length) {
+        info += `🎮 **Gerade online:** ${names.slice(0, 20).join(', ')}${names.length > 20 ? ' …' : ''}\n`;
+      }
+    }
+    container.addTextDisplayComponents(new TextDisplayBuilder().setContent(info.trim()));
+
+    if (online && status.motd?.clean) {
+      container.addSeparatorComponents(new SeparatorBuilder().setDivider(true));
+      container.addTextDisplayComponents(
+        new TextDisplayBuilder().setContent(`-# ${String(status.motd.clean).replace(/\s+/g, ' ').trim().substring(0, 200)}`)
+      );
+    }
+
+    if (mapUrl) {
+      const row = new ActionRowBuilder().addComponents(
+        new ButtonBuilder().setLabel('Live-Map öffnen').setEmoji('🗺️').setStyle(ButtonStyle.Link).setURL(mapUrl)
+      );
+      container.addActionRowComponents(row);
+    }
+
+    container.addSeparatorComponents(new SeparatorBuilder().setDivider(true));
+    container.addTextDisplayComponents(
+      new TextDisplayBuilder().setContent(`-# 🔄 Zuletzt aktualisiert <t:${updatedUnix}:R>`)
+    );
+
+    return [container];
+  }
+
+  async _handleMinecraftCommand(interaction) {
+    await interaction.deferReply({ flags: 64 }); // nur für den Aufrufer sichtbar
+    try {
+      const channel = interaction.channel;
+
+      // Vorherige Minecraft-Nachricht(en) löschen -> immer genau eine
+      const prev = this._parseJSON(this.getConfig('mc_message_ids'), []);
+      if (Array.isArray(prev)) {
+        for (const id of prev) {
+          try { const m = await channel.messages.fetch(id); await m.delete(); } catch { /* schon weg */ }
+        }
+      }
+
+      const status = await this.fetchMinecraftStatus();
+      const components = this._buildMinecraftComponents(status, Math.floor(Date.now() / 1000));
+      const sent = await channel.send({ components, flags: CV2_FLAGS });
+
+      this.setConfig('mc_channel', channel.id);
+      this.setConfig('mc_message_ids', JSON.stringify([sent.id]));
+      this.log('minecraft', channel.id, sent.id, interaction.user.id, { online: !!status.online, players: status.players?.online });
+
+      this._startMinecraftRefresh();
+      await interaction.editReply({ content: '✅ Minecraft-Status gepostet — die Nachricht aktualisiert sich jetzt automatisch.' });
+    } catch (e) {
+      console.error('Minecraft-Command:', e.message);
+      await interaction.editReply({ content: '❌ Konnte den Minecraft-Status nicht abrufen: ' + e.message }).catch(() => {});
+    }
+  }
+
+  // ── Auto-Refresh ──────────────────────────────────────────────
+  _minecraftRefreshMs() {
+    const sec = parseInt(this.getConfig('mc_refresh_seconds'), 10);
+    return (Number.isFinite(sec) && sec >= 60 ? sec : 120) * 1000; // Minimum 60s, Standard 120s
+  }
+
+  _startMinecraftRefresh() {
+    this._stopMinecraftRefresh();
+    if (this.getConfig('mc_autorefresh_enabled') === 'false') return;
+    const channelId = this.getConfig('mc_channel');
+    const ids = this._parseJSON(this.getConfig('mc_message_ids'), []);
+    if (!channelId || !Array.isArray(ids) || !ids.length) return;
+
+    this._minecraftInterval = setInterval(() => {
+      this._refreshMinecraftMessage().catch(e => console.error('Minecraft-Refresh:', e.message));
+    }, this._minecraftRefreshMs());
+    console.log(`Minecraft-Status Auto-Refresh aktiv (alle ${this._minecraftRefreshMs() / 1000}s)`);
+  }
+
+  _stopMinecraftRefresh() {
+    if (this._minecraftInterval) {
+      clearInterval(this._minecraftInterval);
+      this._minecraftInterval = null;
+    }
+  }
+
+  async _refreshMinecraftMessage() {
+    if (!this.client || !this.isConnected) return;
+    const channelId = this.getConfig('mc_channel');
+    const ids = this._parseJSON(this.getConfig('mc_message_ids'), []);
+    if (!channelId || !Array.isArray(ids) || !ids.length) return;
+
+    let channel;
+    try { channel = await this.client.channels.fetch(channelId); } catch { return; }
+    if (!channel) return;
+
+    let msg;
+    try {
+      msg = await channel.messages.fetch(ids[0]);
+    } catch {
+      this._stopMinecraftRefresh(); // Nachricht gelöscht
+      return;
+    }
+
+    let status;
+    try {
+      status = await this.fetchMinecraftStatus();
+    } catch (e) {
+      console.error('Minecraft-Fetch:', e.message);
+      return; // beim nächsten Tick erneut
+    }
+
+    const components = this._buildMinecraftComponents(status, Math.floor(Date.now() / 1000));
+    await msg.edit({ components, flags: CV2_FLAGS });
   }
 
   // ── Helpers ─────────────────────────────────────────────────────

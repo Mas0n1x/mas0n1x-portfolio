@@ -5103,6 +5103,15 @@ async function loadDiscordConfig() {
 
     // Aktive Projekte
     if (config.channel_projects) document.getElementById('discord-channel-projects').value = config.channel_projects;
+
+    // Meine Server
+    if (config.channel_servers) document.getElementById('discord-channel-servers').value = config.channel_servers;
+    if (config.homelab_api_url) document.getElementById('discord-homelab-url').value = config.homelab_api_url;
+    if (config.homelab_user) document.getElementById('discord-homelab-user').value = config.homelab_user;
+    document.getElementById('discord-servers-interval').value = config.servers_refresh_seconds || 300;
+    document.getElementById('discord-servers-autorefresh').checked = config.servers_autorefresh_enabled !== 'false';
+    const pwHint = document.getElementById('discord-homelab-pw-hint');
+    if (pwHint) pwHint.textContent = config.has_homelab_password ? '(gesetzt — leer lassen zum Behalten)' : '(nicht gesetzt)';
     const products = parseJSON(config.msg_products, null);
     const productList = (products && products.length > 0) ? products : DISCORD_DEFAULTS.products;
     const productsList = document.getElementById('discord-products-list');
@@ -5636,6 +5645,53 @@ async function sendDiscordProjects() {
     showToast('Aktive Projekte gepostet', 'success');
   } catch (e) {
     showToast(e.message, 'error');
+  }
+}
+
+function getDiscordServersConfig() {
+  const config = {
+    channel_servers: document.getElementById('discord-channel-servers').value.trim(),
+    homelab_api_url: document.getElementById('discord-homelab-url').value.trim(),
+    homelab_user: document.getElementById('discord-homelab-user').value.trim(),
+    servers_refresh_seconds: String(Math.max(60, parseInt(document.getElementById('discord-servers-interval').value, 10) || 300)),
+    servers_autorefresh_enabled: document.getElementById('discord-servers-autorefresh').checked ? 'true' : 'false',
+  };
+  // Passwort nur senden, wenn ein neuer Wert eingegeben wurde
+  const pw = document.getElementById('discord-homelab-password').value;
+  if (pw) config.homelab_password = pw;
+  return config;
+}
+
+async function saveDiscordServers() {
+  try {
+    await api('/admin/discord/config', { method: 'POST', body: getDiscordServersConfig() });
+    document.getElementById('discord-homelab-password').value = '';
+    showToast('Server-Einstellungen gespeichert', 'success');
+  } catch (e) {
+    showToast(e.message, 'error');
+  }
+}
+
+async function sendDiscordServers() {
+  const channelId = document.getElementById('discord-channel-servers').value.trim();
+  if (!channelId) return showToast('Bitte Channel-ID eintragen', 'error');
+  try {
+    await saveDiscordServers();
+    await api('/admin/discord/send-servers', { method: 'POST', body: { channelId } });
+    showToast('Server-Übersicht gepostet — aktualisiert sich jetzt automatisch', 'success');
+  } catch (e) {
+    showToast(e.message, 'error');
+  }
+}
+
+async function testDiscordHomelab() {
+  try {
+    await saveDiscordServers();
+    const res = await api('/admin/discord/servers-test', { method: 'GET' });
+    const online = (res.servers || []).filter(s => s.online).length;
+    showToast(`Verbindung OK — ${res.count} Server (${online} online)`, 'success');
+  } catch (e) {
+    showToast('Verbindung fehlgeschlagen: ' + e.message, 'error');
   }
 }
 
