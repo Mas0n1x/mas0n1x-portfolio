@@ -17,6 +17,9 @@ services:
       - HOMELAB_API_URL=${HOMELAB_API_URL:-http://host.docker.internal}
       - HOMELAB_USER=${HOMELAB_USER:-}
       - HOMELAB_PASSWORD=${HOMELAB_PASSWORD:-}
+      # Minecraft-Status für den /minecraft Slash-Command
+      - MC_SERVER_IP=${MC_SERVER_IP:-mas0n1x.online}
+      - MC_MAP_URL=${MC_MAP_URL:-}
     volumes:
       - ./data:/app/data
       - ./uploads:/app/uploads
