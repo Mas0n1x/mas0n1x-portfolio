@@ -1713,6 +1713,14 @@ class DiscordBot {
     return `${'█'.repeat(filled)}${'░'.repeat(10 - filled)} ${p}%`;
   }
 
+  // Anzeigenamen für die öffentliche Nachricht (Provider-Namen aus dem Dashboard verbergen)
+  _displayServerName(name) {
+    const n = String(name || '');
+    if (/host\s*unlimited/i.test(n)) return 'Masons VPS 1';
+    if (/hast[-\s]?it/i.test(n)) return 'Masons VPS 2';
+    return name;
+  }
+
   // ── Nachricht bauen ───────────────────────────────────────────
   _buildServersComponents(servers, updatedUnix) {
     const cache = this._serverSpecsCache();
@@ -1742,7 +1750,7 @@ class DiscordBot {
       container.addSeparatorComponents(new SeparatorBuilder().setDivider(true));
 
       const dot = s.online ? '🟢' : '🔴';
-      let block = `## ${dot} ${s.name}\n${s.online ? '**Online**' : '**Offline**'}`;
+      let block = `## ${dot} ${this._displayServerName(s.name)}\n${s.online ? '**Online**' : '**Offline**'}`;
       if (s.online && typeof s.uptime === 'string' && s.uptime !== 'N/A') {
         block += `  ·  ⏱️ Uptime: ${s.uptime}`;
       }
