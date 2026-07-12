@@ -353,6 +353,8 @@ class DiscordBot {
   _registerEvents() {
     this.client.once(Events.ClientReady, () => {
       console.log(`Discord Bot ready as ${this.client.user.tag}`);
+      // Keine "Spielt ..."-Anzeige (Discord cached alte Presence serverseitig -> explizit leeren)
+      try { this.client.user.setPresence({ activities: [], status: 'online' }); } catch (e) { console.error('Presence:', e.message); }
       // Slash-Commands registrieren + Auto-Refresh fortsetzen, falls konfiguriert
       this._registerSlashCommands();
       this._startServersRefresh();
