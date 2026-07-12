@@ -3495,8 +3495,11 @@ app.delete('/api/admin/discord/logs', requireAuth, (req, res) => {
 
 app.post('/api/admin/discord/github-setup-all', requireAuth, async (req, res) => {
   try {
-    const { token } = req.body;
-    if (!token) return res.status(400).json({ error: 'GitHub Token fehlt' });
+    let { token } = req.body;
+    // Serverseitigen GITHUB_TOKEN bevorzugen (gültig, für die eigenen Repos) —
+    // das Formular schickt oft einen veralteten gespeicherten Token.
+    token = process.env.GITHUB_TOKEN || (token && token.trim());
+    if (!token) return res.status(400).json({ error: 'Kein GITHUB_TOKEN in der .env und kein Token angegeben' });
 
     const webhookUrl = discordBot.getConfig('github_webhook_url') || `${req.protocol}://${req.get('host')}/api/webhook/github`;
     const secret = discordBot.getConfig('github_webhook_secret') || '';
@@ -3510,7 +3513,9 @@ app.post('/api/admin/discord/github-setup-all', requireAuth, async (req, res) =>
       });
       if (!repoRes.ok) {
         const err = await repoRes.json().catch(() => ({}));
-        return res.status(repoRes.status).json({ error: `GitHub API Fehler: ${err.message || repoRes.statusText}` });
+        // GitHub-Auth-Fehler (401/403) NICHT als solchen weiterreichen, sonst loggt das Frontend den Admin aus
+        const gs = (repoRes.status === 401 || repoRes.status === 403) ? 502 : repoRes.status;
+        return res.status(gs).json({ error: `GitHub API Fehler: ${err.message || repoRes.statusText}` });
       }
       const repos = await repoRes.json();
       if (repos.length === 0) break;
@@ -3589,7 +3594,8 @@ app.post('/api/admin/discord/github-setup-orgs', requireAuth, async (req, res) =
         });
         if (!repoRes.ok) {
           const err = await repoRes.json().catch(() => ({}));
-          return res.status(repoRes.status).json({ error: `GitHub API Fehler für ${org}: ${err.message || repoRes.statusText}` });
+          const gs2 = (repoRes.status === 401 || repoRes.status === 403) ? 502 : repoRes.status;
+          return res.status(gs2).json({ error: `GitHub API Fehler für ${org}: ${err.message || repoRes.statusText}` });
         }
         const repos = await repoRes.json();
         if (repos.length === 0) break;
