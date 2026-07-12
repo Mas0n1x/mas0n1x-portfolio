@@ -5,6 +5,7 @@
  */
 const express = require('express');
 const session = require('express-session');
+const FileStore = require('session-file-store')(session);
 const cors = require('cors');
 const path = require('path');
 const initSqlJs = require('sql.js');
@@ -627,6 +628,16 @@ app.set('trust proxy', 1);
 
 app.use(session({
   secret: SESSION_SECRET,
+  // Persistenter Store im data-Volume — Sessions überleben Neustarts/Rebuilds
+  // (vorher Default-MemoryStore → jeder Backend-Neustart loggte den Admin aus).
+  // session-file-store ist pure JS (keine native Kompilierung, passt zu sql.js).
+  store: new FileStore({
+    path: path.join(dataDir, 'sessions'),
+    ttl: 24 * 60 * 60,        // Sekunden, deckungsgleich mit cookie.maxAge
+    retries: 2,
+    reapInterval: 60 * 60,    // stündlich abgelaufene Sessions aufräumen
+    logFn: () => {},          // kein Store-Geschwätz im Log
+  }),
   resave: false,
   saveUninitialized: false,
   cookie: {
