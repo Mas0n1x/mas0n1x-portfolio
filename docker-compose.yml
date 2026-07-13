@@ -10,16 +10,12 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
       - GITHUB_TOKEN=${GITHUB_TOKEN}
-      # Homelab-Dashboard (Live-Serverstatus für den Discord-Channel "Meine Server")
-      # Alternativ im Admin-Panel unter Discord -> Meine Server konfigurierbar.
-      - HOMELAB_API_URL=${HOMELAB_API_URL:-http://host.docker.internal}
-      - HOMELAB_USER=${HOMELAB_USER:-}
-      - HOMELAB_PASSWORD=${HOMELAB_PASSWORD:-}
-      # Minecraft-Status für den /minecraft Slash-Command
-      - MC_SERVER_IP=${MC_SERVER_IP:-mas0n1x.online}
-      - MC_MAP_URL=${MC_MAP_URL:-}
+      # Bot-Zentrale: Portfolio meldet Ereignisse (Anfragen/Alerts) per HTTP an die
+      # zentrale Bot-Runtime (Homelab-Dashboard). BOT_HUB_TOKEN ist das geteilte
+      # Bot-Runtime-Token. Fehlt eins, werden Discord-Benachrichtigungen still übersprungen.
+      - BOT_HUB_URL=${BOT_HUB_URL:-}
+      - BOT_HUB_TOKEN=${BOT_HUB_TOKEN:-}
     volumes:
       - ./data:/app/data
       - ./uploads:/app/uploads
