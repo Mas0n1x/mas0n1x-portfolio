@@ -16,6 +16,9 @@ services:
       # Bot-Runtime-Token. Fehlt eins, werden Discord-Benachrichtigungen still übersprungen.
       - BOT_HUB_URL=${BOT_HUB_URL:-}
       - BOT_HUB_TOKEN=${BOT_HUB_TOKEN:-}
+      # Lesender Dienst-Schlüssel für das Homelab-Dashboard (nur GET auf
+      # Dashboard/Anfragen/Termine/Rechnungen/Kunden). Leer = abgeschaltet.
+      - SERVICE_API_KEY=${SERVICE_API_KEY:-}
     volumes:
       - ./data:/app/data
       - ./uploads:/app/uploads

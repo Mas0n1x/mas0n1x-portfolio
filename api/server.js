@@ -668,9 +668,35 @@ app.use(express.static(path.join(__dirname, '..'), { dotfiles: 'deny' }));
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 app.use('/admin', express.static(path.join(__dirname, '..', 'admin')));
 
+// ── Dienst-zu-Dienst-Lesezugriff (Homelab-Dashboard) ──
+// Das Dashboard hatte bisher das Admin-Passwort in seiner .env und hat sich
+// damit wie ein Mensch eingeloggt. Beim nächsten Passwortwechsel bricht das
+// still ab (genau das ist passiert). Stattdessen ein eigener Schlüssel, der
+// bewusst eng ist: nur diese fünf GET-Endpunkte, nie schreibend, und nur
+// aktiv, wenn SERVICE_API_KEY gesetzt ist. Ohne die Variable verhält sich
+// die API exakt wie vorher.
+const SERVICE_KEY_ROUTES = new Set([
+  '/api/dashboard',
+  '/api/admin/requests',
+  '/api/admin/appointments',
+  '/api/invoices',
+  '/api/customers',
+]);
+
+function serviceKeyOk(req) {
+  const key = process.env.SERVICE_API_KEY;
+  if (!key) return false;
+  const given = req.get('x-api-key') || '';
+  // Längenvergleich zuerst — timingSafeEqual wirft bei ungleicher Länge.
+  if (given.length !== key.length) return false;
+  return crypto.timingSafeEqual(Buffer.from(given), Buffer.from(key));
+}
+
 // Auth Middleware - Admin
 const requireAuth = (req, res, next) => {
   if (req.session && req.session.authenticated) {
+    next();
+  } else if (req.method === 'GET' && SERVICE_KEY_ROUTES.has(req.path) && serviceKeyOk(req)) {
     next();
   } else {
     res.status(401).json({ error: 'Unauthorized' });
