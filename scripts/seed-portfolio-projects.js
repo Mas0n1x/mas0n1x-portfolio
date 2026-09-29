@@ -35,7 +35,7 @@ const CURATION = [
     desc: 'Digitales Aktenverwaltungssystem (CAD/MDT) für Behörden-Roleplay — Bürger, Fahrzeuge, Strafakten, Einsatzberichte, Gewerbe und ein Live-Strafrechner.',
     detail: 'Kern des LawNet-Ökosystems. Vanilla-SPA auf Node/Express/SQLite, mandantenfähig (eine Instanz, eine Datenbank pro Kunde), versionierte Migrationen, RBAC mit über 64 Rechten und Auto-Backups. Akten- und Berichtsgeneratoren mit kollaborativen Echtzeit-Sessions über WebSocket. Im produktiven Einsatz bei zwei RP-Servern mit zusammen über 2.300 Spielern.',
     images: ['pf-lawnet-1.png', 'pf-lawnet-2.png', 'pf-lawnet-3.png', 'pf-lawnet-4.png', 'pf-lawnet-5.png'] },
-  { fn: 'Mas0n1x/PersoNet-CC', title: 'PersoNet', status: 'completed', order: 1,
+  { fn: 'LawNet-Team/PersoNet', title: 'PersoNet', status: 'completed', order: 1,
     link: 'https://demo-personet.lawnet.sale',
     tags: ['React', 'TypeScript', 'Prisma', 'Discord OAuth', 'Socket.IO'],
     desc: 'Personalverwaltung für Roleplay-Behörden — Mitarbeiter, Ränge, Units, Schichten, Bewerbungs- und Sanktions-Workflow, mit Discord-Sync.',
