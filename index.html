@@ -25,7 +25,7 @@
 <link rel="icon" href="/logo.png">
 <link href="/fonts/fonts.css" rel="stylesheet">
 <script src="/vendor/lenis.min.js" defer></script><style>
-  :root{--bg:#04060a;--panel:rgba(0,255,170,0.02);--line:rgba(0,255,170,0.16);--line2:rgba(0,255,170,0.34);--mint:#00ffaa;--cyan:#22d3ee;--amber:#ffb020;--text:#dffaf0;--text2:#8aa39b;--text3:#62807a;--glow:rgba(0,255,170,0.5);--container:1240px;--mono:'JetBrains Mono',monospace}
+  :root{--bg:#05070a;--panel:rgba(0,230,160,0.025);--line:rgba(0,230,160,0.14);--line2:rgba(0,230,160,0.32);--mint:#00e6a0;--mint2:#00b386;--cyan:#22d3ee;--amber:#ffb020;--text:#e4f7ef;--text2:#8fa39c;--text3:#5f7369;--glow:rgba(0,230,160,0.45);--container:1240px;--mono:'JetBrains Mono',monospace}
   *{margin:0;padding:0;box-sizing:border-box}
   html{scroll-behavior:smooth}
   /* Lenis smooth-scroll */
@@ -71,7 +71,7 @@
   nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:16px 28px;transition:.4s}
   nav.scr{background:rgba(4,6,10,.8);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
   .logo{font-family:var(--mono);font-weight:700;font-size:1rem;letter-spacing:.04em;display:flex;align-items:center;gap:9px}
-  .logo .d{width:8px;height:8px;background:var(--mint);box-shadow:0 0 10px var(--glow)}
+  .logo-mark{width:20px;height:20px;flex-shrink:0}
   .navl{display:flex;gap:28px;align-items:center}
   .navl a{font-family:var(--mono);font-size:.82rem;color:var(--text2);transition:.2s;text-transform:uppercase;letter-spacing:.05em}
   .navl a:hover,.navl a.act{color:var(--mint)}
@@ -107,24 +107,43 @@
   /* build terminal */
   .jterm{position:relative;opacity:0;transform:translateY(20px);animation:rise 1s ease .5s forwards}
   @keyframes rise{to{opacity:1;transform:none}}
-  .jt-bar{display:flex;align-items:center;gap:8px;padding:13px 16px;border-bottom:1px solid var(--line)}
-  .jd{width:11px;height:11px;border-radius:50%}.jd.r{background:#ff5f57}.jd.y{background:#febc2e}.jd.g{background:#28c840}
-  .jt-t{margin-left:10px;font-family:var(--mono);font-size:.76rem;color:var(--text3)}
+  .jt-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:13px 16px;border-bottom:1px solid var(--line)}
+  .jt-id{display:flex;align-items:center;gap:8px}
+  .jt-pulse{width:7px;height:7px;border-radius:50%;background:var(--mint);box-shadow:0 0 8px var(--glow);animation:pulse 2s infinite;flex-shrink:0}
+  .jt-live{font-family:var(--mono);font-size:.6rem;letter-spacing:.12em;color:var(--mint);border:1px solid var(--line2);padding:3px 8px}
+  .jt-t{font-family:var(--mono);font-size:.76rem;color:var(--text3)}
   .jt-body{padding:22px;font-family:var(--mono);font-size:.85rem;line-height:1.95;min-height:236px}
   .jt-line .pr{color:var(--mint)}.jt-line .fl{color:var(--cyan)}.jt-line .cm{color:var(--text3)}
   .jt-out{color:var(--text2)}
   .jt-cur{display:inline-block;width:9px;height:1.05em;background:var(--mint);vertical-align:text-bottom;animation:blink 1.1s step-end infinite}
   /* capability cards */
   .caps{display:flex;flex-wrap:wrap;justify-content:center;gap:16px}
-  .cap{flex:0 1 calc(20% - 13px);min-width:212px;position:relative;border:1px solid var(--line);background:var(--panel);padding:30px 26px;transition:.3s;clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px))}
+  .cap{flex:0 1 calc(20% - 13px);min-width:212px;position:relative;border:1px solid var(--line);background:var(--panel);padding:30px 26px;transition:.3s}
   .cap:hover{border-color:var(--line2);background:rgba(0,255,170,.04);transform:translateY(-4px)}
   .cap .ic{width:46px;height:46px;display:grid;place-items:center;border:1px solid var(--line2);color:var(--mint);font-size:1.2rem;margin-bottom:18px}
   .cap .ci{font-family:var(--mono);font-size:.64rem;color:var(--mint);letter-spacing:.1em;position:absolute;top:14px;right:14px}
   .cap h3{font-family:'Space Grotesk',sans-serif;font-size:1.18rem;font-weight:600;margin-bottom:10px}
   .cap p{color:var(--text2);font-size:.92rem}
+  /* ecosystem map */
+  .ecowrap{display:grid;grid-template-columns:280px 1fr;gap:24px;align-items:stretch}
+  .eco-core{padding:32px 28px;display:flex;flex-direction:column;gap:14px}
+  .eco-core h3{font-family:'Space Grotesk',sans-serif;font-size:1.5rem;font-weight:600;margin-top:6px}
+  .eco-core p{color:var(--text2);font-size:.92rem}
+  .eco-core-stat{margin-top:auto;padding-top:18px;border-top:1px solid var(--line)}
+  .eco-core-stat .n{font-family:'Space Grotesk',sans-serif;font-size:1.7rem;font-weight:600}
+  .eco-core-stat .l{display:block;font-family:var(--mono);font-size:.66rem;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-top:2px}
+  .eco-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+  .eco-node{padding:22px 22px 24px;transition:.25s}
+  .eco-node:hover{border-color:var(--line2);background:rgba(0,230,160,.04)}
+  .eco-node-top{display:flex;align-items:center;gap:9px;margin-bottom:10px}
+  .eco-node-top h3{font-family:'Space Grotesk',sans-serif;font-size:1.04rem;font-weight:600;flex:1}
+  .eco-dot{width:7px;height:7px;border-radius:50%;background:var(--mint);box-shadow:0 0 6px var(--glow);flex-shrink:0}
+  .eco-stat{font-family:var(--mono);font-size:.62rem;color:var(--mint);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+  .eco-node p{color:var(--text2);font-size:.88rem;line-height:1.6}
+  @media(max-width:980px){.ecowrap{grid-template-columns:1fr}}
   /* work archive */
   .arch{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:16px}
-  .acard{position:relative;border:1px solid var(--line);background:var(--panel);overflow:hidden;cursor:pointer;transition:.3s;clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px))}
+  .acard{position:relative;border:1px solid var(--line);background:var(--panel);overflow:hidden;cursor:pointer;transition:.3s}
   .acard:hover{border-color:var(--line2);background:rgba(0,255,170,.04);transform:translateY(-4px)}
   .athumb{aspect-ratio:16/10;background:#06080c;position:relative;overflow:hidden;display:grid;place-items:center}
   .athumb img{width:100%;height:100%;object-fit:cover;object-position:top center}
@@ -156,7 +175,8 @@
   .abt-list li::before{content:'▸';color:var(--mint);font-size:.8rem;margin-top:3px}
   /* process */
   .proc{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;counter-reset:p}
-  .pstep{position:relative;border:1px solid var(--line);background:var(--panel);padding:28px 22px;clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,12px 100%,0 calc(100% - 12px))}
+  .pstep{position:relative;border:1px solid var(--line);background:var(--panel);padding:28px 22px}
+  .pstep::before{content:'';position:absolute;top:-1px;left:-1px;width:14px;height:14px;border:1px solid var(--line2);border-right:0;border-bottom:0}
   .pstep .pn{font-family:var(--mono);font-size:.7rem;color:var(--mint);letter-spacing:.1em}
   .pstep h3{font-family:'Space Grotesk',sans-serif;font-size:1.12rem;font-weight:600;margin:14px 0 8px}
   .pstep p{color:var(--text2);font-size:.88rem}
@@ -186,7 +206,7 @@
   .modal{position:fixed;inset:0;z-index:1000;display:none;align-items:center;justify-content:center;padding:24px}
   .modal.open{display:flex}
   .mov{position:absolute;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(8px)}
-  .mbox{position:relative;z-index:1;width:100%;max-width:760px;max-height:88vh;overflow-y:auto;background:#06090d;border:1px solid var(--line2);padding:34px;clip-path:polygon(0 0,calc(100% - 18px) 0,100% 18px,100% 100%,18px 100%,0 calc(100% - 18px))}
+  .mbox{position:relative;z-index:1;width:100%;max-width:760px;max-height:88vh;overflow-y:auto;background:#06090d;border:1px solid var(--line2);padding:34px}
   .mclose{position:absolute;top:16px;right:16px;width:36px;height:36px;border:1px solid var(--line);background:transparent;color:var(--text2);cursor:pointer}
   .mclose:hover{color:var(--mint);border-color:var(--mint)}
   .mgal{display:flex;gap:12px;overflow-x:auto;margin-bottom:22px}.mgal img{height:220px;border:1px solid var(--line);cursor:zoom-in;transition:border-color .2s}.mgal img:hover{border-color:var(--mint)}
@@ -203,7 +223,7 @@
   /* Buchungs-Widget */
   .bk-form{display:flex;flex-direction:column;gap:14px}
   .bk-label{display:flex;flex-direction:column;gap:7px;font-family:var(--mono);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--text2)}
-  .bk-form input,.bk-form textarea{background:var(--bg);border:1px solid var(--line);color:var(--text);font-family:'Inter',sans-serif;font-size:.95rem;padding:12px 14px;border-radius:0;clip-path:polygon(7px 0,100% 0,100% calc(100% - 7px),calc(100% - 7px) 100%,0 100%,0 7px)}
+  .bk-form input,.bk-form textarea{background:var(--bg);border:1px solid var(--line);color:var(--text);font-family:'Inter',sans-serif;font-size:.95rem;padding:12px 14px;border-radius:6px}
   .bk-form input:focus,.bk-form textarea:focus{outline:none;border-color:var(--mint)}
   .bk-form input[type=date]{color-scheme:dark}
   .bk-slots{display:flex;flex-wrap:wrap;gap:8px;min-height:38px}
@@ -214,10 +234,10 @@
   .bk-status{font-size:.86rem;margin-top:2px}
   .bk-status.ok{color:var(--mint)}.bk-status.err{color:var(--amber)}
   .bk-status .ok{color:var(--mint)}
-  .bk-cal{display:inline-block;background:none;border:1px solid var(--line2);color:var(--mint);font-family:var(--mono);font-size:.78rem;padding:7px 12px;cursor:pointer;margin-top:8px;transition:.15s}
+  .bk-cal{display:inline-flex;align-items:center;gap:6px;background:none;border:1px solid var(--line2);color:var(--mint);font-family:var(--mono);font-size:.78rem;padding:7px 12px;cursor:pointer;margin-top:8px;transition:.15s}
   .bk-cal:hover{background:var(--mint);color:#000}
   /* cookie */
-  .cookie{position:fixed;bottom:20px;left:20px;right:20px;max-width:480px;margin:0 auto;z-index:900;background:#06090d;border:1px solid var(--line2);padding:20px 22px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;transform:translateY(140%);transition:transform .5s;clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px))}
+  .cookie{position:fixed;bottom:20px;left:20px;right:20px;max-width:480px;margin:0 auto;z-index:900;background:#06090d;border:1px solid var(--line2);padding:20px 22px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;transform:translateY(140%);transition:transform .5s}
   .cookie.show{transform:none}
   .cookie p{font-size:.84rem;color:var(--text2);flex:1;min-width:200px}
   .cookie a{color:var(--mint)}
@@ -245,14 +265,17 @@
 <symbol id="i-user" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
 <symbol id="i-wrench" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></symbol>
 <symbol id="i-ext" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+<symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></symbol>
+<linearGradient id="logoGrad" x1="0" y1="0" x2="120" y2="120" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="var(--mint)"/><stop offset="1" stop-color="var(--cyan)"/></linearGradient>
+<symbol id="i-bracket" viewBox="0 0 120 120"><path d="M72 26 34 60 72 94" fill="none" stroke="url(#logoGrad)" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/><path d="M48 26 86 60 48 94" fill="none" stroke="url(#logoGrad)" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 </defs></svg>
 <div class="fx"><div class="fx-grid"></div><div class="fx-scan"></div><div class="fx-glow"></div><div class="fx-spot" id="fxSpot"></div></div>
 <div class="sprog" id="sprog"></div>
 
 <nav id="nav">
-  <a href="#home" class="logo"><span class="d"></span>MAS0N1X</a>
+  <a href="#home" class="logo"><svg class="logo-mark" aria-hidden="true"><use href="#i-bracket"/></svg>MAS0N1X</a>
   <div class="navl" id="navl">
-    <a href="#cap">Leistungen</a><a href="#arch">Projekte</a><a href="#op">Über mich</a><a href="#faq">FAQ</a><a href="#conn">Kontakt</a>
+    <a href="#cap">Leistungen</a><a href="#eco">Ökosystem</a><a href="#arch">Projekte</a><a href="#op">Über mich</a><a href="#faq">FAQ</a><a href="#conn">Kontakt</a>
     <a href="/kunde" class="nlog"><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg> Kunden-Login</a>
     <a href="/projekt-starten.html" class="ncta">Projekt starten</a>
   </div>
@@ -278,7 +301,7 @@
       </div>
     </div>
     <div class="jterm hud" aria-hidden="true">
-      <div class="jt-bar"><span class="jd r"></span><span class="jd y"></span><span class="jd g"></span><span class="jt-t">~/mas0n1x — build</span></div>
+      <div class="jt-bar"><span class="jt-id"><span class="jt-pulse" aria-hidden="true"></span><span class="jt-t">~/mas0n1x — build</span></span><span class="jt-live">LIVE</span></div>
       <div class="jt-body" id="jterm"></div>
     </div>
   </div>
@@ -292,11 +315,37 @@
     <div class="jline">// keine Insellösungen — sondern Systeme, die zusammenarbeiten</div>
   </div>
   <div class="caps" data-stagger>
-    <div class="cap reveal"><span class="ci">// 01</span><div class="ic"><svg class="icon" aria-hidden="true"><use href="#i-box"/></svg></div><h3>Plattformen &amp; Ökosysteme</h3><p>Modulare Systeme mit gemeinsamer Logik, Auth und Datenbasis — gebaut, um mit deiner Community zu wachsen.</p></div>
-    <div class="cap reveal"><span class="ci">// 02</span><div class="ic"><svg class="icon" aria-hidden="true"><use href="#i-gauge"/></svg></div><h3>Web-Apps &amp; Dashboards</h3><p>Schnelle, moderne Anwendungen mit Echtzeit-Daten, sauberer Architektur und durchdachter UX.</p></div>
-    <div class="cap reveal"><span class="ci">// 03</span><div class="ic"><svg class="icon" aria-hidden="true"><use href="#i-bot"/></svg></div><h3>KI-Systeme &amp; Bots</h3><p>Lokale Sprachassistenten, Discord-Bots mit Dashboard, Automatisierung und smarte Tools.</p></div>
-    <div class="cap reveal"><span class="ci">// 04</span><div class="ic"><svg class="icon" aria-hidden="true"><use href="#i-server"/></svg></div><h3>Server &amp; Selfhosting</h3><p>Linux-Server aufsetzen, absichern und warten — Docker, Reverse-Proxy, Backups. Dein Selfhosting-Stack aus einer Hand.</p></div>
-    <div class="cap reveal"><span class="ci">// 05</span><div class="ic"><svg class="icon" aria-hidden="true"><use href="#i-wrench"/></svg></div><h3>Projekt-Wartung &amp; Support</h3><p>Updates, Bugfixes, Monitoring und schnelle Hilfe nach dem Launch — damit dein Projekt sicher, aktuell und zuverlässig läuft.</p></div>
+    <div class="cap hud reveal"><span class="ci">// 01</span><div class="ic"><svg class="icon" aria-hidden="true"><use href="#i-box"/></svg></div><h3>Plattformen &amp; Ökosysteme</h3><p>Modulare Systeme mit gemeinsamer Logik, Auth und Datenbasis — gebaut, um mit deiner Community zu wachsen.</p></div>
+    <div class="cap hud reveal"><span class="ci">// 02</span><div class="ic"><svg class="icon" aria-hidden="true"><use href="#i-gauge"/></svg></div><h3>Web-Apps &amp; Dashboards</h3><p>Schnelle, moderne Anwendungen mit Echtzeit-Daten, sauberer Architektur und durchdachter UX.</p></div>
+    <div class="cap hud reveal"><span class="ci">// 03</span><div class="ic"><svg class="icon" aria-hidden="true"><use href="#i-bot"/></svg></div><h3>KI-Systeme &amp; Bots</h3><p>Lokale Sprachassistenten, Discord-Bots mit Dashboard, Automatisierung und smarte Tools.</p></div>
+    <div class="cap hud reveal"><span class="ci">// 04</span><div class="ic"><svg class="icon" aria-hidden="true"><use href="#i-server"/></svg></div><h3>Server &amp; Selfhosting</h3><p>Linux-Server aufsetzen, absichern und warten — Docker, Reverse-Proxy, Backups. Dein Selfhosting-Stack aus einer Hand.</p></div>
+    <div class="cap hud reveal"><span class="ci">// 05</span><div class="ic"><svg class="icon" aria-hidden="true"><use href="#i-wrench"/></svg></div><h3>Projekt-Wartung &amp; Support</h3><p>Updates, Bugfixes, Monitoring und schnelle Hilfe nach dem Launch — damit dein Projekt sicher, aktuell und zuverlässig läuft.</p></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="eco" class="wrap sect">
+  <div class="sechead reveal">
+    <span class="eyebrow">Ökosystem</span>
+    <h2>Ein Hub, keine Insel-Lösungen</h2>
+    <p>Jedes System teilt Auth, Daten und Infrastruktur mit den anderen — dein Projekt wächst mit, statt isoliert zu bleiben.</p>
+    <div class="jline">// 1 Entwickler, 1 Infrastruktur, mehrere Systeme im Dauerbetrieb</div>
+  </div>
+  <div class="ecowrap">
+    <div class="eco-core hud reveal">
+      <span class="eyebrow">Hub</span>
+      <h3>Mas0n1x</h3>
+      <p>Ein Entwickler, ein Ansprechpartner — Frontend, Backend, KI und Infrastruktur laufen bei mir zusammen statt über verschiedene Dienstleister.</p>
+      <div class="eco-core-stat"><span class="n">5+</span><span class="l">Systeme im Dauerbetrieb</span></div>
+    </div>
+    <div class="eco-grid" data-stagger>
+      <div class="eco-node hud reveal"><div class="eco-node-top"><span class="eco-dot"></span><h3>LawNet</h3><span class="eco-stat">Live</span></div><p>CAD/MDT-Ökosystem aus über einem Dutzend Modulen für FiveM-Roleplay-Server.</p></div>
+      <div class="eco-node hud reveal"><div class="eco-node-top"><span class="eco-dot"></span><h3>SaleNet</h3><span class="eco-stat">Live</span></div><p>Eigene Verkaufsplattform für Lizenzen, Zahlungen und Kundenzugänge.</p></div>
+      <div class="eco-node hud reveal"><div class="eco-node-top"><span class="eco-dot"></span><h3>Jarvis</h3><span class="eco-stat">In Arbeit</span></div><p>Lokaler KI-Sprachassistent — läuft komplett ohne Cloud-Abhängigkeit.</p></div>
+      <div class="eco-node hud reveal"><div class="eco-node-top"><span class="eco-dot"></span><h3>Aurora</h3><span class="eco-stat">Live</span></div><p>Ressourcenschonende Self-Hosted Cloud für den eigenen Raspberry Pi.</p></div>
+      <div class="eco-node hud reveal"><div class="eco-node-top"><span class="eco-dot"></span><h3>Homelab &amp; Bots</h3><span class="eco-stat">Live</span></div><p>Eigene Server-Infrastruktur, Monitoring und Discord-Automatisierung.</p></div>
+    </div>
   </div>
 </section>
 
@@ -392,10 +441,10 @@
 
 <footer><div class="wrap foot"><span>© <span id="yr"></span> Mas0n1x</span><span class="foot-links"><a href="https://discord.gg/Bg9dDxZ36r" target="_blank" rel="noopener">Support-Discord</a><a href="/kunde">Kunden-Login</a><button type="button" data-legal="impressum">Impressum</button><button type="button" data-legal="datenschutz">Datenschutz</button><button type="button" data-legal="agb">AGB</button></span></div></footer>
 
-<div id="dm" class="modal"><div class="mov" onclick="cd()"></div><div class="mbox" data-lenis-prevent><button class="mclose" onclick="cd()" aria-label="Schließen"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button><div id="db"></div></div></div>
-<div id="lbox" class="lbox" onclick="lboxClose()"><button class="lclose" onclick="lboxClose()" aria-label="Schließen">✕</button><img id="lbox-img" src="" alt=""></div>
-<div id="lm" class="modal"><div class="mov" onclick="cl()"></div><div class="mbox" data-lenis-prevent><button class="mclose" onclick="cl()" aria-label="Schließen"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button><div id="lb"></div></div></div>
-<div id="bm" class="modal"><div class="mov" onclick="cb()"></div><div class="mbox" data-lenis-prevent><button class="mclose" onclick="cb()" aria-label="Schließen"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button>
+<div id="dm" class="modal"><div class="mov" onclick="cd()"></div><div class="mbox hud" data-lenis-prevent><button class="mclose" onclick="cd()" aria-label="Schließen"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button><div id="db"></div></div></div>
+<div id="lbox" class="lbox" onclick="lboxClose()"><button class="lclose" onclick="lboxClose()" aria-label="Schließen"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button><img id="lbox-img" src="" alt=""></div>
+<div id="lm" class="modal"><div class="mov" onclick="cl()"></div><div class="mbox hud" data-lenis-prevent><button class="mclose" onclick="cl()" aria-label="Schließen"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button><div id="lb"></div></div></div>
+<div id="bm" class="modal"><div class="mov" onclick="cb()"></div><div class="mbox hud" data-lenis-prevent><button class="mclose" onclick="cb()" aria-label="Schließen"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button>
   <span class="eyebrow">Kostenlos &amp; unverbindlich</span>
   <h2 style="font-family:'Space Grotesk',sans-serif;font-size:1.7rem;margin:12px 0 6px">15-Minuten-Erstgespräch</h2>
   <p class="mdesc">Wähl einen Tag und eine Uhrzeit — wir klären kurz, ob und wie ich dir helfen kann.</p>
@@ -411,7 +460,7 @@
   </div>
 </div></div>
 
-<div class="cookie" id="cookie"><p>Diese Seite nutzt nur technisch notwendige Daten. Mehr in der <a href="#" data-legal="datenschutz">Datenschutzerklärung</a>.</p><button onclick="okCookie()">Verstanden</button></div>
+<div class="cookie hud" id="cookie"><p>Diese Seite nutzt nur technisch notwendige Daten. Mehr in der <a href="#" data-legal="datenschutz">Datenschutzerklärung</a>.</p><button onclick="okCookie()">Verstanden</button></div>
 
 <script>
   document.getElementById('yr').textContent=new Date().getFullYear();
@@ -442,7 +491,7 @@
   function relTime(iso){const d=Date.parse(iso);if(isNaN(d))return'';const s=Math.floor((Date.now()-d)/1000);if(s<3600)return'gerade';const h=Math.floor(s/3600);if(h<24)return'vor '+h+' Std.';const dd=Math.floor(h/24);if(dd<30)return'vor '+dd+' T.';const mo=Math.floor(dd/30);if(mo<12)return'vor '+mo+' Mon.';return'vor '+Math.floor(mo/12)+' J.';}
   function metaLine(p){const parts=[];if(p.language)parts.push('<span class="adot">'+esc(p.language)+'</span>');if(p.stars)parts.push('<span>★ '+p.stars+'</span>');if(p.pushed_at){const r=relTime(p.pushed_at);if(r)parts.push('<span>aktiv '+r+'</span>');}return parts.length?'<div class="ameta">'+parts.join('')+'</div>':'';}
   // work archive
-  async function load(){const g=document.getElementById('arch-grid');try{const r=await fetch('/api/projects');if(!r.ok)throw 0;const ps=await r.json();g.innerHTML=ps.map((p,i)=>{const im=(p.images&&p.images.length)?p.images:(p.image?[{path:p.image}]:[]);const st={in_progress:'IN ARBEIT',completed:'AKTIV',planned:'GEPLANT'}[p.status]||'AKTIV';return `<div class="acard reveal" data-i="${i}"><div class="athumb">${im.length?`<img src="${im[0].path}" alt="${esc(p.title)}" loading="lazy">`:(p.logo?`<img class="alogo" src="${p.logo}" alt="${esc(p.title)}">`:'<svg class="icon ph" aria-hidden="true"><use href="#i-code"/></svg>')}<span class="aidx">// ${String(i+1).padStart(2,'0')}</span><span class="astat">${st}</span></div><div class="abody"><div class="atags">${(p.tags||[]).slice(0,4).map(t=>`<span class="atag">${esc(t)}</span>`).join('')}</div><h3>${esc(p.title)}</h3><p>${esc(p.description||'')}</p>${metaLine(p)}<span class="amore">Details ▸</span></div></div>`;}).join('');g.querySelectorAll('.acard').forEach(c=>c.onclick=()=>od(ps[+c.dataset.i]));updateReveal();}catch(e){g.innerHTML='<p style="color:var(--text3);grid-column:1/-1">Projekte aktuell nicht erreichbar.</p>';}}
+  async function load(){const g=document.getElementById('arch-grid');try{const r=await fetch('/api/projects');if(!r.ok)throw 0;const ps=await r.json();g.innerHTML=ps.map((p,i)=>{const im=(p.images&&p.images.length)?p.images:(p.image?[{path:p.image}]:[]);const st={in_progress:'IN ARBEIT',completed:'AKTIV',planned:'GEPLANT'}[p.status]||'AKTIV';return `<div class="acard hud reveal" data-i="${i}"><div class="athumb">${im.length?`<img src="${im[0].path}" alt="${esc(p.title)}" loading="lazy">`:(p.logo?`<img class="alogo" src="${p.logo}" alt="${esc(p.title)}">`:'<svg class="icon ph" aria-hidden="true"><use href="#i-code"/></svg>')}<span class="aidx">// ${String(i+1).padStart(2,'0')}</span><span class="astat">${st}</span></div><div class="abody"><div class="atags">${(p.tags||[]).slice(0,4).map(t=>`<span class="atag">${esc(t)}</span>`).join('')}</div><h3>${esc(p.title)}</h3><p>${esc(p.description||'')}</p>${metaLine(p)}<span class="amore">Details ▸</span></div></div>`;}).join('');g.querySelectorAll('.acard').forEach(c=>c.onclick=()=>od(ps[+c.dataset.i]));updateReveal();}catch(e){g.innerHTML='<p style="color:var(--text3);grid-column:1/-1">Projekte aktuell nicht erreichbar.</p>';}}
   function od(p){if(!p)return;const im=(p.images&&p.images.length)?p.images:(p.image?[{path:p.image}]:[]);const detail=esc(p.detail||p.description||'').replace(/\n/g,'<br>');const code=(p.repo_url&&!p.private)?`<a href="${esc(p.repo_url)}" target="_blank" rel="noopener" class="btn btn-g"><svg class="icon" aria-hidden="true"><use href="#i-github"/></svg> Code</a>`:'';const meta=[p.language,p.stars?('★ '+p.stars):'',p.pushed_at?('aktiv '+relTime(p.pushed_at)):''].filter(Boolean).map(m=>`<span class="atag">${esc(m)}</span>`).join('');document.getElementById('db').innerHTML=`${im.length?`<div class="mgal">${im.map(x=>`<img src="${x.path}" alt="${esc(p.title)}" loading="lazy" onclick="lbox(this.src)">`).join('')}</div>`:''}<h2>${esc(p.title)}</h2><div class="atags">${(p.tags||[]).map(t=>`<span class="atag">${esc(t)}</span>`).join('')}${meta}</div><p class="mdesc">${detail}</p><div class="acts" style="display:flex;gap:12px;flex-wrap:wrap">${p.link?`<a href="${esc(p.link)}" target="_blank" rel="noopener" class="btn btn-p">Ansehen <svg class="icon" aria-hidden="true"><use href="#i-ext"/></svg></a>`:''}${code}</div>`;document.getElementById('dm').classList.add('open');document.body.style.overflow='hidden';lenis&&lenis.stop();}
   function cd(){document.getElementById('dm').classList.remove('open');document.body.style.overflow='';lenis&&lenis.start();}
   function lbox(src){const el=document.getElementById('lbox');document.getElementById('lbox-img').src=src;el.classList.add('open');}
@@ -453,7 +502,7 @@
   function openBooking(){const m=document.getElementById('bm');const dt=document.getElementById('bk-date');const tm=new Date();tm.setDate(tm.getDate()+1);dt.min=new Date().toISOString().split('T')[0];dt.value=tm.toISOString().split('T')[0];['bk-name','bk-email','bk-msg'].forEach(id=>document.getElementById(id).value='');const st=document.getElementById('bk-status');st.textContent='';st.className='bk-status';document.getElementById('bk-submit').disabled=false;bkSlot=null;loadBkSlots();m.classList.add('open');document.body.style.overflow='hidden';lenis&&lenis.stop();}
   function cb(){document.getElementById('bm').classList.remove('open');document.body.style.overflow='';lenis&&lenis.start();}
   async function loadBkSlots(){const date=document.getElementById('bk-date').value;const wrap=document.getElementById('bk-slots');bkSlot=null;if(!date){wrap.innerHTML='<span class="bk-hint">Bitte zuerst einen Tag wählen.</span>';return;}wrap.innerHTML='<span class="bk-hint">Lade Zeiten …</span>';try{const r=await fetch('/api/appointments/available?date='+encodeURIComponent(date));const slots=await r.json();if(!slots.length){wrap.innerHTML='<span class="bk-hint">Keine freien Zeiten an diesem Tag.</span>';return;}wrap.innerHTML=slots.map(s=>'<button type="button" class="bk-slot" data-slot="'+s+'">'+s+'</button>').join('');wrap.querySelectorAll('.bk-slot').forEach(b=>b.onclick=()=>{wrap.querySelectorAll('.bk-slot').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');bkSlot=b.dataset.slot;});}catch(e){wrap.innerHTML='<span class="bk-hint">Zeiten nicht abrufbar.</span>';}}
-  async function submitBooking(){const st=document.getElementById('bk-status');const name=document.getElementById('bk-name').value.trim();const email=document.getElementById('bk-email').value.trim();const message=document.getElementById('bk-msg').value.trim();const date=document.getElementById('bk-date').value;st.className='bk-status';if(!name||!email||!date||!bkSlot){st.textContent='Bitte Tag, Uhrzeit, Name und E-Mail ausfüllen.';st.classList.add('err');return;}const btn=document.getElementById('bk-submit');btn.disabled=true;try{const r=await fetch('/api/booking',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,date,time_slot:bkSlot,message})});const d=await r.json();if(!r.ok)throw new Error(d.error||'Fehler');const okD=date,okS=bkSlot;st.innerHTML='<span class="ok">✓ Termin angefragt! Bestätigung kommt per E-Mail.</span> <button type="button" class="bk-cal" id="bk-cal">📅 Zum Kalender hinzufügen</button>';document.getElementById('bk-cal').onclick=()=>downloadIcs(okD,okS);['bk-name','bk-email','bk-msg'].forEach(id=>document.getElementById(id).value='');bkSlot=null;document.querySelectorAll('#bk-slots .bk-slot').forEach(x=>x.classList.remove('sel'));}catch(e){st.textContent=e.message||'Buchung fehlgeschlagen.';st.classList.add('err');btn.disabled=false;}}
+  async function submitBooking(){const st=document.getElementById('bk-status');const name=document.getElementById('bk-name').value.trim();const email=document.getElementById('bk-email').value.trim();const message=document.getElementById('bk-msg').value.trim();const date=document.getElementById('bk-date').value;st.className='bk-status';if(!name||!email||!date||!bkSlot){st.textContent='Bitte Tag, Uhrzeit, Name und E-Mail ausfüllen.';st.classList.add('err');return;}const btn=document.getElementById('bk-submit');btn.disabled=true;try{const r=await fetch('/api/booking',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,date,time_slot:bkSlot,message})});const d=await r.json();if(!r.ok)throw new Error(d.error||'Fehler');const okD=date,okS=bkSlot;st.innerHTML='<span class="ok">✓ Termin angefragt! Bestätigung kommt per E-Mail.</span> <button type="button" class="bk-cal" id="bk-cal"><svg class="icon" aria-hidden="true"><use href="#i-cal"/></svg> Zum Kalender hinzufügen</button>';document.getElementById('bk-cal').onclick=()=>downloadIcs(okD,okS);['bk-name','bk-email','bk-msg'].forEach(id=>document.getElementById(id).value='');bkSlot=null;document.querySelectorAll('#bk-slots .bk-slot').forEach(x=>x.classList.remove('sel'));}catch(e){st.textContent=e.message||'Buchung fehlgeschlagen.';st.classList.add('err');btn.disabled=false;}}
   function downloadIcs(date,time){const [y,m,d]=date.split('-');const [hh,mm]=time.split(':');const startD=new Date(+y,+m-1,+d,+hh,+mm);const endD=new Date(startD.getTime()+15*60000);const fmt=dd=>dd.getFullYear()+String(dd.getMonth()+1).padStart(2,'0')+String(dd.getDate()).padStart(2,'0')+'T'+String(dd.getHours()).padStart(2,'0')+String(dd.getMinutes()).padStart(2,'0')+'00';const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Mas0n1x//Booking//DE','BEGIN:VEVENT','UID:'+Date.now()+'@mas0n1x.online','DTSTAMP:'+fmt(new Date()),'DTSTART:'+fmt(startD),'DTEND:'+fmt(endD),'SUMMARY:Erstgespräch mit Mas0n1x','DESCRIPTION:15-Minuten-Erstgespräch','LOCATION:Online','END:VEVENT','END:VCALENDAR'].join('\r\n');const blob=new Blob([ics],{type:'text/calendar;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='erstgespraech-mas0n1x.ics';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);}
   document.getElementById('bk-date')&&document.getElementById('bk-date').addEventListener('change',loadBkSlots);
   // legal
