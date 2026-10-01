@@ -8,7 +8,8 @@ services:
     container_name: mas0n1x-portfolio-backend
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      # Nur für Container (host.docker.internal), nicht öffentlich – sonst ist das Backend an nginx vorbei erreichbar
+      - "172.17.0.1:3000:3000"
     environment:
       - GITHUB_TOKEN=${GITHUB_TOKEN}
       # Bot-Zentrale: Portfolio meldet Ereignisse (Anfragen/Alerts) per HTTP an die
