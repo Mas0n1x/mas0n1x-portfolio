@@ -20,6 +20,9 @@ services:
       # Lesender Dienst-Schlüssel für das Homelab-Dashboard (nur GET auf
       # Dashboard/Anfragen/Termine/Rechnungen/Kunden). Leer = abgeschaltet.
       - SERVICE_API_KEY=${SERVICE_API_KEY:-}
+      # Ein-Klick-Admin-Login aus dem Homelab-Dashboard (dort PORTFOLIO_SSO_SECRET).
+      # Mind. 32 Zeichen, leer = abgeschaltet.
+      - SSO_SECRET=${SSO_SECRET:-}
     volumes:
       - ./data:/app/data
       - ./uploads:/app/uploads

@@ -798,6 +798,39 @@ function verify2faCode(code) {
   return false;
 }
 
+// Ein-Klick-Login aus dem Homelab-Dashboard (Seite „Zugänge"). Das Dashboard
+// signiert ein 60-s-Einmal-Ticket mit SSO_SECRET; ohne Geheimnis ist der Weg zu.
+const SSO_SECRET = process.env.SSO_SECRET || '';
+const ssoUsedTickets = new Map(); // jti → exp, gegen Wiederverwendung
+function verifySsoTicket(ticket, aud) {
+  if (SSO_SECRET.length < 32 || typeof ticket !== 'string') return false;
+  const [payload, sig] = ticket.split('.');
+  if (!payload || !sig) return false;
+  const expected = crypto.createHmac('sha256', SSO_SECRET).update(payload).digest('base64url');
+  if (sig.length !== expected.length || !crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected))) return false;
+  let data;
+  try { data = JSON.parse(Buffer.from(payload, 'base64url').toString()); } catch { return false; }
+  const now = Math.floor(Date.now() / 1000);
+  for (const [jti, exp] of ssoUsedTickets) if (exp < now) ssoUsedTickets.delete(jti);
+  if (data.aud !== aud || !data.jti || !(data.exp >= now) || ssoUsedTickets.has(data.jti)) return false;
+  ssoUsedTickets.set(data.jti, data.exp);
+  return true;
+}
+
+app.get('/api/sso', loginRateLimit, (req, res) => {
+  if (!verifySsoTicket(req.query.t, 'portfolio')) {
+    registerLoginFail(req);
+    logLogin(req, false, 'SSO-Ticket ungültig');
+    return res.status(401).send('SSO-Ticket ungültig oder abgelaufen.');
+  }
+  req.session.regenerate((err) => {
+    if (err) return res.status(500).send('Session-Fehler');
+    req.session.authenticated = true;
+    logLogin(req, true, 'Homelab-Dashboard (SSO)');
+    res.redirect('/admin/');
+  });
+});
+
 app.post('/api/login', loginRateLimit, (req, res) => {
   const { password } = req.body;
   const admin = dbGet('SELECT password_hash FROM admin WHERE id = 1');
