@@ -239,6 +239,16 @@
   .mbox p{color:var(--muted);line-height:1.7;margin-bottom:8px}
   .mdesc{color:var(--muted);line-height:1.7;margin:16px 0 26px}
   .atags{display:flex;flex-wrap:wrap;gap:6px}
+  .msub{font-size:.5em;font-weight:500;color:var(--accent);vertical-align:middle;margin-left:8px}
+  .mback{background:none;border:0;color:var(--muted);font-size:.9rem;cursor:pointer;padding:0 0 14px;display:block}
+  .mback:hover{color:var(--accent)}
+  .eco h3{font-size:.95rem;font-weight:600;margin:6px 0 12px}
+  .eco ul{list-style:none;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:26px}
+  .eco li button{width:100%;height:100%;text-align:left;background:var(--paper2);border:1px solid var(--line);border-radius:12px;padding:14px 16px;cursor:pointer;display:flex;flex-direction:column;gap:4px;transition:border-color .2s,background .2s}
+  .eco li button:hover{border-color:var(--accent)}
+  .eco li b{font-weight:600;color:var(--ink)}
+  .eco li span{font-size:.85rem;line-height:1.5;color:var(--muted);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  @media (max-width:560px){.eco ul{grid-template-columns:1fr}}
   .atag{font-size:.8rem;color:var(--muted);background:var(--paper2);padding:3px 10px;border-radius:999px}
   .mnote{font-size:.9rem;color:var(--accent);font-weight:500;margin-bottom:6px}
   .lbox{position:fixed;inset:0;z-index:2000;display:none;align-items:center;justify-content:center;padding:32px;background:rgba(4,6,14,.92);backdrop-filter:blur(6px);cursor:zoom-out}
@@ -392,20 +402,19 @@
 <section id="sys" class="sect stage">
   <div class="wrap wide">
     <div class="shead">
-      <h2 class="big">Ein Kern, neun Systeme.</h2>
+      <h2 class="big">Ein Kern, acht Systeme.</h2>
       <p class="lead">Anmeldung, Daten und Infrastruktur teilen sich alle Systeme. Wer eines nutzt, nimmt das nächste ohne Umweg dazu. Fahr mit der Maus über einen Namen und sieh, woran er hängt.</p>
     </div>
     <div class="sysgrid">
       <ul class="sys-list" id="syslist">
-        <li><button class="sys-row" data-id="lawnet" data-open><h3>LawNet</h3><p>CAD/MDT-Ökosystem für FiveM-Roleplay-Server</p><span class="st">Live</span></button></li>
-        <li><button class="sys-row" data-id="personet" data-open><h3>PersoNet</h3><p>Personalverwaltung für Roleplay-Behörden</p><span class="st">Live</span></button></li>
-        <li><button class="sys-row" data-id="dispatchnet" data-open><h3>DispatchNet</h3><p>Live-Leitstelle mit Streifeneinteilung und Status</p><span class="st">Live</span></button></li>
-        <li><button class="sys-row" data-id="mapnet" data-open><h3>MapNet</h3><p>Interaktive Ortskunde-Karte für Polizeibehörden</p><span class="st">Live</span></button></li>
-        <li><button class="sys-row" data-id="azubinet" data-open><h3>AzubiNet</h3><p>Prüfungsplattform für Ausbilder und Azubis</p><span class="st">Live</span></button></li>
-        <li><button class="sys-row" data-id="salenet" data-open><h3>SaleNet</h3><p>Verkauf von Lizenzen, Zahlungen, Kundenzugänge</p><span class="st">Live</span></button></li>
+        <li><button class="sys-row" data-id="lawnet" data-open><h3>LawNet</h3><p>Das Ökosystem für FiveM-Roleplay: CAD/MDT, Personal, Leitstelle, Karte, Prüfung und Shop in einer Plattform</p><span class="st">Live</span></button></li>
         <li><button class="sys-row" data-id="jarvis" data-open><h3>Jarvis</h3><p>Lokaler KI-Sprachassistent ohne Cloud-Zwang</p><span class="st wip">In Arbeit</span></button></li>
-        <li><button class="sys-row" data-id="aurora"><h3>Aurora</h3><p>Ressourcenschonende Self-Hosted Cloud für den Raspberry Pi</p><span class="st">Live</span></button></li>
-        <li><button class="sys-row" data-id="homelab"><h3>Homelab &amp; Bots</h3><p>Server-Infrastruktur, Monitoring, Discord-Automatisierung</p><span class="st">Live</span></button></li>
+        <li><button class="sys-row" data-id="aurora" data-open><h3>Aurora</h3><p>Ressourcenschonende Self-Hosted Cloud für den Raspberry Pi</p><span class="st">Live</span></button></li>
+        <li><button class="sys-row" data-id="homelab" data-open><h3>Homelab-Dashboard</h3><p>Steuerzentrale für Container, Monitoring und Backups</p><span class="st">Live</span></button></li>
+        <li><button class="sys-row" data-id="tradelab" data-open><h3>tradelab</h3><p>Trading-Framework: ein Strategie-Code für Backtest, Paper und Live</p><span class="st wip">In Arbeit</span></button></li>
+        <li><button class="sys-row" data-id="amo" data-open><h3>AMO</h3><p>Cross-Platform-App für iOS, Android und Web mit WebRTC-Anrufen</p><span class="st wip">In Arbeit</span></button></li>
+        <li><button class="sys-row" data-id="tracker" data-open><h3>ProductivityTracker</h3><p>Kanban, Pomodoro und Gamification als Desktop-App</p><span class="st">Live</span></button></li>
+        <li><button class="sys-row" data-id="passwort" data-open><h3>Passwort-Manager</h3><p>Lokaler Tresor mit AES-256 und Leak-Check</p><span class="st">Live</span></button></li>
       </ul>
       <div class="gwrap"><canvas id="graph" aria-hidden="true"></canvas></div>
     </div>
@@ -605,20 +614,19 @@
     const ctx=cv.getContext('2d'),rows=[...document.querySelectorAll('.sys-row')];
     const N=[
       {id:'hub',x:50,y:50,r:5.4,hub:true,label:'Kern'},
-      {id:'lawnet',x:30,y:33,r:7.6,label:'LawNet'},
-      {id:'personet',x:11,y:53,r:4.6,label:'PersoNet'},
-      {id:'dispatchnet',x:20,y:79,r:4.8,label:'DispatchNet'},
-      {id:'mapnet',x:44,y:88,r:4.4,label:'MapNet'},
-      {id:'azubinet',x:46,y:12,r:4.4,label:'AzubiNet'},
-      {id:'salenet',x:70,y:20,r:5.6,label:'SaleNet'},
-      {id:'jarvis',x:88,y:44,r:5.6,label:'Jarvis'},
-      {id:'aurora',x:86,y:72,r:4.8,label:'Aurora'},
-      {id:'homelab',x:67,y:82,r:4.8,label:'Homelab'}
+      {id:'lawnet',x:25,y:40,r:9.2,label:'LawNet'},
+      {id:'amo',x:49,y:13,r:4.6,label:'AMO'},
+      {id:'jarvis',x:76,y:21,r:5.6,label:'Jarvis'},
+      {id:'tradelab',x:90,y:50,r:4.6,label:'tradelab'},
+      {id:'aurora',x:80,y:76,r:5,label:'Aurora'},
+      {id:'homelab',x:57,y:86,r:5,label:'Homelab'},
+      {id:'passwort',x:32,y:87,r:4.4,label:'Passwort-Manager'},
+      {id:'tracker',x:9,y:72,r:4.6,label:'Tracker'}
     ];
     N.forEach((n,i)=>{n.k=0;n.ph=i*1.7;n.sp=.35+((i*37)%10)/40;n.ox=0;n.oy=0;n.vx=0;n.vy=0;});
     const byId=Object.fromEntries(N.map(n=>[n.id,n]));
-    const E=[];['lawnet','personet','dispatchnet','mapnet','azubinet','salenet','jarvis','aurora','homelab'].forEach(id=>E.push(['hub',id]));
-    [['lawnet','personet'],['lawnet','dispatchnet'],['lawnet','mapnet'],['lawnet','azubinet'],['lawnet','salenet'],['dispatchnet','mapnet'],['jarvis','homelab'],['aurora','homelab']].forEach(e=>E.push(e));
+    const E=[];['lawnet','amo','jarvis','tradelab','aurora','homelab','passwort','tracker'].forEach(id=>E.push(['hub',id]));
+    [['jarvis','homelab'],['aurora','homelab'],['jarvis','tradelab'],['homelab','passwort'],['passwort','tracker']].forEach(e=>E.push(e));
     const nb=Object.fromEntries(N.map(n=>[n.id,[]]));E.forEach(([a,c])=>{nb[a].push(c);nb[c].push(a);});
     const P=E.map((e,i)=>({e,t:Math.random(),v:(.05+Math.random()*.07)*(i%2?1:-1)}));
     let W=0,H=0,dpr=1,active=null,col={},vis=true,last=performance.now();
@@ -645,6 +653,7 @@
         if(n.hub){ctx.font='600 '+Math.max(10,u*1.45)+'px IBM Plex Sans, sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(n.label,q.x,q.y);}
         else{ctx.beginPath();ctx.arc(q.x,q.y,Math.max(2.5,r*.28),0,6.283);ctx.fill();
           ctx.font='500 '+Math.max(10.5,u*1.75)+'px IBM Plex Sans, sans-serif';ctx.textAlign='center';ctx.textBaseline='top';ctx.fillStyle=n.k>.02?col.acc:col.ink;ctx.fillText(n.label,q.x,q.y+r+7);}
+        if(n.id==='lawnet'){for(let k=0;k<5;k++){const a=(REDM?0:t*.0004)+k*1.2566+.6,ox=q.x+Math.cos(a)*(r+u*1.9),oy=q.y+Math.sin(a)*(r+u*1.9);ctx.beginPath();ctx.arc(ox,oy,Math.max(2.4,u*.5),0,6.283);ctx.fillStyle=n.k>.02?col.acc:col.muted;ctx.globalAlpha=(dim?.4:1)*.9;ctx.fill();}}
         ctx.globalAlpha=1;});
     }
     // Federphysik: gezogener Knoten folgt dem Zeiger, Nachbarn werden mitgezogen, alles schwingt zurück
@@ -701,16 +710,33 @@
     p.el.style.transform=`translate(${p.x+36}px,${p.y-90}px) rotate(${rot}deg) scale(${p.on?1:.92})`;p.el.style.opacity=p.on?1:0;
     if(p.on||Math.abs(p.tx-p.x)>.5)p.raf=requestAnimationFrame(pvTick);else p.raf=0;}
   function pvMove(e){PV.tx=e.clientX;PV.ty=e.clientY;if(!PV.on)return;if(!PV.raf)PV.raf=requestAnimationFrame(pvTick);}
-  async function load(){const g=document.getElementById('arch-grid');try{const r=await fetch('/api/projects');if(!r.ok)throw 0;PS=await r.json();
-    g.innerHTML=PS.map((p,i)=>{const im=(p.images&&p.images.length)?p.images:(p.image?[{path:p.image}]:[]);const wip=p.status==='in_progress',plan=p.status==='planned';const st=wip?'In Arbeit':(plan?'Geplant':'Live');
-      return `<article class="prow" data-i="${i}" data-img="${im.length?esc(im[0].path):''}" tabindex="0" role="button" aria-label="${esc(p.title)} — Details ansehen"><h3>${esc(p.title)}</h3><p class="pdesc">${esc(clean(p.description))}</p><span class="ptags">${(p.tags||[]).slice(0,3).map(esc).join(', ')}</span><span class="pstat${wip||plan?' wip':''}">${st}</span>${im.length?`<img class="pthumb" src="${im[0].path}" alt="" loading="lazy">`:''}</article>`;}).join('');
+  const LN_FAMILY=['LawNet','PersoNet','SaleNet','DispatchNet','MapNet','AzubiNet'];
+  const EXTRA=[
+    {title:'Aurora',status:'completed',tags:['Go','SQLite','Self-Hosted'],description:'Self-Hosted Cloud als einzelnes Go-Binary für den Raspberry Pi.',detail:'Eine eigene Cloud für Dateien und Freigaben, als einzelnes Go-Binary mit eingebettetem Frontend. 22 interne Module, SQLite im WAL-Modus, Jobs im Prozess statt Redis und Volltextsuche ohne Suchcluster. Bewusst ressourcenschonend, damit sie auf einem Raspberry Pi dauerhaft läuft.'},
+    {title:'Homelab-Dashboard',status:'completed',tags:['TypeScript','Docker','WebSocket'],description:'Steuerzentrale für mein Homelab: Container, Monitoring und Backups.',detail:'Die Steuerzentrale für meine eigene Infrastruktur: Container-Verwaltung, Live-Konsole, Monitoring, Alarmierung und Backups an einem Ort. Ein Agent auf dem Server nimmt Befehle per Token-gesicherter REST- und WebSocket-Schnittstelle entgegen.',repo_url:'https://github.com/Mas0n1x/homelab-dashboard'},
+    {title:'tradelab',status:'in_progress',tags:['Python','ccxt','Backtest'],description:'Trading-Framework: derselbe Strategie-Code für Backtest, Paper und Live.',detail:'Ein Framework für Handelsstrategien, bei dem derselbe Code unverändert im Backtest, im Paper-Trading und live läuft. Ohne Lookahead, mit deterministischen Ergebnissen und einem ehrlichen Kostenmodell.',private:true},
+    {title:'AMO',status:'in_progress',tags:['Expo','React Native','WebRTC','TypeScript'],description:'Cross-Platform-App für iOS, Android und Web mit WebRTC-Anrufen.',detail:'Eine App aus einer einzigen Codebase für iOS, Android und den Browser (Expo, React Native, react-native-web). Anrufe laufen über WebRTC mit eigenem TURN-Server. API, App und ein gemeinsames Paket liegen in einem npm-Workspace, dessen Zod-Schemas für beide Seiten die einzige Wahrheit sind.',private:true}
+  ];
+  const BYSYS={lawnet:'LawNet',jarvis:'Jarvis',aurora:'Aurora',homelab:'Homelab-Dashboard',tradelab:'tradelab',amo:'AMO',tracker:'ProductivityTracker',passwort:'Passwort-Manager'};
+  let ALL=[],ECO=null;
+  function pRow(p,i){const im=(p.images&&p.images.length)?p.images:(p.image?[{path:p.image}]:[]);const wip=p.status==='in_progress',plan=p.status==='planned';const st=wip?'In Arbeit':(plan?'Geplant':'Live');
+    return `<article class="prow" data-i="${i}" data-img="${im.length?esc(im[0].path):''}" tabindex="0" role="button" aria-label="${esc(p.title)} – Details ansehen"><h3>${esc(p.title)}</h3><p class="pdesc">${esc(clean(p.description))}</p><span class="ptags">${(p.tags||[]).slice(0,3).map(esc).join(', ')}</span><span class="pstat${wip||plan?' wip':''}">${st}</span>${im.length?`<img class="pthumb" src="${im[0].path}" alt="" loading="lazy">`:''}</article>`;}
+  async function load(){const g=document.getElementById('arch-grid');try{const r=await fetch('/api/projects');if(!r.ok)throw 0;const raw=await r.json();
+    const fam=LN_FAMILY.map(t=>raw.find(x=>(x.title||'').toLowerCase()===t.toLowerCase())).filter(Boolean);
+    const core=fam.find(x=>x.title==='LawNet')||fam[0];
+    ECO=core?Object.assign({},core,{members:fam,tags:['CAD/MDT','Multi-Tenant',fam.length+' Module'],description:'Das Ökosystem für Behörden-Roleplay auf FiveM: CAD/MDT, Personal, Leitstelle, Karte, Prüfung und Shop in einer Plattform.'}):null;
+    const others=raw.filter(x=>!fam.includes(x));
+    EXTRA.forEach(e=>{if(!others.some(o=>(o.title||'').toLowerCase()===e.title.toLowerCase()))others.push(e);});
+    const order=['Jarvis','Aurora','Homelab-Dashboard','tradelab','AMO','ProductivityTracker','Passwort-Manager'];
+    others.sort((a,b)=>{const x=order.indexOf(a.title),y=order.indexOf(b.title);return (x<0?99:x)-(y<0?99:y);});
+    PS=(ECO?[ECO]:[]).concat(others);ALL=PS.concat(fam);
+    g.innerHTML=PS.map(pRow).join('');
     g.querySelectorAll('.prow').forEach(c=>{const open=()=>od(PS[+c.dataset.i]);c.onclick=open;c.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open();}};
       if(FINE&&!REDM){c.addEventListener('pointerenter',e=>{const s=c.dataset.img;if(!s)return;PV.img.src=s;PV.on=true;PV.tx=e.clientX;PV.ty=e.clientY;if(!PV.raf){PV.x=PV.tx;PV.y=PV.ty;PV.raf=requestAnimationFrame(pvTick);}});c.addEventListener('pointermove',pvMove);c.addEventListener('pointerleave',()=>{PV.on=false;if(!PV.raf)PV.raf=requestAnimationFrame(pvTick);});}});
     // Systemgraph verknüpfen: Klick öffnet das passende Projekt
-    const map={lawnet:'LawNet',personet:'PersoNet',dispatchnet:'DispatchNet',mapnet:'MapNet',azubinet:'AzubiNet',salenet:'SaleNet',jarvis:'Jarvis'};
-    Object.entries(map).forEach(([id,t])=>{const p=PS.find(x=>(x.title||'').toLowerCase()===t.toLowerCase());if(p)SYS_CLICK[id]=()=>od(p);});
+    Object.entries(BYSYS).forEach(([id,t])=>{const p=PS.find(x=>(x.title||'').toLowerCase()===t.toLowerCase());if(p)SYS_CLICK[id]=()=>od(p);});
   }catch(e){g.innerHTML='<p style="color:var(--faint);padding-top:28px">Projekte aktuell nicht erreichbar.</p>';}}
-  function od(p){if(!p)return;PV.on=false;const im=(p.images&&p.images.length)?p.images:(p.image?[{path:p.image}]:[]);const detail=esc(clean(p.detail||p.description||'')).replace(/\n/g,'<br>');const code=(p.repo_url&&!p.private)?`<a href="${esc(p.repo_url)}" target="_blank" rel="noopener" class="btn btn-g"><svg class="icon" aria-hidden="true"><use href="#i-github"/></svg>Code ansehen</a>`:'';document.getElementById('db').innerHTML=`${im.length?`<div class="mgal">${im.map(x=>`<img src="${x.path}" alt="${esc(p.title)}" loading="lazy" onclick="lbox(this.src)">`).join('')}</div>`:''}<h2>${esc(p.title)}</h2><div class="atags">${(p.tags||[]).map(t=>`<span class="atag">${esc(t)}</span>`).join('')}</div><p class="mdesc">${detail}</p><div style="display:flex;gap:12px;flex-wrap:wrap">${p.link?`<a href="${esc(p.link)}" target="_blank" rel="noopener" class="btn btn-p">Live ansehen<svg class="icon" aria-hidden="true"><use href="#i-ext"/></svg></a>`:''}${code}</div>`;document.getElementById('dm').classList.add('open');document.body.style.overflow='hidden';}
+  function od(p,from){if(!p)return;PV.on=false;const im=(p.images&&p.images.length)?p.images:(p.image?[{path:p.image}]:[]);const detail=esc(clean(p.detail||p.description||'')).replace(/\n/g,'<br>');const code=(p.repo_url&&!p.private)?`<a href="${esc(p.repo_url)}" target="_blank" rel="noopener" class="btn btn-g"><svg class="icon" aria-hidden="true"><use href="#i-github"/></svg>Code ansehen</a>`:'';document.getElementById('db').innerHTML=`${im.length?`<div class="mgal">${im.map(x=>`<img src="${x.path}" alt="${esc(p.title)}" loading="lazy" onclick="lbox(this.src)">`).join('')}</div>`:''}${from?`<button class="mback" onclick="od(ECO)">← ${esc(from.title)}</button>`:''}<h2>${esc(p.title)}${p.members?' <span class="msub">Ökosystem</span>':''}</h2><div class="atags">${(p.tags||[]).map(t=>`<span class="atag">${esc(t)}</span>`).join('')}</div><p class="mdesc">${detail}</p>${p.members?`<div class="eco"><h3>Im Ökosystem</h3><ul>${p.members.map((m,i)=>`<li><button onclick="od(ECO.members[${i}],ECO)"><b>${esc(m.title==='LawNet'?'LawNet CAD/MDT':m.title)}</b><span>${esc(clean(m.description))}</span></button></li>`).join('')}</ul></div>`:''}<div style="display:flex;gap:12px;flex-wrap:wrap">${p.link?`<a href="${esc(p.link)}" target="_blank" rel="noopener" class="btn btn-p">Live ansehen<svg class="icon" aria-hidden="true"><use href="#i-ext"/></svg></a>`:''}${code}</div>`;document.getElementById('dm').classList.add('open');document.body.style.overflow='hidden';}
   function cd(){document.getElementById('dm').classList.remove('open');document.body.style.overflow='';}
   function lbox(src){const el=document.getElementById('lbox');document.getElementById('lbox-img').src=src;el.classList.add('open');}
   function lboxClose(){document.getElementById('lbox').classList.remove('open');}
@@ -838,7 +864,7 @@
       {t:'Datenschutz',k:'Rechtliches',s:'dsgvo privacy',go:()=>openLegal('datenschutz')},
       {t:'AGB',k:'Rechtliches',s:'bedingungen',go:()=>openLegal('agb')}
     ];
-    PS.forEach(p=>a.push({t:p.title,k:'Projekt',s:(p.tags||[]).join(' ').toLowerCase(),go:()=>od(p)}));
+    ALL.forEach(p=>a.push({t:p.members?'LawNet-Ökosystem':p.title,k:p.members?'Projekt':(LN_FAMILY.includes(p.title)?'LawNet-Modul':'Projekt'),s:(p.tags||[]).join(' ').toLowerCase()+(p.members?' personet salenet dispatchnet mapnet azubinet':''),go:()=>od(p,LN_FAMILY.includes(p.title)&&p!==ECO?ECO:undefined)}));
     PAL.items=a;
   }
   function palRender(){
