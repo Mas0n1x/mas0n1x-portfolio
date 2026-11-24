@@ -44,18 +44,18 @@ async function api(endpoint, options = {}) {
   const css = `
     #toast-wrap{position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:10px;max-width:340px}
     .toast{padding:14px 16px;border-radius:12px;background:#1a1a1a;border:1px solid rgba(255,255,255,.1);color:#fff;font-size:.9rem;box-shadow:0 8px 24px rgba(0,0,0,.4);animation:toastIn .25s ease;display:flex;gap:10px;align-items:flex-start}
-    .toast.success{border-left:3px solid #00ff88}.toast.error{border-left:3px solid #ff5b5b}.toast.info{border-left:3px solid #4aa3ff}
+    .toast.success{border-left:3px solid var(--accent)}.toast.error{border-left:3px solid #ff5b5b}.toast.info{border-left:3px solid #4aa3ff}
     @keyframes toastIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
     .status-timeline{display:flex;align-items:center;gap:6px;margin:0 0 18px;padding:16px;border-radius:14px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06)}
     .status-timeline.cancelled{color:#ff5b5b;font-weight:600;justify-content:center;gap:8px}
     .st-step{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:84px}
     .st-dot{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;background:#222;color:#888;border:2px solid #333}
-    .st-step.active .st-dot{background:#00ff88;color:#000;border-color:#00ff88;box-shadow:0 0 0 4px rgba(0,255,136,.15)}
-    .st-step.done .st-dot{background:rgba(0,255,136,.2);color:#00ff88;border-color:#00ff88}
+    .st-step.active .st-dot{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);box-shadow:0 0 0 4px rgba(var(--acc-rgb),.15)}
+    .st-step.done .st-dot{background:rgba(var(--acc-rgb),.2);color:var(--accent);border-color:var(--accent)}
     .st-label{font-size:.78rem;color:#999;text-align:center}
     .st-step.active .st-label,.st-step.done .st-label{color:#fff}
     .st-line{flex:1;height:2px;background:#333;min-width:20px}
-    .st-line.done{background:#00ff88}
+    .st-line.done{background:var(--accent)}
     .st-note{display:flex;align-items:center;gap:8px;margin:-8px 0 18px;padding:10px 14px;border-radius:10px;background:rgba(255,180,0,.08);border:1px solid rgba(255,180,0,.25);color:#ffb400;font-size:.85rem}`;
   const s = document.createElement('style'); s.textContent = css; document.head.appendChild(s);
 })();

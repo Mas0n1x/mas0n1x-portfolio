@@ -2019,7 +2019,7 @@ function downloadInvoice() {
       <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; font-size: 12px; line-height: 1.5; color: #000; padding: 40px; }
-        .invoice-header { display: flex; justify-content: space-between; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 2px solid #00ffaa; }
+        .invoice-header { display: flex; justify-content: space-between; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 2px solid #2133ff; }
         .invoice-logo { width: 80px; height: 80px; object-fit: contain; margin-bottom: 12px; border-radius: 12px; }
         .invoice-title { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
         .invoice-meta { color: #666; font-size: 11px; }
@@ -2035,7 +2035,7 @@ function downloadInvoice() {
         .invoice-total { display: flex; justify-content: flex-end; margin-bottom: 40px; }
         .total-box { width: 250px; }
         .total-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; }
-        .grand-total { font-weight: 700; font-size: 16px; border-bottom: 2px solid #00ffaa; padding: 12px 0; margin-top: 8px; }
+        .grand-total { font-weight: 700; font-size: 16px; border-bottom: 2px solid #2133ff; padding: 12px 0; margin-top: 8px; }
         .invoice-footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; }
         .payment-info { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 20px; }
         .payment-info h4 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #999; margin-bottom: 8px; }
@@ -2471,7 +2471,7 @@ function renderRevenueDonut(rev) {
       labels: ['Bezahlt', 'Offen', 'Überfällig'],
       datasets: [{
         data: empty ? [1] : [paid, open, overdue],
-        backgroundColor: empty ? ['rgba(255,255,255,0.05)'] : ['#00ffaa', '#ffaa00', '#ff4444'],
+        backgroundColor: empty ? ['rgba(255,255,255,0.05)'] : ['#46d3a2', '#f0b04a', '#ff7b7b'],
         borderWidth: 0, hoverOffset: 6,
       }],
     },
@@ -2504,7 +2504,7 @@ async function renderProjectsDonut() {
       labels: ['Abgeschlossen', 'In Arbeit', 'Sonstige'],
       datasets: [{
         data: empty ? [1] : [done, prog, other],
-        backgroundColor: empty ? ['rgba(255,255,255,0.05)'] : ['#00ffaa', '#ffaa00', 'rgba(255,255,255,0.14)'],
+        backgroundColor: empty ? ['rgba(255,255,255,0.05)'] : ['#46d3a2', '#f0b04a', 'rgba(255,255,255,0.14)'],
         borderWidth: 0, hoverOffset: 6,
       }],
     },
@@ -3160,9 +3160,9 @@ function downloadQuote() {
       <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; font-size: 12px; line-height: 1.5; color: #000; padding: 40px; }
-        .invoice-header { display: flex; justify-content: space-between; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 2px solid #22d3ee; }
+        .invoice-header { display: flex; justify-content: space-between; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 2px solid #2133ff; }
         .invoice-logo { width: 80px; height: 80px; object-fit: contain; margin-bottom: 12px; border-radius: 12px; }
-        .invoice-title { font-size: 28px; font-weight: 700; margin-bottom: 8px; color: #22d3ee; }
+        .invoice-title { font-size: 28px; font-weight: 700; margin-bottom: 8px; color: #2133ff; }
         .invoice-meta { color: #666; font-size: 11px; }
         .invoice-meta div { margin-bottom: 4px; }
         .invoice-parties { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 40px; }
@@ -3177,7 +3177,7 @@ function downloadQuote() {
         .invoice-total { display: flex; justify-content: flex-end; margin-bottom: 40px; }
         .total-box { width: 280px; }
         .total-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; }
-        .grand-total { font-weight: 700; font-size: 16px; border-bottom: 2px solid #22d3ee; padding: 12px 0; margin-top: 8px; }
+        .grand-total { font-weight: 700; font-size: 16px; border-bottom: 2px solid #2133ff; padding: 12px 0; margin-top: 8px; }
         .invoice-footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; }
         .quote-timeline { margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; }
         .invoice-notes { font-size: 11px; color: #666; font-style: italic; margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee; white-space: pre-line; }
@@ -3454,11 +3454,11 @@ async function loadAnalytics() {
       const c = document.getElementById(id); if (!c) return;
       if (anCharts[id]) anCharts[id].destroy();
       const empty = data.reduce((a, b) => a + b, 0) === 0;
-      anCharts[id] = new Chart(c, { type: 'doughnut', data: { labels, datasets: [{ data: empty ? [1] : data, backgroundColor: empty ? [grid] : ['#00ffaa', '#22d3ee', '#ffb020', '#a78bfa', '#ff4d5e', '#5eead4'], borderWidth: 0, hoverOffset: 6 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '62%', plugins: { legend: { position: 'bottom', labels: { color: '#8aa39b', font: { size: 11 }, padding: 12, boxWidth: 12 } }, tooltip: { enabled: !empty } } } });
+      anCharts[id] = new Chart(c, { type: 'doughnut', data: { labels, datasets: [{ data: empty ? [1] : data, backgroundColor: empty ? [grid] : ['#8b99ff', '#46d3a2', '#f0b04a', '#c4a5ff', '#ff7b7b', '#5eead4'], borderWidth: 0, hoverOffset: 6 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '62%', plugins: { legend: { position: 'bottom', labels: { color: '#8aa39b', font: { size: 11 }, padding: 12, boxWidth: 12 } }, tooltip: { enabled: !empty } } } });
     };
     const mo = a => (a || []).map(m => m.month);
-    mkBar('an-requests-chart', mo(d.requestsPerMonth), (d.requestsPerMonth || []).map(m => m.count), '#00ffaa');
-    mkBar('an-revenue-chart', mo(d.revenuePerMonth), (d.revenuePerMonth || []).map(m => m.revenue || 0), '#22d3ee');
+    mkBar('an-requests-chart', mo(d.requestsPerMonth), (d.requestsPerMonth || []).map(m => m.count), '#8b99ff');
+    mkBar('an-revenue-chart', mo(d.revenuePerMonth), (d.revenuePerMonth || []).map(m => m.revenue || 0), '#46d3a2');
     mkDonut('an-types-chart', (d.projectTypes || []).map(t => t.project_type || '–'), (d.projectTypes || []).map(t => t.count));
     mkDonut('an-status-chart', (d.statusDistribution || []).map(s => s.status || '–'), (d.statusDistribution || []).map(s => s.count));
 
@@ -4486,7 +4486,7 @@ function openNewSkillModal() {
   document.getElementById('skill-icon').value = 'fab fa-js';
   document.getElementById('skill-category').value = 'frontend';
   document.getElementById('skill-level').value = '80';
-  document.getElementById('skill-color').value = '#00ffaa';
+  document.getElementById('skill-color').value = '#2133ff';
   document.getElementById('skill-sort-order').value = '0';
   document.getElementById('skill-active').checked = true;
   updateSkillPreview();
@@ -4503,7 +4503,7 @@ async function editSkill(id) {
   document.getElementById('skill-icon').value = skill.icon;
   document.getElementById('skill-category').value = skill.category || 'frontend';
   document.getElementById('skill-level').value = skill.level;
-  document.getElementById('skill-color').value = skill.color || '#00ffaa';
+  document.getElementById('skill-color').value = skill.color || '#2133ff';
   document.getElementById('skill-sort-order').value = skill.sort_order || 0;
   document.getElementById('skill-active').checked = skill.is_active;
   updateSkillPreview();
@@ -4563,7 +4563,7 @@ function updateSkillPreview() {
   const name = document.getElementById('skill-name')?.value || 'JavaScript';
   const icon = document.getElementById('skill-icon')?.value || 'fab fa-js';
   const level = document.getElementById('skill-level')?.value || 80;
-  const color = document.getElementById('skill-color')?.value || '#00ffaa';
+  const color = document.getElementById('skill-color')?.value || '#2133ff';
 
   const preview = document.getElementById('skill-preview-badge');
   if (preview) {

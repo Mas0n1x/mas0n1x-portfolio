@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api/
+Disallow: /kunde
+
+Sitemap: https://mas0n1x.online/sitemap.xml

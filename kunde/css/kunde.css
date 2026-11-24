@@ -4,30 +4,27 @@
  * Alle Rechte vorbehalten.
  */
 :root {
-  /* FUI-Palette — exakt wie die Landing Page (index.html) */
-  --bg-primary: #04060a;
-  --bg-secondary: #070b11;
-  --bg-card: #0a0e14;
-  --text-primary: #dffaf0;
-  --text-secondary: #6f8a82;
-  --text-muted: #3d514c;
-  --accent: #00ffaa;
-  --accent-secondary: #00ffaa;
-  --border-color: rgba(0, 255, 170, 0.16);
-  --border-accent: rgba(0, 255, 170, 0.34);
-  --success: #00ffaa;
-  --warning: #ffb020;
-  --danger: #ff4d5e;
-  /* Landing-Page-Aliase fuer neue FUI-Elemente */
-  --mint: #00ffaa;
-  --cyan: #22d3ee;
-  --amber: #ffb020;
-  --line: rgba(0, 255, 170, 0.16);
-  --line2: rgba(0, 255, 170, 0.34);
-  --glow: rgba(0, 255, 170, 0.5);
-  --panel: rgba(0, 255, 170, 0.02);
-  --mono: 'JetBrains Mono', monospace;
+  /* Gleiche Palette wie die Startseite (Kobalt, hell + dunkel) */
+  --bg-primary:#eceef2; --bg-secondary:#e2e5eb; --bg-card:#ffffff;
+  --text-primary:#0a0d12; --text-secondary:#475262; --text-muted:#76808e;
+  --accent:#2133ff; --accent-secondary:#2133ff; --accent-ink:#ffffff; --acc-rgb:33,51,255;
+  --border-color:#cdd2db; --border-accent:#b4bcc8;
+  --success:#0b8a5a; --success-ink:#ffffff; --warning:#b25e00; --danger:#c22b2b;
+  --mint:#2133ff; --cyan:#2133ff; --amber:#b25e00;
+  --line:#cdd2db; --line2:#b4bcc8; --glow:transparent; --panel:#e2e5eb;
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:light;
 }
+@media (prefers-color-scheme: dark){:root{
+  --bg-primary:#0b0e14; --bg-secondary:#10141c; --bg-card:#151a24;
+  --text-primary:#eef1f6; --text-secondary:#9ba6b6; --text-muted:#6e7a8b;
+  --accent:#8b99ff; --accent-secondary:#8b99ff; --accent-ink:#0a0d12; --acc-rgb:139,153,255;
+  --border-color:#202836; --border-accent:#2f3a4c;
+  --success:#46d3a2; --success-ink:#06241c; --warning:#f0b04a; --danger:#ff7b7b;
+  --mint:#8b99ff; --cyan:#8b99ff; --amber:#f0b04a;
+  --line:#202836; --line2:#2f3a4c; --panel:#10141c;
+  color-scheme:dark;
+}}
 
 * {
   margin: 0;
@@ -36,18 +33,12 @@
 }
 
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   background-color: var(--bg-primary);
-  /* FUI-Signatur: dezentes Grid + Scanlines (fix, wie Landing Page) */
-  background-image:
-    repeating-linear-gradient(0deg, transparent 0, transparent 2px, rgba(0, 255, 170, 0.012) 3px, transparent 4px),
-    linear-gradient(rgba(0, 255, 170, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 255, 170, 0.035) 1px, transparent 1px);
-  background-size: auto, 50px 50px, 50px 50px;
-  background-attachment: fixed;
   color: var(--text-primary);
   min-height: 100vh;
   line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
 }
 
 /* Display-Typo (konsistent mit der Landing Page) */
@@ -55,8 +46,9 @@ h1, h2,
 .login-container h1,
 .page-header h1,
 .modal-header h2 {
-  font-family: 'Space Grotesk', sans-serif;
-  letter-spacing: -0.02em;
+  font-family: 'Archivo', 'IBM Plex Sans', sans-serif;
+  font-stretch: 106%;
+  letter-spacing: -0.03em;
 }
 
 .hidden {
@@ -132,7 +124,7 @@ h1, h2,
 .form-group select:focus {
   outline: none;
   border-color: var(--accent-secondary);
-  box-shadow: 0 0 0 3px rgba(0, 255, 170, 0.1);
+  box-shadow: 0 0 0 3px rgba(var(--acc-rgb), 0.1);
 }
 
 .error-message {
@@ -165,10 +157,9 @@ h1, h2,
   gap: 8px;
   padding: 14px 24px;
   background: var(--accent);
-  color: #000;
+  color: var(--accent-ink);
   border: none;
-  border-radius: 0;
-  clip-path: polygon(9px 0, 100% 0, 100% calc(100% - 9px), calc(100% - 9px) 100%, 0 100%, 0 9px);
+  border-radius: 999px;
   font-family: inherit;
   font-size: 0.95rem;
   font-weight: 600;
@@ -181,7 +172,7 @@ h1, h2,
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0, 255, 170, 0.3);
+  box-shadow: 0 8px 20px rgba(var(--acc-rgb), 0.3);
 }
 
 .btn-secondary {
@@ -309,14 +300,14 @@ h1, h2,
 .inv-num{font-weight:600;font-size:1rem;color:var(--text-primary)}
 .inv-meta{font-size:.8rem;color:var(--text-muted);margin-top:4px}
 .inv-right{display:flex;align-items:center;gap:16px;flex-shrink:0}
-.inv-total{font-family:'JetBrains Mono',monospace;font-size:1.05rem;color:var(--text-primary)}
-.inv-status{font-size:.68rem;font-weight:600;padding:4px 11px;border-radius:6px;text-transform:uppercase;letter-spacing:.05em;border:1px solid}
-.inv-status.paid{color:var(--accent);border-color:rgba(0,255,170,.4);background:rgba(0,255,170,.12)}
+.inv-total{font-family:'IBM Plex Mono',monospace;font-size:1.05rem;color:var(--text-primary)}
+.inv-status{font-size:.68rem;font-weight:600;padding:4px 11px;border-radius:6px;text-transform:none;letter-spacing:.05em;border:1px solid}
+.inv-status.paid{color:var(--accent);border-color:rgba(var(--acc-rgb), .4);background:rgba(var(--acc-rgb), .12)}
 .inv-status.open{color:var(--warning);border-color:rgba(255,176,32,.4);background:rgba(255,176,32,.12)}
 .inv-status.overdue{color:var(--danger);border-color:rgba(255,77,94,.4);background:rgba(255,77,94,.12)}
 .inv-item{cursor:pointer;transition:border-color .2s}
 .inv-item:hover{border-color:var(--border-accent)}
-.inv-pay{display:inline-flex;align-items:center;gap:6px;background:var(--success);color:#000;font-size:.78rem;font-weight:600;padding:6px 12px;border-radius:7px;text-decoration:none}
+.inv-pay{display:inline-flex;align-items:center;gap:6px;background:var(--success);color:var(--success-ink);font-size:.78rem;font-weight:600;padding:6px 12px;border-radius:7px;text-decoration:none}
 @media(max-width:560px){.inv-item{flex-direction:column;align-items:flex-start}}
 /* Rechnung Detail/Druck */
 .iv-modal{position:fixed;inset:0;z-index:2000;display:none;align-items:flex-start;justify-content:center;padding:30px;overflow-y:auto}
@@ -324,16 +315,16 @@ h1, h2,
 .iv-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7)}
 .iv-box{position:relative;z-index:1;background:var(--bg-card);border:1px solid var(--border-color);border-radius:14px;padding:26px;max-width:780px;width:100%}
 .iv-actions{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:22px}
-.iv-actions .pay{background:var(--success);color:#000}
+.iv-actions .pay{background:var(--success);color:var(--success-ink)}
 .iv-doc{background:#fff;color:#1a1a1a;padding:40px;border-radius:8px}
 .iv-head{display:flex;justify-content:space-between;gap:20px;margin-bottom:26px}
 .iv-from{font-size:.82rem;line-height:1.65;color:#444}
 .iv-title{text-align:right}
 .iv-title h2{font-size:1.9rem;color:#111;margin:0 0 4px}
-.iv-title div{color:#777;font-family:'JetBrains Mono',monospace;font-size:.85rem}
+.iv-title div{color:#777;font-family:'IBM Plex Mono',monospace;font-size:.85rem}
 .iv-meta{display:flex;gap:24px;flex-wrap:wrap;font-size:.83rem;color:#444;margin-bottom:22px;padding-bottom:16px;border-bottom:2px solid #eee}
 .iv-table{width:100%;border-collapse:collapse;margin-bottom:18px;font-size:.86rem}
-.iv-table th{text-align:left;color:#999;font-weight:600;padding:8px 10px;border-bottom:1px solid #ddd;font-size:.72rem;text-transform:uppercase;letter-spacing:.04em}
+.iv-table th{text-align:left;color:#999;font-weight:600;padding:8px 10px;border-bottom:1px solid #ddd;font-size:.72rem;text-transform:none;letter-spacing:.04em}
 .iv-table td{padding:10px;border-bottom:1px solid #f0f0f0;color:#222}
 .iv-table .r{text-align:right}
 .iv-sum{margin-left:auto;max-width:280px;font-size:.88rem}
@@ -372,7 +363,7 @@ h1, h2,
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 255, 170, 0.1);
+  background: rgba(var(--acc-rgb), 0.1);
   border-radius: 14px;
   font-size: 1.8rem;
 }
@@ -411,7 +402,7 @@ h1, h2,
   border-radius: 24px;
   font-size: 0.75rem;
   font-weight: 600;
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: 0.5px;
   white-space: nowrap;
 }
@@ -422,7 +413,7 @@ h1, h2,
 }
 
 .request-status.in_progress {
-  background: rgba(0, 255, 170, 0.15);
+  background: rgba(var(--acc-rgb), 0.15);
   color: var(--accent-secondary);
 }
 
@@ -458,8 +449,8 @@ h1, h2,
 .progress-section {
   margin-top: 14px;
   padding: 14px;
-  background: linear-gradient(135deg, rgba(0, 255, 170, 0.08) 0%, rgba(0, 255, 170, 0.02) 100%);
-  border: 1px solid rgba(0, 255, 170, 0.2);
+  background: linear-gradient(135deg, rgba(var(--acc-rgb), 0.08) 0%, rgba(var(--acc-rgb), 0.02) 100%);
+  border: 1px solid rgba(var(--acc-rgb), 0.2);
   border-radius: 12px;
 }
 
@@ -480,7 +471,7 @@ h1, h2,
 .progress-percent {
   font-weight: 700;
   color: var(--accent-secondary);
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'IBM Plex Mono', monospace;
 }
 
 .progress-bar-track {
@@ -551,7 +542,7 @@ h1, h2,
   font-size: 0.8rem;
   padding: 4px 10px;
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(var(--acc-rgb), 0.06);
 }
 
 .days-remaining.overdue {
@@ -577,8 +568,8 @@ h1, h2,
 
 /* ==================== PROGRESS CARD (Detail View) ==================== */
 .progress-card {
-  background: linear-gradient(145deg, var(--bg-secondary) 0%, rgba(0, 255, 170, 0.05) 100%);
-  border: 1px solid rgba(0, 255, 170, 0.25);
+  background: linear-gradient(145deg, var(--bg-secondary) 0%, rgba(var(--acc-rgb), 0.05) 100%);
+  border: 1px solid rgba(var(--acc-rgb), 0.25);
   border-radius: 16px;
   padding: 20px;
   margin-bottom: 20px;
@@ -606,11 +597,11 @@ h1, h2,
 }
 
 .progress-card-value {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'IBM Plex Mono', monospace;
   font-size: 1.5rem;
   font-weight: 700;
   color: var(--accent-secondary);
-  text-shadow: 0 0 20px rgba(0, 255, 170, 0.4);
+  
 }
 
 .progress-card-bar {
@@ -628,7 +619,7 @@ h1, h2,
   border-radius: 6px;
   transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
-  box-shadow: 0 0 15px rgba(0, 255, 170, 0.4);
+  box-shadow: 0 0 15px rgba(var(--acc-rgb), 0.4);
 }
 
 .progress-card-milestones {
@@ -647,7 +638,7 @@ h1, h2,
 .progress-card-milestones span.active {
   color: var(--accent-secondary);
   font-weight: 600;
-  background: rgba(0, 255, 170, 0.1);
+  background: rgba(var(--acc-rgb), 0.1);
 }
 
 /* ==================== DEADLINE CARD (Detail View) ==================== */
@@ -699,7 +690,7 @@ h1, h2,
 .deadline-card-label {
   font-size: 0.7rem;
   color: var(--text-muted);
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: 1px;
 }
 
@@ -757,7 +748,7 @@ h1, h2,
 .info-label {
   font-size: 0.7rem;
   color: var(--text-muted);
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: 1px;
   margin-bottom: 6px;
 }
@@ -832,8 +823,8 @@ h1, h2,
 }
 
 .chat-message.customer {
-  background: rgba(0, 255, 170, 0.1);
-  border: 1px solid rgba(0, 255, 170, 0.2);
+  background: rgba(var(--acc-rgb), 0.1);
+  border: 1px solid rgba(var(--acc-rgb), 0.2);
   margin-left: auto;
   border-bottom-right-radius: 4px;
 }
@@ -1217,7 +1208,7 @@ h1, h2,
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 255, 170, 0.1);
+  background: rgba(var(--acc-rgb), 0.1);
   border-radius: 10px;
   color: var(--accent-secondary);
   font-size: 1.1rem;
@@ -1616,7 +1607,7 @@ h1, h2,
 }
 
 .appointment-status.completed {
-  background: rgba(0, 255, 170, 0.15);
+  background: rgba(var(--acc-rgb), 0.15);
   color: var(--accent-secondary);
 }
 
@@ -1697,7 +1688,7 @@ h1, h2,
 .faq-category {
   display: inline-block;
   padding: 4px 10px;
-  background: rgba(0, 255, 170, 0.1);
+  background: rgba(var(--acc-rgb), 0.1);
   color: var(--accent-secondary);
   border-radius: 20px;
   font-size: 0.7rem;
@@ -1757,3 +1748,6 @@ h1, h2,
 .ic{width:1em;height:1em;display:inline-block;vertical-align:-0.125em;flex-shrink:0;stroke:currentColor;fill:none}
 .ic.spin{animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
+
+/* Formularelemente erben die Schrift (sonst System-Standard) */
+button, input, select, textarea { font-family: inherit; }
