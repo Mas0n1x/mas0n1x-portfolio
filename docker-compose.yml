@@ -51,6 +51,9 @@ services:
       - ./admin:/usr/share/nginx/html/admin:ro
       - ./kunde:/usr/share/nginx/html/kunde:ro
       - ./logo.png:/usr/share/nginx/html/logo.png:ro
+      - ./favicon.svg:/usr/share/nginx/html/favicon.svg:ro
+      - ./favicon.ico:/usr/share/nginx/html/favicon.ico:ro
+      - ./apple-touch-icon.png:/usr/share/nginx/html/apple-touch-icon.png:ro
       - ./og-image.png:/usr/share/nginx/html/og-image.png:ro
       - ./robots.txt:/usr/share/nginx/html/robots.txt:ro
       - ./sitemap.xml:/usr/share/nginx/html/sitemap.xml:ro

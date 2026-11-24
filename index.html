@@ -23,7 +23,9 @@
 <meta name="twitter:image" content="https://mas0n1x.online/og-image.png">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#2133ff">
-<link rel="icon" href="/logo.png">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preload" href="/fonts/Archivo-var-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/IBMPlexSans-400-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"ProfessionalService","name":"Mas0n1x","url":"https://mas0n1x.online/","description":"Entwicklung und Betrieb modularer Software-Systeme: Web-Apps, KI-Assistenten, Discord-Bots und CAD/MDT-Plattformen.","areaServed":"DE","founder":{"@type":"Person","name":"Max-Cedrik Blecker","sameAs":"https://github.com/Mas0n1x"},"knowsAbout":["Webentwicklung","Node.js","React","TypeScript","KI-Assistenten","Discord-Bots","Linux-Server","Docker"],"availableLanguage":"de"}</script>
@@ -407,11 +409,11 @@
     </div>
     <div class="sysgrid">
       <ul class="sys-list" id="syslist">
-        <li><button class="sys-row" data-id="lawnet" data-open><h3>LawNet</h3><p>Das Ökosystem für FiveM-Roleplay: CAD/MDT, Personal, Leitstelle, Karte, Prüfung und Shop in einer Plattform</p><span class="st">Live</span></button></li>
+        <li><button class="sys-row" data-id="lawnet" data-open><h3>LawNet</h3><p>Das Ökosystem für FiveM-Roleplay: zehn Module von CAD/MDT bis Shop, ein Login, eine Plattform</p><span class="st">Live</span></button></li>
         <li><button class="sys-row" data-id="jarvis" data-open><h3>Jarvis</h3><p>Lokaler KI-Sprachassistent ohne Cloud-Zwang</p><span class="st wip">In Arbeit</span></button></li>
         <li><button class="sys-row" data-id="aurora" data-open><h3>Aurora</h3><p>Ressourcenschonende Self-Hosted Cloud für den Raspberry Pi</p><span class="st">Live</span></button></li>
         <li><button class="sys-row" data-id="homelab" data-open><h3>Homelab-Dashboard</h3><p>Steuerzentrale für Container, Monitoring und Backups</p><span class="st">Live</span></button></li>
-        <li><button class="sys-row" data-id="tradelab" data-open><h3>tradelab</h3><p>Trading-Framework: ein Strategie-Code für Backtest, Paper und Live</p><span class="st wip">In Arbeit</span></button></li>
+        <li><button class="sys-row" data-id="webnet" data-open><h3>WebNet</h3><p>Website-Template für FiveM-Server mit eigenem Admin-Panel</p><span class="st">Live</span></button></li>
         <li><button class="sys-row" data-id="amo" data-open><h3>AMO</h3><p>Cross-Platform-App für iOS, Android und Web mit WebRTC-Anrufen</p><span class="st wip">In Arbeit</span></button></li>
         <li><button class="sys-row" data-id="tracker" data-open><h3>ProductivityTracker</h3><p>Kanban, Pomodoro und Gamification als Desktop-App</p><span class="st">Live</span></button></li>
         <li><button class="sys-row" data-id="passwort" data-open><h3>Passwort-Manager</h3><p>Lokaler Tresor mit AES-256 und Leak-Check</p><span class="st">Live</span></button></li>
@@ -614,19 +616,19 @@
     const ctx=cv.getContext('2d'),rows=[...document.querySelectorAll('.sys-row')];
     const N=[
       {id:'hub',x:50,y:50,r:5.4,hub:true,label:'Kern'},
-      {id:'lawnet',x:25,y:40,r:9.2,label:'LawNet'},
-      {id:'amo',x:49,y:13,r:4.6,label:'AMO'},
-      {id:'jarvis',x:76,y:21,r:5.6,label:'Jarvis'},
-      {id:'tradelab',x:90,y:50,r:4.6,label:'tradelab'},
-      {id:'aurora',x:80,y:76,r:5,label:'Aurora'},
-      {id:'homelab',x:57,y:86,r:5,label:'Homelab'},
-      {id:'passwort',x:32,y:87,r:4.4,label:'Passwort-Manager'},
-      {id:'tracker',x:9,y:72,r:4.6,label:'Tracker'}
+      {id:'lawnet',x:25,y:42,r:9.2,label:'LawNet'},
+      {id:'webnet',x:12,y:15,r:4.6,label:'WebNet'},
+      {id:'amo',x:46,y:12,r:4.6,label:'AMO'},
+      {id:'jarvis',x:80,y:24,r:5.6,label:'Jarvis'},
+      {id:'aurora',x:88,y:58,r:5,label:'Aurora'},
+      {id:'homelab',x:64,y:84,r:5,label:'Homelab'},
+      {id:'passwort',x:36,y:86,r:4.4,label:'Passwort-Manager'},
+      {id:'tracker',x:9,y:74,r:4.6,label:'Tracker'}
     ];
     N.forEach((n,i)=>{n.k=0;n.ph=i*1.7;n.sp=.35+((i*37)%10)/40;n.ox=0;n.oy=0;n.vx=0;n.vy=0;});
     const byId=Object.fromEntries(N.map(n=>[n.id,n]));
-    const E=[];['lawnet','amo','jarvis','tradelab','aurora','homelab','passwort','tracker'].forEach(id=>E.push(['hub',id]));
-    [['jarvis','homelab'],['aurora','homelab'],['jarvis','tradelab'],['homelab','passwort'],['passwort','tracker']].forEach(e=>E.push(e));
+    const E=[];['lawnet','webnet','amo','jarvis','aurora','homelab','passwort','tracker'].forEach(id=>E.push(['hub',id]));
+    [['lawnet','webnet'],['jarvis','homelab'],['aurora','homelab'],['homelab','passwort'],['passwort','tracker']].forEach(e=>E.push(e));
     const nb=Object.fromEntries(N.map(n=>[n.id,[]]));E.forEach(([a,c])=>{nb[a].push(c);nb[c].push(a);});
     const P=E.map((e,i)=>({e,t:Math.random(),v:(.05+Math.random()*.07)*(i%2?1:-1)}));
     let W=0,H=0,dpr=1,active=null,col={},vis=true,last=performance.now();
@@ -714,22 +716,30 @@
   const EXTRA=[
     {title:'Aurora',status:'completed',tags:['Go','SQLite','Self-Hosted'],description:'Self-Hosted Cloud als einzelnes Go-Binary für den Raspberry Pi.',detail:'Eine eigene Cloud für Dateien und Freigaben, als einzelnes Go-Binary mit eingebettetem Frontend. 22 interne Module, SQLite im WAL-Modus, Jobs im Prozess statt Redis und Volltextsuche ohne Suchcluster. Bewusst ressourcenschonend, damit sie auf einem Raspberry Pi dauerhaft läuft.'},
     {title:'Homelab-Dashboard',status:'completed',tags:['TypeScript','Docker','WebSocket'],description:'Steuerzentrale für mein Homelab: Container, Monitoring und Backups.',detail:'Die Steuerzentrale für meine eigene Infrastruktur: Container-Verwaltung, Live-Konsole, Monitoring, Alarmierung und Backups an einem Ort. Ein Agent auf dem Server nimmt Befehle per Token-gesicherter REST- und WebSocket-Schnittstelle entgegen.',repo_url:'https://github.com/Mas0n1x/homelab-dashboard'},
-    {title:'tradelab',status:'in_progress',tags:['Python','ccxt','Backtest'],description:'Trading-Framework: derselbe Strategie-Code für Backtest, Paper und Live.',detail:'Ein Framework für Handelsstrategien, bei dem derselbe Code unverändert im Backtest, im Paper-Trading und live läuft. Ohne Lookahead, mit deterministischen Ergebnissen und einem ehrlichen Kostenmodell.',private:true},
+    {title:'WebNet',status:'completed',tags:['Laravel 11','Tailwind','Alpine.js'],description:'Website-Template für FiveM-Server mit eigenem Admin-Panel.',detail:'Ein Website-Template für FiveM-Roleplay-Server auf Basis von Laravel 11, Tailwind und Alpine.js. Das eigene Admin-Panel verwaltet News, Team, Galerie mit Lightbox, Regelwerk, Benutzer und den Server-Status. Gedacht für Communities, die schnell eine saubere Webseite brauchen.',private:true},
     {title:'AMO',status:'in_progress',tags:['Expo','React Native','WebRTC','TypeScript'],description:'Cross-Platform-App für iOS, Android und Web mit WebRTC-Anrufen.',detail:'Eine App aus einer einzigen Codebase für iOS, Android und den Browser (Expo, React Native, react-native-web). Anrufe laufen über WebRTC mit eigenem TURN-Server. API, App und ein gemeinsames Paket liegen in einem npm-Workspace, dessen Zod-Schemas für beide Seiten die einzige Wahrheit sind.',private:true}
   ];
-  const BYSYS={lawnet:'LawNet',jarvis:'Jarvis',aurora:'Aurora',homelab:'Homelab-Dashboard',tradelab:'tradelab',amo:'AMO',tracker:'ProductivityTracker',passwort:'Passwort-Manager'};
+  const EXTRA_MEMBERS=[
+    {title:'MedNet',tags:['React','TypeScript','Prisma'],description:'Medic-Management: Patientenakten, Einsätze, Diagnosen und Krankenhausaufnahmen.',detail:'Das Medizin- und Rettungsdienstmodul des Ökosystems. Es verwaltet Patientenakten mit Behandlungshistorie, Einsätze mit Medic-Zuweisung, den Krankenhausbetrieb mit Zimmern, Aufnahmen und Warteliste und ein vorlagenbasiertes Diagnose-System.'},
+    {title:'CarNet',tags:['Next.js','TypeScript','Prisma'],description:'Autohaus- und Vermietungsverwaltung: Fuhrpark, Kunden, Preislisten.',detail:'Eine eigenständige Webanwendung für Autohändler und Vermieter: Dashboard mit Statistiken, Kundenakten mit Vermietungshistorie, Fuhrpark mit Statusfiltern, Vermietung und Rückgabe, Wartungsplanung und Preislisten.'},
+    {title:'AnwaltNet',tags:['Next.js','TypeScript','Prisma'],description:'Kanzleiverwaltung: Fallakten mit Revisionssystem, Mandanten, Terminkalender.',detail:'Ein Verwaltungssystem für Kanzleien im Roleplay: Fallakten mit Revisionssystem (Snapshot, Diff, Rollback), Mandanten, Kanzlei-Rollen und Berechtigungen, Terminkalender und Dokumentvorlagen mit PDF-Export.'},
+    {title:'TowNet',tags:['Next.js','TypeScript','Prisma'],description:'Abschlepp-Dokumentation in unter 60 Sekunden.',detail:'Ein reines Web-Tool zur Dokumentation von Abschleppvorgängen. Ziel ist, einen Vorgang in unter 60 Sekunden zu erfassen: Kennzeichen-Autocomplete, Schnellauswahl und Fotos per Drag and Drop.'}
+  ];
+  const LN_ALL=LN_FAMILY.concat(['MedNet','CarNet','AnwaltNet','TowNet']);
+  const BYSYS={lawnet:'LawNet',jarvis:'Jarvis',aurora:'Aurora',homelab:'Homelab-Dashboard',webnet:'WebNet',amo:'AMO',tracker:'ProductivityTracker',passwort:'Passwort-Manager'};
   let ALL=[],ECO=null;
   function pRow(p,i){const im=(p.images&&p.images.length)?p.images:(p.image?[{path:p.image}]:[]);const wip=p.status==='in_progress',plan=p.status==='planned';const st=wip?'In Arbeit':(plan?'Geplant':'Live');
     return `<article class="prow" data-i="${i}" data-img="${im.length?esc(im[0].path):''}" tabindex="0" role="button" aria-label="${esc(p.title)} – Details ansehen"><h3>${esc(p.title)}</h3><p class="pdesc">${esc(clean(p.description))}</p><span class="ptags">${(p.tags||[]).slice(0,3).map(esc).join(', ')}</span><span class="pstat${wip||plan?' wip':''}">${st}</span>${im.length?`<img class="pthumb" src="${im[0].path}" alt="" loading="lazy">`:''}</article>`;}
   async function load(){const g=document.getElementById('arch-grid');try{const r=await fetch('/api/projects');if(!r.ok)throw 0;const raw=await r.json();
     const fam=LN_FAMILY.map(t=>raw.find(x=>(x.title||'').toLowerCase()===t.toLowerCase())).filter(Boolean);
     const core=fam.find(x=>x.title==='LawNet')||fam[0];
-    ECO=core?Object.assign({},core,{members:fam,tags:['CAD/MDT','Multi-Tenant',fam.length+' Module'],description:'Das Ökosystem für Behörden-Roleplay auf FiveM: CAD/MDT, Personal, Leitstelle, Karte, Prüfung und Shop in einer Plattform.'}):null;
+    const mem=fam.concat(EXTRA_MEMBERS);
+    ECO=core?Object.assign({},core,{members:mem,tags:['CAD/MDT','Multi-Tenant',mem.length+' Module'],description:'Das Ökosystem für Behörden-Roleplay auf FiveM: CAD/MDT, Personal, Leitstelle, Karte, Prüfung und Shop in einer Plattform.'}):null;
     const others=raw.filter(x=>!fam.includes(x));
     EXTRA.forEach(e=>{if(!others.some(o=>(o.title||'').toLowerCase()===e.title.toLowerCase()))others.push(e);});
-    const order=['Jarvis','Aurora','Homelab-Dashboard','tradelab','AMO','ProductivityTracker','Passwort-Manager'];
+    const order=['Jarvis','Aurora','Homelab-Dashboard','WebNet','AMO','ProductivityTracker','Passwort-Manager'];
     others.sort((a,b)=>{const x=order.indexOf(a.title),y=order.indexOf(b.title);return (x<0?99:x)-(y<0?99:y);});
-    PS=(ECO?[ECO]:[]).concat(others);ALL=PS.concat(fam);
+    PS=(ECO?[ECO]:[]).concat(others);ALL=PS.concat(mem);
     g.innerHTML=PS.map(pRow).join('');
     g.querySelectorAll('.prow').forEach(c=>{const open=()=>od(PS[+c.dataset.i]);c.onclick=open;c.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open();}};
       if(FINE&&!REDM){c.addEventListener('pointerenter',e=>{const s=c.dataset.img;if(!s)return;PV.img.src=s;PV.on=true;PV.tx=e.clientX;PV.ty=e.clientY;if(!PV.raf){PV.x=PV.tx;PV.y=PV.ty;PV.raf=requestAnimationFrame(pvTick);}});c.addEventListener('pointermove',pvMove);c.addEventListener('pointerleave',()=>{PV.on=false;if(!PV.raf)PV.raf=requestAnimationFrame(pvTick);});}});
@@ -864,7 +874,7 @@
       {t:'Datenschutz',k:'Rechtliches',s:'dsgvo privacy',go:()=>openLegal('datenschutz')},
       {t:'AGB',k:'Rechtliches',s:'bedingungen',go:()=>openLegal('agb')}
     ];
-    ALL.forEach(p=>a.push({t:p.members?'LawNet-Ökosystem':p.title,k:p.members?'Projekt':(LN_FAMILY.includes(p.title)?'LawNet-Modul':'Projekt'),s:(p.tags||[]).join(' ').toLowerCase()+(p.members?' personet salenet dispatchnet mapnet azubinet':''),go:()=>od(p,LN_FAMILY.includes(p.title)&&p!==ECO?ECO:undefined)}));
+    ALL.forEach(p=>a.push({t:p.members?'LawNet-Ökosystem':p.title,k:p.members?'Projekt':(LN_ALL.includes(p.title)?'LawNet-Modul':'Projekt'),s:(p.tags||[]).join(' ').toLowerCase()+(p.members?' personet salenet dispatchnet mapnet azubinet mednet carnet anwaltnet townet':''),go:()=>od(p,LN_ALL.includes(p.title)&&p!==ECO?ECO:undefined)}));
     PAL.items=a;
   }
   function palRender(){
